@@ -18,19 +18,13 @@ namespace Sandbox
 	void GameScene::shutdown()
 	{
 		entityManager.clear();
+
+		Scene::shutdown();
 	}
 
 	void GameScene::update(float dt)
 	{
-		printf("%.2f, %.2f, %.2f\n", config.currentCamera->position.x, config.currentCamera->position.y, config.currentCamera->position.z);
-	}
-
-	void GameScene::fixedUpdate(float dt)
-	{
-	}
-
-	void GameScene::render(float dt)
-	{
+		// printf("%.2f, %.2f, %.2f\n", config.currentCamera->position.x, config.currentCamera->position.y, config.currentCamera->position.z);
 	}
 
 	void GameScene::prepareScene()
@@ -44,7 +38,7 @@ namespace Sandbox
 
 		{
 			auto obj = createObject();
-			auto& geometry = obj.addComponent<Component::Geometry>(createTriangleMesh());
+			auto& geometry = obj.addComponent<Component::Geometry>(createHelloTriangle());
 			auto& material = obj.addComponent<Component::Material>();
 		}
 	}

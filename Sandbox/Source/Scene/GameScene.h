@@ -1,9 +1,9 @@
 #pragma once
-#include "Scene.h"
+#include "Core/BaseScene.h"
 
 namespace Sandbox
 {
-	class GameScene : public Scene
+	class GameScene : public BaseScene
 	{
 	public:
 		GameScene() = default;
@@ -13,8 +13,6 @@ namespace Sandbox
 		virtual void shutdown() override;
 
 		virtual void update(float dt) override;
-		virtual void fixedUpdate(float dt) override;
-		virtual void render(float dt) override;
 
 	private:
 		void prepareScene();
