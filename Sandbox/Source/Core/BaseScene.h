@@ -13,6 +13,8 @@ namespace Sandbox
 		BaseScene() = default;
 		~BaseScene() = default;
 
+		virtual bool init() override;
+
 		/**
 		 * @brief Create a "game object" with a transform component and any other essentials for visual items
 		 */

@@ -1,9 +1,17 @@
 #include "BaseScene.h"
 
 #include "Component/Transform.h"
+#include "System/CoreSystem.h"
 
 namespace Sandbox
 {
+	bool BaseScene::init()
+	{
+		addSystem<CoreSystem>();
+
+		return wf::Scene::init();
+	}
+
 	[[nodiscard]] wf::Entity BaseScene::createObject(const wf::Vec3& position)
 	{
 		auto ob = createEmptyObject();

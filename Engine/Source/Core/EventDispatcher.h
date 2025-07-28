@@ -1,23 +1,22 @@
 #pragma once
-#include "Events/Base.h"
 
 #include <functional>
 #include <memory>
-#include <SDL3/SDL.h>
 #include <typeindex>
 #include <unordered_map>
 #include <vector>
 
 namespace wf
 {
+	/**
+	 * @brief A simple event dispatcher. Nothing clever, just immediate invocation of callbacks.
+	 */
 	class EventDispatcher
 	{
-	public:
 	private:
 		struct ListenerBase
 		{
 			virtual ~ListenerBase() = default;
-			virtual bool tryInvoke(BaseEvent* event) = 0;
 		};
 
 		template<typename T>
@@ -25,15 +24,6 @@ namespace wf
 		{
 			explicit Listener(std::function<void(T&)> cb) : callback(std::move(cb)) {}
 			std::function<void(T&)> callback;
-
-			bool tryInvoke(BaseEvent* event) override
-			{
-				if (auto ptr = dynamic_cast<T*>(event)) {
-					callback(*ptr);
-					return true;
-				}
-				return false;
-			}
 		};
 
 	public:
@@ -56,11 +46,13 @@ namespace wf
 		template<typename T>
 		void dispatch(T& event)
 		{
-			BaseEvent* basePtr = &event;  // now event *must* derive BaseEvent
-
-			for (auto& [type, vec] : listeners) {
-				for (auto& listener : vec) {
-					listener->tryInvoke(basePtr);
+			auto it = listeners.find(typeid(T));
+			if (it != listeners.end())
+			{
+				for (auto& basePtr : it->second)
+				{
+					auto* listener = static_cast<Listener<T>*>(basePtr.get());
+					listener->callback(event);
 				}
 			}
 		}

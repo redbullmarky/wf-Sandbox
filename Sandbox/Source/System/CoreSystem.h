@@ -6,7 +6,7 @@ namespace Sandbox
 	class CoreSystem : public wf::ISystem
 	{
 	public:
-		CoreSystem() = default;
+		CoreSystem(wf::Scene* scene);
 		~CoreSystem() = default;
 
 		virtual bool init() override;

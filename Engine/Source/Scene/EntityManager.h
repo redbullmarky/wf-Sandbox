@@ -1,6 +1,7 @@
 #pragma once
+#include "Common.h"
 #include "Core/EventDispatcher.h"
-#include "Scene/Entity.h"
+#include "Entity.h"
 
 #include <entt/entt.hpp>
 #include <string>
