@@ -5,6 +5,8 @@
 #include "Window.h"
 #include "Math/Math.h"
 
+#include <memory>
+
 namespace wf
 {
 	struct State
@@ -23,6 +25,8 @@ namespace wf
 
 		State() : guiHandler(&window) {}
 	};
+
+	struct Texture;
 
 	extern State g_gameState;
 
@@ -57,6 +61,8 @@ namespace wf
 	Vec2 getMousePosition();
 	Vec2 getMouseWheel();
 	Vec2 getMouseDelta();
+
+	[[nodiscard]] std::shared_ptr<Texture> loadTexture(const char* filename);
 }
 
 namespace {

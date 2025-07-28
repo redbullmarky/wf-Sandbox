@@ -1,7 +1,6 @@
 #pragma once
 #include "Geometry/Geometry.h"
 #include "Misc/Colour.h"
-#include "Render/Texture.h"
 
 #include <string>
 #include <unordered_map>
@@ -17,11 +16,55 @@
 
 namespace wf::wgl
 {
-	struct MeshBuffers
+	struct MeshBufferHandle
 	{
 		unsigned int vao{};
 		unsigned int vbo{};
 		unsigned int ebo{};
+	};
+
+	enum class TextureWrap
+	{
+		DEFAULT = -1,
+		REPEAT = 0,
+		CLAMP,
+		MIRROR_REPEAT,
+		MIRROR_CLAMP
+	};
+
+	enum class TextureFormat
+	{
+		AUTO = -1,	// let's the loader do its thing instead of being specific
+		RGBA8 = 0,
+		RGB8,
+		RGBA16F,
+		RGBA32F,
+		DEPTH24,
+		DEPTH32F
+	};
+
+	enum class TextureFilter
+	{
+		LINEAR = 0,
+		NEAREST,
+		ANISOTROPIC_4X,
+		ANISOTROPIC_8X,
+		ANISOTROPIC_16X
+	};
+
+	struct TextureHandle
+	{
+		unsigned int glId{};
+		int width{};
+		int height{};
+
+		int format{};
+		int internalFormat{};
+	};
+
+	struct ShaderHandle
+	{
+		unsigned int glId{};
 	};
 
 	bool init();
@@ -30,40 +73,67 @@ namespace wf::wgl
 	void setViewport(int x, int y, int w, int h);
 
 	void enableDepthTest(bool enable = true);
+	void enableDepthMask(bool enable = true);
 
 	void clear(bool colour = true, bool depth = true);
 	void clearColour(const Colour& colour, bool clearDepth = false);
 
-	[[nodiscard]] MeshBuffers createMeshBuffers();
-	void destroyMeshBuffers(MeshBuffers& buffers);
+	[[nodiscard]] MeshBufferHandle createMeshBuffers();
+	void destroyMeshBuffers(MeshBufferHandle& buffers);
 	void uploadMeshData(
-		const MeshBuffers& buffers,
+		const MeshBufferHandle& buffers,
 		const std::vector<Vertex>& vertices,
 		const std::vector<unsigned int>& indices,
 		bool dynamic = false
 	);
 	void updateMeshData(
-		const MeshBuffers& buffers,
+		const MeshBufferHandle& buffers,
 		const std::vector<Vertex>& vertices,
 		const std::vector<unsigned int>& indices
 	);
-	void drawMeshBuffers(const MeshBuffers& buffers, unsigned int vertexCount, unsigned int indexCount, bool wireframe = false);
+	void drawMeshBuffers(const MeshBufferHandle& buffers, unsigned int vertexCount, unsigned int indexCount, bool wireframe = false);
 
-	[[nodiscard]] unsigned int loadShader(const char* vertFilename, const char* fragFilename);
-	[[nodiscard]] unsigned int loadShaderFromString(const char* vertexShader, const char* fragmentShader);
-	void useShader(unsigned int shader);
-	void destroyShader(unsigned int shader);
-	int getShaderUniformLocation(unsigned int shader, const char* name);
-	int getShaderAttribLocation(unsigned int shader, const char* name);
-	void setShaderUniform(unsigned int shader, int loc, const Vec2& value);
-	void setShaderUniform(unsigned int shader, int loc, const Vec3& value);
-	void setShaderUniform(unsigned int shader, int loc, const Vec4& value);
-	void setShaderUniform(unsigned int shader, int loc, const Colour& value);
-	void setShaderUniform(unsigned int shader, int loc, const Mat4& value);
-	void setShaderUniform(unsigned int shader, int loc, int value);
-	void setShaderUniform(unsigned int shader, int loc, bool value);
-	void setShaderUniform(unsigned int shader, int loc, float value);
+	[[nodiscard]] ShaderHandle loadShader(const char* vertFilename, const char* fragFilename);
+	[[nodiscard]] ShaderHandle loadShaderFromString(const char* vertexShader, const char* fragmentShader);
+	void useShader(const ShaderHandle& shader);
+	void destroyShader(ShaderHandle& shader);
+	int getShaderUniformLocation(const ShaderHandle& shader, const char* name);
+	int getShaderAttribLocation(const ShaderHandle& shader, const char* name);
+	void setShaderUniform(const ShaderHandle& shader, int loc, const Vec2& value);
+	void setShaderUniform(const ShaderHandle& shader, int loc, const Vec3& value);
+	void setShaderUniform(const ShaderHandle& shader, int loc, const Vec4& value);
+	void setShaderUniform(const ShaderHandle& shader, int loc, const Colour& value);
+	void setShaderUniform(const ShaderHandle& shader, int loc, const Mat4& value);
+	void setShaderUniform(const ShaderHandle& shader, int loc, int value);
+	void setShaderUniform(const ShaderHandle& shader, int loc, bool value);
+	void setShaderUniform(const ShaderHandle& shader, int loc, float value);
 
-	void bindTexture(const Texture& texture, int slot);
-	void destroyTexture(Texture& texture);
+	[[nodiscard]] TextureHandle loadTextureData(
+		const void* data,
+		unsigned int width,
+		unsigned int height,
+		TextureFormat format = TextureFormat::AUTO
+	);
+
+	[[nodiscard]] TextureHandle loadTexture(
+		const char* filename,
+		bool flipY = true,
+		bool flipNormalMapY = false,
+		TextureFormat format = TextureFormat::AUTO
+	);
+
+	[[nodiscard]] TextureHandle createColourTexture(
+		unsigned int width,
+		unsigned int height,
+		TextureFormat format = TextureFormat::AUTO
+	);
+
+	[[nodiscard]] TextureHandle createDepthTexture(
+		unsigned int width,
+		unsigned int height,
+		TextureFormat format = TextureFormat::AUTO
+	);
+
+	void bindTexture(const TextureHandle& texture, int slot);
+	void destroyTexture(TextureHandle& texture);
 }

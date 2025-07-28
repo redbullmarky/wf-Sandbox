@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "Core.h"
+#include "GL.h"
+#include "Render/Texture.h"
 
 #include <GL/glew.h>
 #include <SDL3/SDL.h>
@@ -132,6 +134,13 @@ namespace wf
 	Vec2 getMouseDelta()
 	{
 		return g_gameState.inputHandler.getMouseDelta();
+	}
+
+	std::shared_ptr<Texture> loadTexture(const char* filename)
+	{
+		auto texture = wf::Texture::create();
+		texture->handle = wf::wgl::loadTexture(filename);
+		return texture;
 	}
 }
 

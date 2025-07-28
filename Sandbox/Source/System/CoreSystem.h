@@ -27,11 +27,10 @@ namespace Sandbox
 		void uploadMaterialData(Component::Material& material);
 		void updateMaterialData(const Component::Material& material);
 
-		void uploadMaterialTexture(wf::Texture& texture);
-
 	private:
-		std::unordered_map<unsigned int, wf::wgl::MeshBuffers> m_meshBuffers;
-		std::unordered_map<unsigned int, unsigned int> m_shaders;
+		std::unordered_map<unsigned int, wf::wgl::MeshBufferHandle> m_meshBuffers;
+		std::unordered_map<unsigned int, wf::wgl::TextureHandle> m_textures;
+		std::unordered_map<unsigned int, wf::wgl::ShaderHandle> m_shaders;
 
 		unsigned int m_lastId{ 0 };
 	};

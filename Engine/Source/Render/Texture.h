@@ -1,12 +1,23 @@
 #pragma once
+#include "Core/GL.h"
+
 #include <memory>
-#include <vector>
 
 namespace wf
 {
 	struct Texture
 	{
-		unsigned int handle{};
+		wgl::TextureHandle handle;							// internal ref
+
+		int getWidth() const
+		{
+			return handle.width;
+		}
+
+		int getHeight() const
+		{
+			return handle.height;
+		}
 
 		static std::shared_ptr<Texture> create()
 		{

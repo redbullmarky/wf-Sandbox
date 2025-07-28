@@ -1,10 +1,11 @@
 #version 330
 
-in vec3 vertexPosition;
-in vec3 vertexNormal;
-in vec4 vertexColour;
-in vec2 vertexTexCoord;
-in vec4 vertexTangent;
+// @todo figure out why we seem to have to set locations here. should we pick them up after compile like the uniforms?
+layout(location = 0) in vec3 vertexPosition;
+layout(location = 1) in vec3 vertexNormal;
+layout(location = 2) in vec4 vertexColour;
+layout(location = 3) in vec2 vertexTexCoord;
+layout(location = 4) in vec4 vertexTangent;
 
 uniform mat4 mvp;
 uniform mat4 matModel;

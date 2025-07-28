@@ -56,7 +56,7 @@ namespace Sandbox
 
 	void CoreSystem::render(float dt)
 	{
-		wf::getWindow().clear(scene->getBackgroundColour());
+		wf::wgl::clearColour(scene->getBackgroundColour(), true);
 
 		auto& camera = *scene->getCurrentCamera();
 
@@ -68,17 +68,16 @@ namespace Sandbox
 
 				auto& buffers = m_meshBuffers[geometry.mesh->handle];
 				auto& shader = material.shader;
-				auto shaderHandle = m_shaders[material.shader->handle];
+				auto& shaderHandle = m_shaders[material.shader->handle];
 
 				wf::wgl::useShader(shaderHandle);
 
 				// @todo textures
-				wf::Vec3 lightDir = wf::Vec3{ 0.f, -1.f, -1.f };
-				wf::Vec3 viewPos = wf::Vec3{ 1.f, 0.f, 5.f };
-				wf::Mat4 vp = wf::Mat4{ 1.f };
-				wf::Mat4 mvp(vp * transform.getTransformMatrix());
 
-				mvp = wf::Mat4{ 1.f };
+				wf::Vec3 lightDir = wf::Vec3{ 0.f, -1.f, -1.f };
+				wf::Vec3 viewPos = camera.position;
+				wf::Mat4 vp = camera.getViewProjectionMatrix(wf::getAspectRatio());
+				wf::Mat4 mvp(vp * transform.getTransformMatrix());
 
 				wf::wgl::setShaderUniform(
 					shaderHandle,
@@ -93,7 +92,7 @@ namespace Sandbox
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["matModel"],
-					wf::Mat4{}// transform.getTransformMatrix()
+					transform.getTransformMatrix()
 				);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
@@ -111,12 +110,46 @@ namespace Sandbox
 					0.5f
 				);
 
-				glDisable(GL_DEPTH_TEST);
+				// @todo we'll need to shifty this gl stuff out of here...
+				switch (material.cullMode)
+				{
+				case  Component::Material::CullMode::NONE:
+					glDisable(GL_CULL_FACE);
+					break;
+				case Component::Material::CullMode::BACK:
+					glEnable(GL_CULL_FACE);
+					glCullFace(GL_BACK);
+					break;
+				case Component::Material::CullMode::FRONT:
+					glEnable(GL_CULL_FACE);
+					glCullFace(GL_FRONT);
+					break;
+				}
 
-				// @todo
-			/*	setCullMode(material->cullMode);
-				setBlendMode(material->blendMode);
-				setDepthSettings(material->depthMask, material->depthTest, material->depthFunc);*/
+				switch (material.blendMode)
+				{
+				case Component::Material::BlendMode::OPAQUE:
+					glDisable(GL_BLEND);
+					break;
+				case Component::Material::BlendMode::ALPHA:
+					glEnable(GL_BLEND);
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					break;
+				case Component::Material::BlendMode::ADDITIVE:
+					glEnable(GL_BLEND);
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+					break;
+				case Component::Material::BlendMode::MULTIPLY:
+					glEnable(GL_BLEND);
+					glBlendFunc(GL_DST_COLOR, GL_ZERO);
+					break;
+				}
+
+				// @todo apparently only supposed to be done once unless necessary according to gpt.
+				wf::wgl::enableDepthTest(material.depthTest);
+				wf::wgl::enableDepthMask(material.depthMask);
+
+				// @todo depth func? if we find out what it's for...
 
 				wf::wgl::drawMeshBuffers(
 					buffers,
@@ -139,14 +172,14 @@ namespace Sandbox
 		entityManager->each<Component::Material>(
 			[&](Component::Material& material) {
 				if (!material.shader->handle) return;
-				if (material.diffuse.map && material.diffuse.map->handle) {
-					wf::wgl::destroyTexture(*material.diffuse.map.get());
+				if (material.diffuse.map && material.diffuse.map->handle.glId) {
+					wf::wgl::destroyTexture(material.diffuse.map.get()->handle);
 				}
-				if (material.normal.map && material.normal.map->handle) {
-					wf::wgl::destroyTexture(*material.normal.map.get());
+				if (material.normal.map && material.normal.map->handle.glId) {
+					wf::wgl::destroyTexture(material.normal.map.get()->handle);
 				}
-				if (material.specular.map && material.specular.map->handle) {
-					wf::wgl::destroyTexture(*material.specular.map.get());
+				if (material.specular.map && material.specular.map->handle.glId) {
+					wf::wgl::destroyTexture(material.specular.map.get()->handle);
 				}
 
 				if (m_shaders.contains(material.shader->handle)) {
@@ -226,18 +259,6 @@ namespace Sandbox
 			material.shader->locs["lightColour"] = wf::wgl::getShaderUniformLocation(shader, "lightColour");
 			material.shader->locs["ambientLevel"] = wf::wgl::getShaderUniformLocation(shader, "ambientLevel");
 		}
-
-		if (material.diffuse.map && !material.diffuse.map->handle) {
-			uploadMaterialTexture(*material.diffuse.map.get());
-		}
-
-		if (material.normal.map && !material.normal.map->handle) {
-			uploadMaterialTexture(*material.normal.map.get());
-		}
-
-		if (material.specular.map && !material.specular.map->handle) {
-			uploadMaterialTexture(*material.specular.map.get());
-		}
 	}
 
 	void CoreSystem::updateMaterialData(const Component::Material& material)
@@ -245,7 +266,7 @@ namespace Sandbox
 		if (!material.shader || !material.shader->handle) throw std::runtime_error("NO shader loaded");
 
 		auto& shader = material.shader;
-		auto shaderHandle = m_shaders[shader->handle];
+		auto& shaderHandle = m_shaders[shader->handle];
 
 		wf::wgl::useShader(shaderHandle);
 
@@ -254,7 +275,7 @@ namespace Sandbox
 			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasDiffuseMap"], material.hasDiffuseTexture());
 
 			if (material.hasDiffuseTexture()) {
-				wf::wgl::bindTexture(*material.diffuse.map.get(), 0);
+				wf::wgl::bindTexture(material.diffuse.map.get()->handle, 0);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["diffuseMap"],
@@ -276,10 +297,10 @@ namespace Sandbox
 			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasNormalMap"], material.hasNormalTexture());
 
 			if (material.hasNormalTexture()) {
-				wf::wgl::bindTexture(*material.normal.map.get(), 1);
+				wf::wgl::bindTexture(material.normal.map.get()->handle, 1);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
-					shader->locs["diffuseMap"],
+					shader->locs["normalMap"],
 					1
 				);
 			}
@@ -298,7 +319,7 @@ namespace Sandbox
 			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasSpecularMap"], material.hasSpecularTexture());
 
 			if (material.hasSpecularTexture()) {
-				wf::wgl::bindTexture(*material.specular.map.get(), 2);
+				wf::wgl::bindTexture(material.specular.map.get()->handle, 2);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["specularMap"],
@@ -329,11 +350,5 @@ namespace Sandbox
 				material.specular.intensity
 			);
 		}
-	}
-
-	void CoreSystem::uploadMaterialTexture(wf::Texture& texture)
-	{
-		// @todo upload the texture
-		// @todo update the param with the handle
 	}
 }

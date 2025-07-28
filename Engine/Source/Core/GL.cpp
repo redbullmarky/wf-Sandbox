@@ -3,7 +3,9 @@
 
 #include "Geometry/Geometry.h"
 
-#include "GL/glew.h"
+#include <GL/glew.h>
+#include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 
 namespace wf::wgl
 {
@@ -33,6 +35,11 @@ namespace wf::wgl
 		}
 	}
 
+	void enableDepthMask(bool enable)
+	{
+		glDepthMask(enable ? GL_TRUE : GL_FALSE);
+	}
+
 	void clear(bool colour, bool depth)
 	{
 		GLbitfield flags{};
@@ -49,9 +56,9 @@ namespace wf::wgl
 		clear(true, clearDepth);
 	}
 
-	[[nodiscard]] MeshBuffers createMeshBuffers()
+	MeshBufferHandle createMeshBuffers()
 	{
-		MeshBuffers buffers;
+		MeshBufferHandle buffers;
 
 		glGenVertexArrays(1, &buffers.vao);
 		glGenBuffers(1, &buffers.vbo);
@@ -76,7 +83,7 @@ namespace wf::wgl
 		return buffers;
 	}
 
-	void destroyMeshBuffers(MeshBuffers& buffers)
+	void destroyMeshBuffers(MeshBufferHandle& buffers)
 	{
 		if (buffers.vao) glDeleteVertexArrays(1, &buffers.vao);
 		if (buffers.vbo) glDeleteBuffers(1, &buffers.vbo);
@@ -85,7 +92,7 @@ namespace wf::wgl
 	}
 
 	void uploadMeshData(
-		const MeshBuffers& buffers,
+		const MeshBufferHandle& buffers,
 		const std::vector<Vertex>& vertices,
 		const std::vector<unsigned int>& indices,
 		bool dynamic
@@ -103,7 +110,7 @@ namespace wf::wgl
 	}
 
 	void updateMeshData(
-		const MeshBuffers& buffers,
+		const MeshBufferHandle& buffers,
 		const std::vector<Vertex>& vertices,
 		const std::vector<unsigned int>& indices
 	) {
@@ -119,7 +126,7 @@ namespace wf::wgl
 		}
 	}
 
-	void drawMeshBuffers(const MeshBuffers& buffers, unsigned int vertexCount, unsigned int indexCount, bool wireframe)
+	void drawMeshBuffers(const MeshBufferHandle& buffers, unsigned int vertexCount, unsigned int indexCount, bool wireframe)
 	{
 		if (!buffers.vao || !buffers.vbo) throw std::runtime_error("Cannot draw non-initialised buffers");
 		if (!buffers.ebo && indexCount) throw std::runtime_error("Indices provided but no ebo created");
@@ -159,7 +166,7 @@ namespace wf::wgl
 		return shader;
 	}
 
-	unsigned int loadShader(const char* vertFilename, const char* fragFilename)
+	ShaderHandle loadShader(const char* vertFilename, const char* fragFilename)
 	{
 		std::string vsSourceStr, fsSourceStr;
 
@@ -178,110 +185,111 @@ namespace wf::wgl
 		return loadShaderFromString(vsSourceStr.c_str(), fsSourceStr.c_str());
 	}
 
-	unsigned int loadShaderFromString(const char* vertexShader, const char* fragmentShader)
+	ShaderHandle loadShaderFromString(const char* vertexShader, const char* fragmentShader)
 	{
-		int ret = glCreateProgram();
+		ShaderHandle handle{ glCreateProgram() };
 
 		if (vertexShader) {
 			auto vs = compileShader(GL_VERTEX_SHADER, vertexShader);
 			if (vs) {
-				glAttachShader(ret, vs);
+				glAttachShader(handle.glId, vs);
 				glDeleteShader(vs);
 			}
 		}
 		if (fragmentShader) {
 			auto fs = compileShader(GL_FRAGMENT_SHADER, fragmentShader);
 			if (fs) {
-				glAttachShader(ret, fs);
+				glAttachShader(handle.glId, fs);
 				glDeleteShader(fs);
 			}
 		}
 
-		glLinkProgram(ret);
+		glLinkProgram(handle.glId);
 
 		int success;
-		glGetProgramiv(ret, GL_LINK_STATUS, &success);
+		glGetProgramiv(handle.glId, GL_LINK_STATUS, &success);
 		if (!success) {
 			char infoLog[512];
-			glGetProgramInfoLog(ret, 512, NULL, infoLog);
+			glGetProgramInfoLog(handle.glId, 512, NULL, infoLog);
 			throw std::runtime_error("Shader compilation failed: " + std::string(infoLog));
 		}
 
-		glValidateProgram(ret);
+		glValidateProgram(handle.glId);
 
 		GLint validated = 0;
-		glGetProgramiv(ret, GL_VALIDATE_STATUS, &validated);
+		glGetProgramiv(handle.glId, GL_VALIDATE_STATUS, &validated);
 		if (!validated) {
 			char log[512];
-			glGetProgramInfoLog(ret, sizeof(log), nullptr, log);
+			glGetProgramInfoLog(handle.glId, sizeof(log), nullptr, log);
 			throw std::runtime_error("Shader validation failed: " + std::string(log));
 		}
 
-		return ret;
+		return handle;
 	}
 
-	void useShader(unsigned int shader)
+	void useShader(const ShaderHandle& shader)
 	{
-		if (shader <= 0) throw std::runtime_error("Unmanaged shader cannot be used");
-		glUseProgram(shader);
+		if (shader.glId <= 0) throw std::runtime_error("Unmanaged shader cannot be used");
+		glUseProgram(shader.glId);
 	}
 
-	void destroyShader(unsigned int shader)
+	void destroyShader(ShaderHandle& shader)
 	{
-		if (shader >= 0) {
-			glDeleteProgram(shader);
+		if (shader.glId >= 0) {
+			glDeleteProgram(shader.glId);
+			shader.glId = {};
 		}
 	}
 
-	int getShaderUniformLocation(unsigned int shader, const char* name)
+	int getShaderUniformLocation(const ShaderHandle& shader, const char* name)
 	{
-		return glGetUniformLocation(shader, name);
+		return glGetUniformLocation(shader.glId, name);
 	}
 
-	int getShaderAttribLocation(unsigned int shader, const char* name)
+	int getShaderAttribLocation(const ShaderHandle& shader, const char* name)
 	{
-		return glGetAttribLocation(shader, name);
+		return glGetAttribLocation(shader.glId, name);
 	}
 
-	void setShaderUniform(unsigned int shader, int loc, const Vec2& value)
+	void setShaderUniform(const ShaderHandle& shader, int loc, const Vec2& value)
 	{
-		glUseProgram(shader);
+		glUseProgram(shader.glId);
 		glUniform2f(
 			loc,
 			value.x, value.y
 		);
 	}
 
-	void setShaderUniform(unsigned int shader, int loc, const Vec3& value)
+	void setShaderUniform(const ShaderHandle& shader, int loc, const Vec3& value)
 	{
-		glUseProgram(shader);
+		glUseProgram(shader.glId);
 		glUniform3f(
 			loc,
 			value.x, value.y, value.z
 		);
 	}
 
-	void setShaderUniform(unsigned int shader, int loc, const Vec4& value)
+	void setShaderUniform(const ShaderHandle& shader, int loc, const Vec4& value)
 	{
-		glUseProgram(shader);
+		glUseProgram(shader.glId);
 		glUniform4f(
 			loc,
 			value.x, value.y, value.z, value.w
 		);
 	}
 
-	void setShaderUniform(unsigned int shader, int loc, const Colour& value)
+	void setShaderUniform(const ShaderHandle& shader, int loc, const Colour& value)
 	{
-		glUseProgram(shader);
+		glUseProgram(shader.glId);
 		glUniform4f(
 			loc,
 			value.r, value.g, value.b, value.a
 		);
 	}
 
-	void setShaderUniform(unsigned int shader, int loc, const Mat4& value)
+	void setShaderUniform(const ShaderHandle& shader, int loc, const Mat4& value)
 	{
-		glUseProgram(shader);
+		glUseProgram(shader.glId);
 		glUniformMatrix4fv(
 			loc,
 			1,
@@ -290,36 +298,177 @@ namespace wf::wgl
 		);
 	}
 
-	void setShaderUniform(unsigned int shader, int loc, int value)
+	void setShaderUniform(const ShaderHandle& shader, int loc, int value)
 	{
-		glUseProgram(shader);
+		glUseProgram(shader.glId);
 		glUniform1i(
 			loc,
 			value
 		);
 	}
 
-	void setShaderUniform(unsigned int shader, int loc, bool value)
+	void setShaderUniform(const ShaderHandle& shader, int loc, bool value)
 	{
 		setShaderUniform(shader, loc, (int)value);
 	}
 
-	void setShaderUniform(unsigned int shader, int loc, float value)
+	void setShaderUniform(const ShaderHandle& shader, int loc, float value)
 	{
-		glUseProgram(shader);
+		glUseProgram(shader.glId);
 		glUniform1f(
 			loc,
 			value
 		);
 	}
 
-	void bindTexture(const Texture& texture, int slot)
+	TextureHandle loadTextureData(const void* data, unsigned int width, unsigned int height, TextureFormat format)
 	{
-		// @todo
+		TextureHandle texture;
+
+		glGenTextures(1, &texture.glId);
+		glBindTexture(GL_TEXTURE_2D, texture.glId);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		texture.width = width;
+		texture.height = height;
+
+		texture.format = format == TextureFormat::RGBA8 ? GL_RGBA : GL_RGB;
+		texture.internalFormat = format == TextureFormat::RGBA8 ? GL_RGBA8 : GL_RGB8;
+
+		glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			texture.internalFormat,
+			width,
+			height,
+			0,
+			texture.format,
+			GL_UNSIGNED_BYTE,
+			data
+		);
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return texture;
 	}
 
-	void destroyTexture(Texture& texture)
+	TextureHandle loadTexture(const char* filename, bool flipY, bool flipNormalMapY, TextureFormat format)
 	{
-		// @todo
+		SDL_Surface* surface = IMG_Load(filename);
+		if (!surface) {
+			throw std::runtime_error("Cannot load texture " + std::string(SDL_GetError()));
+		}
+
+		uint8_t* pixels = static_cast<uint8_t*>(surface->pixels);
+		int pitch = surface->pitch;
+
+		// flip Y...
+		if (flipY) {
+			std::vector<uint8_t> temp(pitch);
+
+			for (int y = 0; y < surface->h / 2; y++) {
+				uint8_t* rowTop = pixels + y * pitch;
+				uint8_t* rowBottom = pixels + (surface->h - y - 1) * pitch;
+
+				memcpy(temp.data(), rowTop, pitch);
+				memcpy(rowTop, rowBottom, pitch);
+				memcpy(rowBottom, temp.data(), pitch);
+			}
+		}
+		if (flipNormalMapY) {
+			for (int y = 0; y < surface->h; y++) {
+				uint8_t* pixels = static_cast<uint8_t*>(surface->pixels);
+				uint8_t* row = pixels + y * pitch;
+				for (int x = 0; x < surface->w; x++) {
+					uint8_t* texel = row + x * SDL_BYTESPERPIXEL(surface->format);
+					texel[1] = 255 - texel[1];
+				}
+			}
+		}
+
+		GLint glFormat = SDL_BYTESPERPIXEL(surface->format) == 4 ? GL_RGBA : GL_RGB;
+
+		// AUTO resolves based on loaded image if requested
+		TextureFormat finalFormat = format == TextureFormat::AUTO ?
+			(glFormat == GL_RGBA ? TextureFormat::RGBA8 : TextureFormat::RGB8) :
+			format;
+
+		TextureHandle texture = loadTextureData(surface->pixels, surface->w, surface->h, finalFormat);
+
+		SDL_DestroySurface(surface);
+		return texture;
+	}
+
+	TextureHandle createColourTexture(unsigned int width, unsigned int height, TextureFormat format)
+	{
+		TextureHandle texture;
+
+		texture.width = width;
+		texture.height = height;
+
+		glGenTextures(1, &texture.glId);
+		glBindTexture(GL_TEXTURE_2D, texture.glId);
+
+		texture.format = format == TextureFormat::RGBA8 ? GL_RGBA : GL_RGB;
+		texture.internalFormat = format == TextureFormat::RGBA8 ? GL_RGBA8 : GL_RGB8;
+
+		glTexImage2D(GL_TEXTURE_2D, 0, texture.internalFormat, width, height, 0, texture.format, GL_UNSIGNED_BYTE, nullptr);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return texture;
+	}
+
+	TextureHandle createDepthTexture(unsigned int width, unsigned int height, TextureFormat format)
+	{
+		TextureHandle texture;
+
+		texture.width = width;
+		texture.height = height;
+		texture.format = GL_DEPTH_COMPONENT;
+		texture.internalFormat = GL_DEPTH_COMPONENT;
+
+		glGenTextures(1, &texture.glId);
+		glBindTexture(GL_TEXTURE_2D, texture.glId);
+
+		GLenum glType = GL_FLOAT;
+
+		if (format == TextureFormat::DEPTH24) {
+			texture.internalFormat = GL_DEPTH_COMPONENT24;
+			glType = GL_UNSIGNED_INT;
+		}
+
+		glTexImage2D(GL_TEXTURE_2D, 0, texture.internalFormat, width, height, 0, texture.format, glType, nullptr);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return texture;
+	}
+
+	void bindTexture(const TextureHandle& texture, int slot)
+	{
+		glActiveTexture(GL_TEXTURE0 + slot);
+		glBindTexture(GL_TEXTURE_2D, texture.glId);
+	}
+
+	void destroyTexture(TextureHandle& texture)
+	{
+		glDeleteTextures(1, &texture.glId);
+		texture.glId = {};
 	}
 }

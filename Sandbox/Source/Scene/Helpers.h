@@ -23,6 +23,8 @@ namespace Sandbox
 		mesh->vertices[1].texcoord = { 1.f, 0.f };
 		mesh->vertices[2].texcoord = { 0.5f, 1.f };
 
+		mesh->indices = { 0, 1, 2 };
+
 		return mesh;
 	}
 }
