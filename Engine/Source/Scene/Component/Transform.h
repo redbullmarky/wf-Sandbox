@@ -1,7 +1,8 @@
 #pragma once
-#include "Engine.h"
+#include "Geometry/Geometry.h"
+#include "Math/Math.h"
 
-namespace Sandbox::Component
+namespace wf::component
 {
 	struct Transform
 	{

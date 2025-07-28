@@ -1,13 +1,14 @@
 #pragma once
-#include "Engine.h"
+#include "Geometry/Geometry.h"
+#include "Math/Math.h"
 
-namespace Sandbox::Component
+namespace wf::component
 {
 	struct Camera
 	{
-		wf::Vec3 position{};
-		wf::Vec3 target{};
-		wf::Vec3 up{ 0.f, 1.f, 0.f };
+		Vec3 position{};
+		Vec3 target{};
+		Vec3 up{ 0.f, 1.f, 0.f };
 		bool orthographic = false;
 
 		// Parameters for projection
@@ -18,17 +19,17 @@ namespace Sandbox::Component
 		// For ortho:
 		float orthoWidth = 10.f;
 
-		static Camera createPerspective(wf::Vec3 position, wf::Vec3 target, float fovDegrees = 60.f);
-		static Camera createOrthographic(wf::Vec3 position, wf::Vec3 target, float width);
+		static Camera createPerspective(Vec3 position, Vec3 target, float fovDegrees = 60.f);
+		static Camera createOrthographic(Vec3 position, Vec3 target, float width);
 
-		wf::Mat4 getViewMatrix() const;
-		wf::Mat4 getProjectionMatrix(float aspectRatio) const;
-		wf::Mat4 getViewProjectionMatrix(float aspectRatio) const;
+		Mat4 getViewMatrix() const;
+		Mat4 getProjectionMatrix(float aspectRatio) const;
+		Mat4 getViewProjectionMatrix(float aspectRatio) const;
 
 
-		wf::Vec3 getForward() const;
-		wf::Vec3 getUp() const;
-		wf::Vec3 getRight() const;
+		Vec3 getForward() const;
+		Vec3 getUp() const;
+		Vec3 getRight() const;
 
 		void moveForward(float distance, bool moveInWorldPlane);
 		void moveUp(float distance);

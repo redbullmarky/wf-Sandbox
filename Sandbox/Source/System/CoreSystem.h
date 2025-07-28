@@ -6,6 +6,7 @@ namespace Sandbox
 	namespace Component
 	{
 		struct Geometry;
+		struct Material;
 	}
 
 	class CoreSystem : public wf::ISystem
@@ -23,8 +24,14 @@ namespace Sandbox
 		void uploadMesh(Component::Geometry& geometry);
 		void updateMeshData(const Component::Geometry& geometry);
 
+		void uploadMaterialData(Component::Material& material);
+		void updateMaterialData(const Component::Material& material);
+
+		void uploadMaterialTexture(wf::Texture& texture);
+
 	private:
 		std::unordered_map<unsigned int, wf::wgl::MeshBuffers> m_meshBuffers;
+		std::unordered_map<unsigned int, unsigned int> m_shaders;
 
 		unsigned int m_lastId{ 0 };
 	};

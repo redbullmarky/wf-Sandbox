@@ -36,6 +36,8 @@ namespace wf
 		wgl::setViewport(width, height);
 		wgl::enableDepthTest();
 
+		SDL_GL_SetSwapInterval(1); // enables vsync
+
 		return true;
 	}
 

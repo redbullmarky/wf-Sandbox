@@ -1,7 +1,6 @@
 #include "GameScene.h"
 #include "Engine.h"
 
-#include "Component/Camera.h"
 #include "Component/Geometry.h"
 #include "Component/Material.h"
 #include "Helpers.h"
@@ -26,7 +25,9 @@ namespace Sandbox
 		{
 			auto obj = createObject();
 			auto& geometry = obj.addComponent<Component::Geometry>(createHelloTriangle());
+			geometry.mesh->indices = { 0, 1, 2 };
 			auto& material = obj.addComponent<Component::Material>();
+			//material.diffuse.colour = wf::RED;
 		}
 	}
 }

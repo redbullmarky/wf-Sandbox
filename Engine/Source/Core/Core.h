@@ -33,6 +33,7 @@ namespace wf
 	bool shouldClose();
 
 	float getAspectRatio();
+	Window& getWindow();
 
 	bool initGui();
 	void shutdownGui();

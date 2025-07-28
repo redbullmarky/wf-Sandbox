@@ -7,7 +7,7 @@ namespace Sandbox::Component
 {
 	struct Material
 	{
-		unsigned int handle{};
+		std::shared_ptr<wf::Shader> shader;
 
 		struct Diffuse
 		{
@@ -28,5 +28,20 @@ namespace Sandbox::Component
 			float shininess{ 32.f };
 			float intensity{ 0.f };
 		} specular;
+
+		bool hasDiffuseTexture() const
+		{
+			return diffuse.map && diffuse.map->handle;
+		}
+
+		bool hasNormalTexture() const
+		{
+			return normal.map && normal.map->handle;
+		}
+
+		bool hasSpecularTexture() const
+		{
+			return specular.map && specular.map->handle;
+		}
 	};
 }

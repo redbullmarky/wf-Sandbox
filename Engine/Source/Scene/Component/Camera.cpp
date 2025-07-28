@@ -1,10 +1,9 @@
-#pragma once
+#include "pch.h"
 #include "Camera.h"
-#include "Engine.h"
 
-namespace Sandbox::Component
+namespace wf::component
 {
-	[[nodiscard]] Camera Camera::createPerspective(wf::Vec3 position, wf::Vec3 target, float fovDegrees)
+	[[nodiscard]] Camera Camera::createPerspective(Vec3 position, Vec3 target, float fovDegrees)
 	{
 		return {
 			.position = position,
@@ -14,7 +13,7 @@ namespace Sandbox::Component
 		};
 	}
 
-	[[nodiscard]] Camera Camera::createOrthographic(wf::Vec3 position, wf::Vec3 target, float width)
+	[[nodiscard]] Camera Camera::createOrthographic(Vec3 position, Vec3 target, float width)
 	{
 		return {
 			.position = position,
@@ -24,46 +23,46 @@ namespace Sandbox::Component
 		};
 	}
 
-	wf::Mat4 Camera::getViewMatrix() const
+	Mat4 Camera::getViewMatrix() const
 	{
-		wf::Vec3 forward = glm::normalize(target - position);
-		return wf::Mat4{ glm::lookAt(position, position + forward, up) };
+		Vec3 forward = glm::normalize(target - position);
+		return Mat4{ glm::lookAt(position, position + forward, up) };
 	}
 
-	wf::Mat4 Camera::getProjectionMatrix(float aspectRatio) const
+	Mat4 Camera::getProjectionMatrix(float aspectRatio) const
 	{
 		if (orthographic) {
 			float top = fovDegrees / 2.f;
 			float right = top * aspectRatio;
 
 			// Left, Right, Bottom, Top, Near, Far
-			return wf::Mat4{ glm::ortho(
+			return Mat4{ glm::ortho(
 				-right, right,
 				-top, top,
 				nearPlane, farPlane
 			) };
 		}
 		else {
-			return wf::Mat4{ glm::perspective(glm::radians(fovDegrees), aspectRatio, nearPlane, farPlane) };
+			return Mat4{ glm::perspective(glm::radians(fovDegrees), aspectRatio, nearPlane, farPlane) };
 		}
 	}
 
-	wf::Mat4 Camera::getViewProjectionMatrix(float aspectRatio) const
+	Mat4 Camera::getViewProjectionMatrix(float aspectRatio) const
 	{
 		return getProjectionMatrix(aspectRatio) * getViewMatrix();
 	}
 
-	wf::Vec3 Camera::getForward() const
+	Vec3 Camera::getForward() const
 	{
 		return glm::normalize(target - position);
 	}
 
-	wf::Vec3 Camera::getUp() const
+	Vec3 Camera::getUp() const
 	{
 		return glm::normalize(up);
 	}
 
-	wf::Vec3 Camera::getRight() const
+	Vec3 Camera::getRight() const
 	{
 		return glm::normalize(glm::cross(getForward(), getUp()));
 	}

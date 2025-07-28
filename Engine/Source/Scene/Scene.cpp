@@ -1,6 +1,10 @@
 #include "pch.h"
 #include "Scene.h"
 
+#include "Component/Camera.h"
+#include "Component/Transform.h"
+#include "Entity.h"
+
 namespace wf
 {
 	bool Scene::init()
@@ -58,14 +62,60 @@ namespace wf
 		}
 	}
 
-	void Scene::setBackgroundColour(const wf::Colour& colour)
+	void Scene::setBackgroundColour(const Colour& colour)
 	{
 		config.backgroundColour = colour;
 	}
 
-	wf::Entity Scene::createEmptyObject()
+	Colour Scene::getBackgroundColour() const
+	{
+		return config.backgroundColour;
+	}
+
+	Entity Scene::createEmptyObject()
 	{
 		return entityManager.create();
+	}
+
+	[[nodiscard]] Entity Scene::createObject(const wf::Vec3& position)
+	{
+		auto ob = createEmptyObject();
+		ob.addComponent<component::Transform>(position);
+		return ob;
+	}
+
+	Entity Scene::createCamera(const Vec3& position, const Vec3& target, bool ortho, float fovOrWidth)
+	{
+		auto object = createObject(position);
+
+		component::Camera cam;
+
+		if (ortho) {
+			cam = component::Camera::createOrthographic(
+				position,
+				target,
+				fovOrWidth > 0.f ? fovOrWidth : 10.f
+			);
+		}
+		else {
+			cam = component::Camera::createPerspective(
+				position,
+				target,
+				fovOrWidth > 0.f ? fovOrWidth : 60.f
+			);
+		}
+
+		auto& camera = object.addComponent<component::Camera>(cam);
+		if (!currentCamera) {
+			currentCamera = &camera;
+		}
+
+		return object;
+	}
+
+	component::Camera* Scene::getCurrentCamera()
+	{
+		return currentCamera;
 	}
 
 	EntityManager* Scene::getEntityManager()

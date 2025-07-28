@@ -1,6 +1,7 @@
 #pragma once
 #include "Common.h"
 #include "EntityManager.h"
+#include "Geometry/Geometry.h"
 #include "Misc/Colour.h"
 #include "System.h"
 
@@ -8,6 +9,11 @@
 
 namespace wf
 {
+	namespace component
+	{
+		struct Camera;
+	}
+
 	struct SceneConfig
 	{
 		Colour backgroundColour = CUTTINGMAT;
@@ -66,9 +72,29 @@ namespace wf
 		void setBackgroundColour(const Colour& colour);
 
 		/**
+		 * Fetch the background colour
+		 */
+		Colour getBackgroundColour() const;
+
+		/**
 		 * @brief Create a plain, undecorated entity
 		 */
 		Entity createEmptyObject();
+
+		/**
+		 * @brief Create a "game object" with a transform component and any other essentials for visual items
+		 */
+		Entity createObject(const Vec3& position = { 0.f, 0.f, 0.f });
+
+		/**
+		 * @brief Create a perspective (default) or ortho camera. If it's the first camera, it'll also be used as the default
+		 */
+		Entity createCamera(const Vec3& position, const Vec3& target, bool ortho = false, float fovOrWidth = -1.f);
+
+		/**
+		 * @brief Fetch the camera currently in use
+		 */
+		component::Camera* getCurrentCamera();
 
 		/**
 		 * @brief Return the entity manager attached to this scene
@@ -89,6 +115,7 @@ namespace wf
 	protected:
 		EntityManager entityManager;
 		SceneConfig config;
+		component::Camera* currentCamera{ nullptr };
 
 	private:
 		std::vector<std::unique_ptr<ISystem>> m_systems;

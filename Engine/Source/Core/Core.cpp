@@ -39,6 +39,11 @@ namespace wf
 		return g_gameState.window.getAspectRatio();
 	}
 
+	Window& getWindow()
+	{
+		return g_gameState.window;
+	}
+
 	bool initGui()
 	{
 		return g_gameState.guiHandler.init();
