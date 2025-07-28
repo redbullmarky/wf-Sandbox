@@ -19,11 +19,45 @@ namespace wf
 		Scene() = default;
 		virtual ~Scene() = default;
 
+		/**
+		 * @brief Invoked when the scene is physically created
+		 *
+		 * Typically this would be for setup of global stuff as well as event registration. Also initialises all of the systems. Essentially, a constructor...
+		 */
 		virtual bool init();
+
+		/**
+		 * @brief Invoked when the scene is destroyed. Essentially, a destructor of sorts
+		 */
 		virtual void shutdown();
 
+		/**
+		 * @brief Invoked when the scene is started
+		 *
+		 * This generally would be where the scene is populated, now that the events etc are all ready in all active systems following the init()
+		 */
+		virtual void setup() = 0;
+
+		/**
+		 * @brief Invoked when the scene is left
+		 */
+		virtual void teardown();
+
+		/**
+		 * @brief Regular update
+		 */
 		virtual void update(float dt);
+
+		/**
+		 * @brief Update with fixed timestep.
+		 *
+		 * Typically for physics stuff; This can run multiple times per frame
+		 */
 		virtual void fixedUpdate(float dt);
+
+		/**
+		 * @brief Render the scene
+		 */
 		virtual void render(float dt);
 
 		/**
@@ -37,6 +71,11 @@ namespace wf
 		Entity createEmptyObject();
 
 		/**
+		 * @brief Return the entity manager attached to this scene
+		 */
+		EntityManager* getEntityManager();
+
+		/**
 		 * @brief Register and initialise a system
 		 */
 		template<typename T, typename... Args>
@@ -44,9 +83,6 @@ namespace wf
 		{
 			static_assert(std::is_base_of<ISystem, T>::value, "T must derive from ISystem");
 			m_systems.push_back(std::make_unique<T>(this, std::forward<Args>(args)...));
-			if (!(T*)(m_systems.back())->init()) {
-				throw std::runtime_error("System init() returned false: " + std::string(typeid(T).name()));
-			}
 			return dynamic_cast<T&>(*m_systems.back());
 		}
 

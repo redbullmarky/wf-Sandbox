@@ -4,7 +4,7 @@
 
 namespace Sandbox
 {
-	wf::Entity BaseScene::createObject(const wf::Vec3& position)
+	[[nodiscard]] wf::Entity BaseScene::createObject(const wf::Vec3& position)
 	{
 		auto ob = createEmptyObject();
 		ob.addComponent<Component::Transform>(position);

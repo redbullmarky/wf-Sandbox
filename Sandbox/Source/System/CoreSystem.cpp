@@ -4,6 +4,7 @@ namespace Sandbox
 {
 	bool CoreSystem::init()
 	{
+		printf("core system init");
 		return true;
 	}
 

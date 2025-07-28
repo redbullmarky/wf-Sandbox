@@ -3,7 +3,7 @@
 
 namespace Sandbox
 {
-	std::shared_ptr<wf::Mesh> createHelloTriangle()
+	[[nodiscard]] std::shared_ptr<wf::Mesh> createHelloTriangle()
 	{
 		auto mesh = wf::Mesh::create();
 		mesh->vertices.resize(3);

@@ -9,10 +9,7 @@ namespace Sandbox
 		GameScene() = default;
 		~GameScene() = default;
 
-		virtual bool init() override;
-		virtual void shutdown() override;
-
-		virtual void update(float dt) override;
+		virtual void setup() override;
 
 	private:
 		void prepareScene();

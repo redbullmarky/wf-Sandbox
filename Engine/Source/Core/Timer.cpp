@@ -16,6 +16,11 @@ namespace wf
 		m_frameCount++;
 		m_fixedAccumulator += m_deltaTime;
 
+		// so that the fixed update runs at least once on the first frame
+		if (m_frameCount == 1) {
+			m_fixedAccumulator = m_fixedTimeStep;
+		}
+
 		refreshFps();
 	}
 

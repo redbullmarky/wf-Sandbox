@@ -28,7 +28,7 @@ int main()
 
 		game->shutdown();
 		game.reset();
-
+		system("PAUSE");
 		if (!result) {
 			printf("Error starting game\n");
 			system("PAUSE");

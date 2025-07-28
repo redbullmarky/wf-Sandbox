@@ -18,6 +18,8 @@ namespace Sandbox
 			return false;
 		}
 
+		m_scene->setup();
+
 		return true;
 	}
 

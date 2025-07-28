@@ -4,7 +4,7 @@
 
 namespace Sandbox::Component
 {
-	Camera Camera::createPerspective(wf::Vec3 position, wf::Vec3 target, float fovDegrees)
+	[[nodiscard]] Camera Camera::createPerspective(wf::Vec3 position, wf::Vec3 target, float fovDegrees)
 	{
 		return {
 			.position = position,
@@ -14,7 +14,7 @@ namespace Sandbox::Component
 		};
 	}
 
-	Camera Camera::createOrthographic(wf::Vec3 position, wf::Vec3 target, float width)
+	[[nodiscard]] Camera Camera::createOrthographic(wf::Vec3 position, wf::Vec3 target, float width)
 	{
 		return {
 			.position = position,

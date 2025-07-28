@@ -8,23 +8,10 @@
 
 namespace Sandbox
 {
-	bool GameScene::init()
+	void GameScene::setup()
 	{
 		prepareScene();
-
-		return Scene::init();
-	}
-
-	void GameScene::shutdown()
-	{
-		entityManager.clear();
-
-		Scene::shutdown();
-	}
-
-	void GameScene::update(float dt)
-	{
-		// printf("%.2f, %.2f, %.2f\n", config.currentCamera->position.x, config.currentCamera->position.y, config.currentCamera->position.z);
+		Scene::setup();
 	}
 
 	void GameScene::prepareScene()
