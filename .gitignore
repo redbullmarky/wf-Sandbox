@@ -1,0 +1,17 @@
+# Directories
+.vs/
+Binaries/
+vcpkg_installed/
+
+# Files
+*.vcxproj
+*.vcxproj.user
+*.vcxproj.filters
+*.sln
+*.log
+Makefile
+imgui.ini
+world.dat
+
+# Exclude
+!Vendor/Binaries

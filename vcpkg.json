@@ -1,0 +1,34 @@
+{
+  "name": "wf-world",
+  "version": "0.1",
+  "dependencies": [
+    "assimp",
+    "bullet3",
+    "fmt",
+    "glew",
+    "glm",
+    {
+      "name": "imgui",
+      "features": [
+        "docking-experimental",
+        "freetype",
+        "opengl3-binding",
+        "sdl3-binding"
+      ]
+    },
+    {
+      "name": "sdl3",
+      "features": [
+        "vulkan"
+      ]
+    },
+    {
+      "name": "sdl3-image",
+      "features": [
+        "jpeg",
+        "png"
+      ]
+    },
+    "entt"
+  ]
+}
