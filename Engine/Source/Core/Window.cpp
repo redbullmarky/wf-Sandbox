@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Window.h"
 
+#include "GL.h"
+
 #include <GL/glew.h>
 #include <SDL3/SDL.h>
 
@@ -26,14 +28,14 @@ namespace wf
 			return false;
 		}
 
-		GLenum result = glewInit();
-		if (result != GLEW_OK) {
-			SDL_Log("glewInit() failed");
+		if (!wgl::init()) {
+			SDL_Log("SDL_GL_CreateContext() failed: %s", SDL_GetError());
+			close();
 		}
 
-		glViewport(0, 0, width, height);
-		glEnable(GL_DEPTH_TEST);
-		getAspectRatio();
+		wgl::setViewport(width, height);
+		wgl::enableDepthTest();
+
 		return true;
 	}
 
@@ -61,8 +63,7 @@ namespace wf
 
 	void Window::clear(const Colour& colour)
 	{
-		glClearColor(colour.r, colour.g, colour.b, colour.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		wgl::clearColour(colour);
 	}
 
 	void Window::swapBuffers()

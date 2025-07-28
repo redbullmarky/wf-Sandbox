@@ -3,6 +3,11 @@
 
 namespace Sandbox
 {
+	namespace Component
+	{
+		struct Geometry;
+	}
+
 	class CoreSystem : public wf::ISystem
 	{
 	public:
@@ -11,6 +16,16 @@ namespace Sandbox
 
 		virtual bool init() override;
 		virtual void update(float dt) override;
-		virtual void shutdown() override;
+		virtual void render(float dt) override;
+		virtual void teardown() override;
+
+	private:
+		void uploadMesh(Component::Geometry& geometry);
+		void updateMeshData(const Component::Geometry& geometry);
+
+	private:
+		std::unordered_map<unsigned int, wf::wgl::MeshBuffers> m_meshBuffers;
+
+		unsigned int m_lastId{ 0 };
 	};
 }

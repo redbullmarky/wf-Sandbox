@@ -2,6 +2,7 @@
 #include "Core/Application.h"
 #include "Core/Core.h"
 #include "Core/EventDispatcher.h"
+#include "Core/GL.h"
 #include "Core/Input.h"
 #include "Core/Timer.h"
 #include "Core/Window.h"
