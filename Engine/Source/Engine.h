@@ -17,12 +17,14 @@
 
 #include "Misc/Colour.h"
 
-#include "Render/Material.h"
 #include "Render/Shader.h"
 #include "Render/Texture.h"
 
 #include "Scene/Component/Camera.h"
+#include "Scene/Component/Geometry.h"
 #include "Scene/Component/Light.h"
+#include "Scene/Component/Material.h"
+#include "Scene/Component/NameTag.h"
 #include "Scene/Component/Transform.h"
 #include "Scene/Common.h"
 #include "Scene/Entity.h"

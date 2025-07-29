@@ -3,7 +3,6 @@
 #include "GL.h"
 #include "Render/Texture.h"
 
-#include <GL/glew.h>
 #include <SDL3/SDL.h>
 #include "Gui.h"
 

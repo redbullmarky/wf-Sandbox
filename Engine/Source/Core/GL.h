@@ -66,6 +66,32 @@ namespace wf::wgl
 		int internalFormat{};
 	};
 
+	enum class BlendMode
+	{
+		OPAQUE = 0,		///< No blending, the source color fully replaces the destination color.
+		ALPHA,			///< Alpha blending: source color is blended with the destination based on alpha value.
+		ADDITIVE,		///< Additive blending: source color is added to the destination, making bright effects.
+		MULTIPLY		///< Multiply blending: source color is multiplied with the destination, darkening the image.
+	};
+
+	enum class CullMode
+	{
+		NONE,
+		BACK,
+		FRONT
+	};
+
+	enum class DepthFunc
+	{
+		LESS = 0,
+		EQUAL,
+		LEQUAL,
+		GREATER,
+		GEQUAL,
+		ALWAYS,
+		NEVER
+	};
+
 	struct ShaderHandle
 	{
 		unsigned int glId{};
@@ -94,6 +120,8 @@ namespace wf::wgl
 
 	void enableDepthTest(bool enable = true);
 	void enableDepthMask(bool enable = true);
+	void setCullMode(CullMode mode);
+	void setBlendMode(BlendMode mode);
 
 	void clear(bool colour = true, bool depth = true);
 	void clearColour(const Colour& colour, bool clearDepth = false);

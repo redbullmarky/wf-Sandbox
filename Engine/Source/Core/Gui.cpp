@@ -59,7 +59,7 @@ namespace wf
 		return m_renderReady;
 	}
 
-	bool Gui::handleEvent(const SDL_Event* event)
+	bool Gui::handleEvent(const SDL_Event* event) const
 	{
 		if (!m_initialised) return false;
 		return ImGui_ImplSDL3_ProcessEvent(event);

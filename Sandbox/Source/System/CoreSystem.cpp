@@ -1,12 +1,7 @@
 #include "CoreSystem.h"
 #include "Engine.h"
 
-#include "Component/Geometry.h"
-#include "Component/Material.h"
-
 #include "Scene/GameScene.h"
-
-#include <GL/glew.h>
 
 namespace Sandbox
 {
@@ -23,8 +18,8 @@ namespace Sandbox
 	{
 		// for any geometry we've not prepared, we'll need to create the VAO/VBOs for it.
 		// if we already have those, and we're working with a dynamic mesh, see if it needs updating and update it
-		entityManager->each<Component::Geometry>(
-			[&](Component::Geometry& geometry) {
+		entityManager->each<wf::component::Geometry>(
+			[&](wf::component::Geometry& geometry) {
 				// no mesh yet
 				if (!geometry.mesh) return;
 
@@ -41,8 +36,8 @@ namespace Sandbox
 
 		// for any materials we've not prepared, we'll setup the textures/shaders, etc.
 		// for those we have, we'll update the shader uniforms
-		entityManager->each<Component::Material>(
-			[&](Component::Material& material) {
+		entityManager->each<wf::component::Material>(
+			[&](wf::component::Material& material) {
 				// if we've not got a handle, prep it.
 				if (!material.shader || !material.shader->handle) {
 					uploadMaterialData(material);
@@ -67,8 +62,8 @@ namespace Sandbox
 		auto& camera = gameScene->m_lightCamera;*/
 
 		// @todo render meshes with assigned material
-		entityManager->each<Component::Geometry, Component::Material, wf::component::Transform>(
-			[&](const Component::Geometry& geometry, const Component::Material& material, const wf::component::Transform& transform) {
+		entityManager->each<wf::component::Geometry, wf::component::Material, wf::component::Transform>(
+			[&](const wf::component::Geometry& geometry, const wf::component::Material& material, const wf::component::Transform& transform) {
 				if (!geometry.mesh || !geometry.mesh->handle || !m_meshBuffers.contains(geometry.mesh->handle)) return;
 				if (!material.shader || !material.shader->handle) return;
 
@@ -143,43 +138,9 @@ namespace Sandbox
 					scene->getCurrentLight()->ambientLevel
 				);
 
-				// @todo we'll need to shifty this gl stuff out of here...
-				switch (material.cullMode)
-				{
-				case  Component::Material::CullMode::NONE:
-					glDisable(GL_CULL_FACE);
-					break;
-				case Component::Material::CullMode::BACK:
-					glEnable(GL_CULL_FACE);
-					glCullFace(GL_BACK);
-					break;
-				case Component::Material::CullMode::FRONT:
-					glEnable(GL_CULL_FACE);
-					glCullFace(GL_FRONT);
-					break;
-				}
-
-				switch (material.blendMode)
-				{
-				case Component::Material::BlendMode::OPAQUE:
-					glDisable(GL_BLEND);
-					break;
-				case Component::Material::BlendMode::ALPHA:
-					glEnable(GL_BLEND);
-					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-					break;
-				case Component::Material::BlendMode::ADDITIVE:
-					glEnable(GL_BLEND);
-					glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-					break;
-				case Component::Material::BlendMode::MULTIPLY:
-					glEnable(GL_BLEND);
-					glBlendFunc(GL_DST_COLOR, GL_ZERO);
-					break;
-				}
-
-				// @todo apparently only supposed to be done once unless necessary according to gpt.
-				wf::wgl::enableDepthTest(material.depthTest);
+				wf::wgl::setCullMode(material.cullMode);
+				wf::wgl::setBlendMode(material.blendMode);
+				wf::wgl::enableDepthTest(material.depthTest); // @todo apparently only supposed to be done once unless necessary according to gpt.
 				wf::wgl::enableDepthMask(material.depthMask);
 
 				// @todo depth func? if we find out what it's for...
@@ -191,17 +152,13 @@ namespace Sandbox
 					geometry.mesh->wireframe
 				);
 			});
-
-		// @todo sprites
-		// @todo gui (frontend)
-		// @todo imgui
 	}
 
 	void CoreSystem::teardown()
 	{
 		// delete material (i.e. textures and shaders)
-		entityManager->each<Component::Material>(
-			[&](Component::Material& material) {
+		entityManager->each<wf::component::Material>(
+			[&](wf::component::Material& material) {
 				if (!material.shader->handle) return;
 				if (material.diffuse.map && material.diffuse.map->handle.glId) {
 					wf::wgl::destroyTexture(material.diffuse.map.get()->handle);
@@ -222,8 +179,8 @@ namespace Sandbox
 			});
 
 		// delete the VAO/VBOs
-		entityManager->each<Component::Geometry>(
-			[&](Component::Geometry& geometry) {
+		entityManager->each<wf::component::Geometry>(
+			[&](wf::component::Geometry& geometry) {
 				if (!geometry.mesh->handle) return;
 
 				if (!m_meshBuffers.contains(geometry.mesh->handle)) throw std::runtime_error("Encountered an unmanaged MeshBuffer");
@@ -234,10 +191,10 @@ namespace Sandbox
 				geometry.mesh->handle = {};
 			});
 
-		// @todo delete FBOs
+		// @todo delete FBOs, although we don't yet manage those here
 	}
 
-	void CoreSystem::uploadMesh(Component::Geometry& geometry)
+	void CoreSystem::uploadMesh(wf::component::Geometry& geometry)
 	{
 		auto buffers = wf::wgl::createMeshBuffers();
 		wf::wgl::uploadMeshData(buffers, geometry.mesh->vertices, geometry.mesh->indices, geometry.mesh->isDynamic);
@@ -246,7 +203,7 @@ namespace Sandbox
 		m_meshBuffers[id] = buffers;
 	}
 
-	void CoreSystem::updateMeshData(const Component::Geometry& geometry)
+	void CoreSystem::updateMeshData(const wf::component::Geometry& geometry)
 	{
 		if (geometry.mesh->isDynamic && (geometry.mesh->needsUpdate || geometry.mesh->autoUpdate)) {
 			auto& buffers = m_meshBuffers[geometry.mesh->handle];
@@ -254,7 +211,7 @@ namespace Sandbox
 		}
 	}
 
-	void CoreSystem::uploadMaterialData(Component::Material& material)
+	void CoreSystem::uploadMaterialData(wf::component::Material& material)
 	{
 		if (!material.shader) {
 			material.shader = wf::Shader::create();
@@ -298,7 +255,7 @@ namespace Sandbox
 		}
 	}
 
-	void CoreSystem::updateMaterialData(const Component::Material& material)
+	void CoreSystem::updateMaterialData(const wf::component::Material& material)
 	{
 		if (!material.shader || !material.shader->handle) throw std::runtime_error("NO shader loaded");
 

@@ -206,24 +206,24 @@ namespace wf::component
 		}
 
 		// WASD movement
-		if (wf::isKeyHeld(SDL_SCANCODE_W)) {
+		if (wf::isKeyHeld(KEY_W)) {
 			position += forward * moveBase * moveSpeed;
 		}
-		if (wf::isKeyHeld(SDL_SCANCODE_S)) {
+		if (wf::isKeyHeld(KEY_S)) {
 			position -= forward * moveBase * moveSpeed;
 		}
-		if (wf::isKeyHeld(SDL_SCANCODE_A)) {
+		if (wf::isKeyHeld(KEY_A)) {
 			position -= right * moveBase * moveSpeed;
 		}
-		if (wf::isKeyHeld(SDL_SCANCODE_D)) {
+		if (wf::isKeyHeld(KEY_D)) {
 			position += right * moveBase * moveSpeed;
 		}
 
 		// Vertical movement
-		if (wf::isKeyHeld(SDL_SCANCODE_SPACE)) {
+		if (wf::isKeyHeld(KEY_SPACE)) {
 			position += up * moveBase * moveSpeed;
 		}
-		if (wf::isKeyHeld(SDL_SCANCODE_LCTRL)) {
+		if (wf::isKeyHeld(KEY_CTRL_LEFT)) {
 			position -= up * moveBase * moveSpeed;
 		}
 

@@ -59,6 +59,46 @@ namespace wf::wgl
 		glDepthMask(enable ? GL_TRUE : GL_FALSE);
 	}
 
+	void setCullMode(CullMode mode)
+	{
+		switch (mode)
+		{
+		case CullMode::NONE:
+			glDisable(GL_CULL_FACE);
+			break;
+		case CullMode::BACK:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
+			break;
+		case CullMode::FRONT:
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_FRONT);
+			break;
+		}
+	}
+
+	void setBlendMode(BlendMode mode)
+	{
+		switch (mode)
+		{
+		case BlendMode::OPAQUE:
+			glDisable(GL_BLEND);
+			break;
+		case BlendMode::ALPHA:
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			break;
+		case BlendMode::ADDITIVE:
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+			break;
+		case BlendMode::MULTIPLY:
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_DST_COLOR, GL_ZERO);
+			break;
+		}
+	}
+
 	void clear(bool colour, bool depth)
 	{
 		GLbitfield flags{};

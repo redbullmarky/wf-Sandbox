@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace Sandbox::Component
+namespace wf::component
 {
 	struct NameTag
 	{

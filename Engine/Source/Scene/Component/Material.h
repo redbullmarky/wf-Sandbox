@@ -1,71 +1,48 @@
 #pragma once
-#include "Engine.h"
+#include "Core/GL.h"
+#include "Misc/Colour.h"
+#include "Render/Shader.h"
+#include "Render/Texture.h"
 
 #include <memory>
 
-namespace Sandbox::Component
+namespace wf::component
 {
 	struct Material
 	{
-		enum class BlendMode
-		{
-			OPAQUE = 0,		///< No blending, the source color fully replaces the destination color.
-			ALPHA,			///< Alpha blending: source color is blended with the destination based on alpha value.
-			ADDITIVE,		///< Additive blending: source color is added to the destination, making bright effects.
-			MULTIPLY		///< Multiply blending: source color is multiplied with the destination, darkening the image.
-		};
-
-		enum class CullMode
-		{
-			NONE,
-			BACK,
-			FRONT
-		};
-
-		enum class DepthFunc
-		{
-			LESS = 0,
-			EQUAL,
-			LEQUAL,
-			GREATER,
-			GEQUAL,
-			ALWAYS,
-			NEVER
-		};
-
-		std::shared_ptr<wf::Shader> shader;
+		std::shared_ptr<Shader> shader;
 
 		struct Diffuse											// diffuse settings
 		{
-			std::shared_ptr<wf::Texture> map;						// diffuse texture
-			wf::Colour colour{ wf::WHITE };							// base diffuse colour
+			std::shared_ptr<Texture> map;						// diffuse texture
+			Colour colour{ WHITE };							// base diffuse colour
 		} diffuse;
 
 		struct Normal											// normal map settings
 		{
-			std::shared_ptr<wf::Texture> map;						// normal map
+			std::shared_ptr<Texture> map;						// normal map
 			float strength{ 1.f };									// strength for applying map
 		} normal;
 
 		struct Specular											// specular settings
 		{
-			std::shared_ptr<wf::Texture> map;						// specular map
-			wf::Colour colour{ wf::WHITE };							// specular colour
+			std::shared_ptr<Texture> map;						// specular map
+			Colour colour{ WHITE };							// specular colour
 			float shininess{ 32.f };								// how shiny
 			float intensity{ 0.f };									// level of specular. defaults to bland.
 		} specular;
 
 		struct Shadow											// shadow map (internals, @todo temporary to get it working)
 		{
-			wf::wgl::RenderTargetHandle* map;						// shadow map
+			wgl::RenderTargetHandle* map;						// shadow map
 			bool shadowPass{ false };								// if we're creating the shadows (true) or using them.
 		} shadow;
 
-		BlendMode blendMode = BlendMode::OPAQUE;				// blend mode
-		CullMode cullMode = CullMode::BACK;						// cull mode
+		wgl::BlendMode blendMode = wgl::BlendMode::OPAQUE;				// blend mode
+		wgl::CullMode cullMode = wgl::CullMode::BACK;						// cull mode
 		bool depthMask{ true };									// depth mask
 		bool depthTest{ true };									// depth test
-		DepthFunc depthFunc{ DepthFunc::LESS };					// depth test function
+		wgl::DepthFunc depthFunc{ wgl::DepthFunc::LESS };					// depth test function
 
 		bool wireframe{ false };								// if we're drawing using wireframe mode
 

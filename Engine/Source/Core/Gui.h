@@ -14,7 +14,7 @@ namespace wf
 		bool init();
 		void shutdown();
 
-		bool handleEvent(const SDL_Event* event);
+		bool handleEvent(const SDL_Event* event) const;
 		bool isInitialised() const;
 		bool isFocussed() const;
 		bool isRenderReady() const;

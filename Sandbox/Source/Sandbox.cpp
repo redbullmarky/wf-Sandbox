@@ -3,9 +3,6 @@
 
 #include "Scene/GameScene.h"
 
-#include <imgui.h>
-#include <GL/glew.h>
-
 namespace Sandbox
 {
 	bool Sandbox::init()
@@ -45,8 +42,6 @@ namespace Sandbox
 				wf::endDrawing();
 			}
 		}
-
-		//wf::wgl::destroyRenderTarget(rt);
 	}
 
 	void Sandbox::shutdown()

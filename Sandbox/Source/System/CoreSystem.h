@@ -21,11 +21,11 @@ namespace Sandbox
 		virtual void teardown() override;
 
 	private:
-		void uploadMesh(Component::Geometry& geometry);
-		void updateMeshData(const Component::Geometry& geometry);
+		void uploadMesh(wf::component::Geometry& geometry);
+		void updateMeshData(const wf::component::Geometry& geometry);
 
-		void uploadMaterialData(Component::Material& material);
-		void updateMaterialData(const Component::Material& material);
+		void uploadMaterialData(wf::component::Material& material);
+		void updateMaterialData(const wf::component::Material& material);
 
 	private:
 		std::unordered_map<unsigned int, wf::wgl::MeshBufferHandle> m_meshBuffers;
