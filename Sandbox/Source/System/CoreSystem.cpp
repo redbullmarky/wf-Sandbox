@@ -4,6 +4,7 @@
 #include "Component/Material.h"
 
 #include <GL/glew.h>
+#include <imgui.h>
 
 namespace Sandbox
 {
@@ -162,6 +163,14 @@ namespace Sandbox
 		// @todo sprites
 		// @todo gui (frontend)
 		// @todo imgui
+	}
+
+	void CoreSystem::renderGui(float dt)
+	{
+		ImGui::Begin("Sandbox");
+		static float foo{ 0.f };
+		ImGui::InputFloat("Hey", &foo);
+		ImGui::End();
 	}
 
 	void CoreSystem::teardown()

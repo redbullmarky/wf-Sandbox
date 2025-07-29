@@ -62,6 +62,13 @@ namespace wf
 		}
 	}
 
+	void Scene::renderGui(float dt)
+	{
+		for (auto& system : m_systems) {
+			system->renderGui(dt);
+		}
+	}
+
 	void Scene::setBackgroundColour(const Colour& colour)
 	{
 		config.backgroundColour = colour;

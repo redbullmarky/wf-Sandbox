@@ -46,10 +46,7 @@ namespace Sandbox
 				wf::wgl::blitRenderTarget(rt, 0, 0, wf::getWindow().getWidth(), wf::getWindow().getHeight());*/
 
 				if (wf::beginGui()) {
-					ImGui::Begin("Sandbox");
-					static float foo{ 0.f };
-					ImGui::InputFloat("Hey", &foo);
-					ImGui::End();
+					m_scene->renderGui(wf::getDeltaTime());
 					wf::endGui();
 				}
 				else {
