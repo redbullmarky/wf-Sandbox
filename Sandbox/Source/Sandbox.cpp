@@ -3,6 +3,9 @@
 
 #include "Scene/GameScene.h"
 
+#include <imgui.h>
+#include <GL/glew.h>
+
 namespace Sandbox
 {
 	bool Sandbox::init()
@@ -25,13 +28,43 @@ namespace Sandbox
 
 	void Sandbox::run()
 	{
+		//auto rt = wf::wgl::createRenderTarget(1024, 1024);
+
 		while (!wf::shouldClose()) {
 			while (wf::isFixedUpdateReady()) {
 				m_scene->fixedUpdate(wf::getFixedTime());
 			}
 			m_scene->update(wf::getDeltaTime());
-			m_scene->render(wf::getDeltaTime());
+
+			if (wf::beginDrawing()) {
+
+				//wf::wgl::bindRenderTarget(rt);
+
+				m_scene->render(wf::getDeltaTime());
+
+				/*wf::wgl::unbindRenderTarget(rt);
+				wf::wgl::blitRenderTarget(rt, 0, 0, wf::getWindow().getWidth(), wf::getWindow().getHeight());*/
+
+				if (wf::beginGui()) {
+					ImGui::Begin("Sandbox");
+					static float foo{ 0.f };
+					ImGui::InputFloat("Hey", &foo);
+					ImGui::End();
+					wf::endGui();
+				}
+				else {
+					throw std::runtime_error("balls");
+				}
+
+				wf::endDrawing();
+			}
+			else {
+				throw std::runtime_error("oh");
+			}
+
 		}
+
+		//wf::wgl::destroyRenderTarget(rt);
 	}
 
 	void Sandbox::shutdown()

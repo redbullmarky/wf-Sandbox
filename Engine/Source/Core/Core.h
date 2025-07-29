@@ -39,6 +39,9 @@ namespace wf
 	float getAspectRatio();
 	Window& getWindow();
 
+	bool beginDrawing();
+	void endDrawing();
+
 	bool initGui();
 	void shutdownGui();
 	bool beginGui();

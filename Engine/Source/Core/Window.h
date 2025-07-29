@@ -14,6 +14,8 @@ namespace wf
 		bool open(const char* title, int width, int height, int flags);
 		void close();
 
+		int getWidth() const;
+		int getHeight() const;
 		float getAspectRatio() const;
 
 		void clear(const Colour& colour);

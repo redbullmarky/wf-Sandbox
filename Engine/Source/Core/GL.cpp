@@ -9,6 +9,8 @@
 
 namespace wf::wgl
 {
+	std::stack<glm::ivec4> g_viewportStack;
+
 	bool init()
 	{
 		GLenum result = glewInit();
@@ -23,6 +25,23 @@ namespace wf::wgl
 	void setViewport(int x, int y, int w, int h)
 	{
 		glViewport(x, y, w, h);
+	}
+
+	void pushViewport()
+	{
+		GLint vp[4];
+		glGetIntegerv(GL_VIEWPORT, vp);
+		g_viewportStack.push(glm::ivec4(vp[0], vp[1], vp[2], vp[3]));
+	}
+
+	void popViewport()
+	{
+		if (g_viewportStack.empty())
+			throw std::runtime_error("Viewport stack underflow");
+
+		auto vp = g_viewportStack.top();
+		g_viewportStack.pop();
+		glViewport(vp.x, vp.y, vp.z, vp.w);
 	}
 
 	void enableDepthTest(bool enable)
@@ -470,5 +489,80 @@ namespace wf::wgl
 	{
 		glDeleteTextures(1, &texture.glId);
 		texture.glId = {};
+	}
+
+	RenderTargetHandle createRenderTarget(int width, int height, bool colour, bool depth, TextureFormat colourFormat, TextureFormat depthFormat)
+	{
+		RenderTargetHandle renderTarget;
+		renderTarget.width = width;
+		renderTarget.height = height;
+
+		glGenFramebuffers(1, &renderTarget.fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, renderTarget.fbo);
+
+		if (colour) {
+			renderTarget.colour = true;
+			renderTarget.colourTexture = createColourTexture(width, height, colourFormat);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTarget.colourTexture.glId, 0);
+		}
+		else {
+			glDrawBuffer(GL_NONE);
+			glReadBuffer(GL_NONE);
+		}
+
+		if (depth) {
+			renderTarget.depth = true;
+			renderTarget.depthTexture = createDepthTexture(width, height, depthFormat);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, renderTarget.depthTexture.glId, 0);
+		}
+
+
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE)
+			throw std::runtime_error("Framebuffer is incomplete");
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		return renderTarget;
+	}
+
+	void blitRenderTarget(const RenderTargetHandle& target, int x, int y, int w, int h)
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, target.fbo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBlitFramebuffer(0, 0, target.width, target.height, x, y, w, h, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	}
+
+	void bindRenderTarget(const RenderTargetHandle& target)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, target.fbo);
+		pushViewport();
+		setViewport(target.width, target.height);
+
+		GLint currentFBO = 0;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
+		if ((GLuint)currentFBO != target.fbo)
+			throw std::runtime_error("FBO bind failed. Drawing to default framebuffer.");
+
+	}
+
+	void unbindRenderTarget(const RenderTargetHandle& target)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		popViewport();
+	}
+
+	void destroyRenderTarget(RenderTargetHandle& target)
+	{
+		if (target.colourTexture.glId)
+			destroyTexture(target.colourTexture);
+
+		if (target.depthTexture.glId)
+			destroyTexture(target.depthTexture);
+
+		if (target.fbo) {
+			glDeleteFramebuffers(1, &target.fbo);
+			target.fbo = 0;
+		}
 	}
 }

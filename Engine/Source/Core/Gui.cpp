@@ -73,6 +73,7 @@ namespace wf
 		ImGui_ImplSDL3_NewFrame();
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
+		ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 
 		m_inFrame = true;
 		m_renderReady = false;

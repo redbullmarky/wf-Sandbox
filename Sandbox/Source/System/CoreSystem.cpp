@@ -162,8 +162,6 @@ namespace Sandbox
 		// @todo sprites
 		// @todo gui (frontend)
 		// @todo imgui
-
-		wf::getWindow().swapBuffers();
 	}
 
 	void CoreSystem::teardown()

@@ -2,6 +2,8 @@
 #include "Geometry/Geometry.h"
 #include "Misc/Colour.h"
 
+#include <glm/glm.hpp>
+#include <stack>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -16,6 +18,8 @@
 
 namespace wf::wgl
 {
+	extern std::stack<glm::ivec4> g_viewportStack;
+
 	struct MeshBufferHandle
 	{
 		unsigned int vao{};
@@ -67,10 +71,26 @@ namespace wf::wgl
 		unsigned int glId{};
 	};
 
+	struct RenderTargetHandle
+	{
+		TextureHandle colourTexture{};
+		TextureHandle depthTexture{};
+
+		bool colour{ false };
+		bool depth{ false };
+
+		int width{};
+		int height{};
+
+		unsigned int fbo{};
+	};
+
 	bool init();
 
 	void setViewport(int w, int h);
 	void setViewport(int x, int y, int w, int h);
+	void pushViewport();
+	void popViewport();
 
 	void enableDepthTest(bool enable = true);
 	void enableDepthMask(bool enable = true);
@@ -136,4 +156,17 @@ namespace wf::wgl
 
 	void bindTexture(const TextureHandle& texture, int slot);
 	void destroyTexture(TextureHandle& texture);
+
+	[[nodiscard]] RenderTargetHandle createRenderTarget(
+		int width,
+		int height,
+		bool colour = true,
+		bool depth = false,
+		TextureFormat colourFormat = TextureFormat::RGBA8,
+		TextureFormat depthFormat = TextureFormat::DEPTH24
+	);
+	void blitRenderTarget(const RenderTargetHandle& target, int x, int y, int w, int h);
+	void bindRenderTarget(const RenderTargetHandle& target);
+	void unbindRenderTarget(const RenderTargetHandle& target);
+	void destroyRenderTarget(RenderTargetHandle& target);
 }

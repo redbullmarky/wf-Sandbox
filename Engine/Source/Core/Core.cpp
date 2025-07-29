@@ -46,6 +46,20 @@ namespace wf
 		return g_gameState.window;
 	}
 
+	bool beginDrawing()
+	{
+		// @todo return a renderer when we get further along
+		return true;
+	}
+
+	void endDrawing()
+	{
+		if (g_gameState.guiHandler.isRenderReady()) {
+			g_gameState.guiHandler.render();
+		}
+		g_gameState.window.swapBuffers();
+	}
+
 	bool initGui()
 	{
 		return g_gameState.guiHandler.init();
