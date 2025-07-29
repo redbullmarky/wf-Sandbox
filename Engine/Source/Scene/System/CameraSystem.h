@@ -1,12 +1,12 @@
 #pragma once
-#include "Engine.h"
+#include "Scene/System.h"
 
-namespace Sandbox
+namespace wf::system
 {
-	class CameraSystem : public wf::ISystem
+	class CameraSystem : public ISystem
 	{
 	public:
-		using wf::ISystem::ISystem;
+		using ISystem::ISystem;
 
 		virtual bool init() override;
 		virtual void update(float dt) override;

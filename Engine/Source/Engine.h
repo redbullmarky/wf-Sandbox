@@ -31,3 +31,5 @@
 #include "Scene/EntityManager.h"
 #include "Scene/Scene.h"
 #include "Scene/System.h"
+#include "Scene/System/CameraSystem.h"
+#include "Scene/System/CoreSystem.h"

@@ -1,13 +1,13 @@
-#include "Sandbox.h"
+#include "Squishies.h"
 #include "Engine.h"
 
 #include "Scene/TestScene.h"
 
-namespace Sandbox
+namespace Squishies
 {
-	bool Sandbox::init()
+	bool Squishies::init()
 	{
-		if (!wf::init("Sandbox", 1600, 900)) {
+		if (!wf::init("Squishies", 1600, 900)) {
 			return false;
 		}
 
@@ -23,7 +23,7 @@ namespace Sandbox
 		return true;
 	}
 
-	void Sandbox::run()
+	void Squishies::run()
 	{
 		while (!wf::shouldClose()) {
 			while (wf::isFixedUpdateReady()) {
@@ -44,7 +44,7 @@ namespace Sandbox
 		}
 	}
 
-	void Sandbox::shutdown()
+	void Squishies::shutdown()
 	{
 		m_scene->shutdown();
 		wf::shutdownGui();

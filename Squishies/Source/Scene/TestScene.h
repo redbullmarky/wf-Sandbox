@@ -1,16 +1,15 @@
 #pragma once
 #include "Engine.h"
 
-#include "Core/BaseScene.h"
-
-namespace Sandbox
+namespace Squishies
 {
-	class GameScene : public BaseScene
+	class TestScene : public wf::Scene
 	{
 	public:
-		GameScene() = default;
-		~GameScene() = default;
+		TestScene() = default;
+		~TestScene() = default;
 
+		virtual bool init() override;
 		virtual void setup() override;
 		virtual void teardown() override;
 		virtual void render(float dt) override;

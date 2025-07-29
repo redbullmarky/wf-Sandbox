@@ -1,11 +1,19 @@
-#include "GameScene.h"
+#include "TestScene.h"
 #include "Engine.h"
 
 #include <imgui.h>
 
-namespace Sandbox
+namespace Squishies
 {
-	void GameScene::setup()
+	bool TestScene::init()
+	{
+		addSystem<wf::system::RenderSystem>();
+		addSystem<wf::system::CameraSystem>();
+
+		return wf::Scene::init();
+	}
+
+	void TestScene::setup()
 	{
 		m_shadowMap = wf::wgl::createRenderTarget(2048, 2048, false, true);
 
@@ -15,12 +23,12 @@ namespace Sandbox
 		//currentCamera = &m_lightCamera; // @temp @todo for visualising the light camera.
 	}
 
-	void GameScene::teardown()
+	void TestScene::teardown()
 	{
 		wf::wgl::destroyRenderTarget(m_shadowMap);
 	}
 
-	void GameScene::render(float dt)
+	void TestScene::render(float dt)
 	{
 		auto camera = getCurrentCamera();
 		auto light = getCurrentLight();
@@ -33,7 +41,7 @@ namespace Sandbox
 				});
 
 			currentCamera = &currentLight->lightCam;
-			BaseScene::render(dt);
+			wf::Scene::render(dt);
 
 			getEntityManager()->each<wf::component::Material>(
 				[&](wf::component::Material& mat) {
@@ -44,12 +52,10 @@ namespace Sandbox
 
 		currentCamera = camera;
 
-		BaseScene::render(dt);
-
-		//wf::wgl::blitRenderTarget(m_shadowMap, 0, 0, wf::getWindow().getWidth(), wf::getWindow().getHeight());
+		wf::Scene::render(dt);
 	}
 
-	void GameScene::prepareScene()
+	void TestScene::prepareScene()
 	{
 		setBackgroundColour(wf::LIGHTBLUE);
 
@@ -68,12 +74,6 @@ namespace Sandbox
 
 		// textures
 		auto grassTex = wf::loadTexture("resources/images/grass12.png");
-		auto brickTex = wf::loadTexture("resources/images/brickwall.jpg");
-		auto brickNorm = wf::loadTexture("resources/images/brickwall_normal.jpg");
-		auto waterTex = wf::loadTexture("resources/images/water2.jpg");
-		auto gravelTex = wf::loadTexture("resources/images/gravel.jpg");
-		auto gravelNorm = wf::loadTexture("resources/images/gravel_normal.jpg");
-		auto earthTex = wf::loadTexture("resources/images/earth.jpg");
 		auto scuffyNorm = wf::loadTexture("resources/images/tileable-TT7002066_nm.png");
 
 		{
@@ -85,71 +85,20 @@ namespace Sandbox
 			material.shadow.map = &m_shadowMap;
 		}
 
-		// ROW
-		{
-			auto obj = createObject({ -2.f, 1.f, -4.f });
-			obj.addComponent<wf::component::NameTag>("Triangle");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createHelloTriangle());
-			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.map = brickTex;
-			material.normal.map = brickNorm;
-			material.shadow.map = &m_shadowMap;
-		}
-
-		{
-			auto obj = createObject({ 2.f, .5f, -4.f });
-			obj.addComponent<wf::component::NameTag>("Scruffcube");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCube({ 1.f, 1.f, 1.f }));
-			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.map = brickTex;
-			material.normal.map = brickNorm;
-			material.shadow.map = &m_shadowMap;
-		}
-
-		{
-			auto obj = createObject({ 6.f, .5f, -4.f });
-			obj.addComponent<wf::component::NameTag>("Waterbox");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
-			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.map = waterTex;
-			material.specular.intensity = 1.5f;
-			material.shadow.map = &m_shadowMap;
-		}
-
-		// ROW
-		{
-			auto obj = createObject({ -2.f, .5f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Cube");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
-			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.map = gravelTex;
-			material.normal.map = gravelNorm;
-			material.shadow.map = &m_shadowMap;
-		}
-
 		{
 			auto obj = createObject({ 2.f, 1.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Globe");
+			obj.addComponent<wf::component::NameTag>("Sphere 1");
 			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
 			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.map = earthTex;
-			material.shadow.map = &m_shadowMap;
-		}
-
-		// ROW
-		{
-			auto obj = createObject({ -2.f, .5f, 4.f });
-			obj.addComponent<wf::component::NameTag>("Cube 2");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
-			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.map = brickTex;
-			material.normal.map = brickNorm;
+			material.diffuse.colour = wf::ORANGE;
+			material.normal.map = scuffyNorm;
+			material.specular.intensity = 1.5f;
 			material.shadow.map = &m_shadowMap;
 		}
 
 		{
 			auto obj = createObject({ 2.f, 1.f, 4.f });
-			obj.addComponent<wf::component::NameTag>("Sphere");
+			obj.addComponent<wf::component::NameTag>("Sphere 2");
 			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::RED;
@@ -159,12 +108,12 @@ namespace Sandbox
 		}
 	}
 
-	void GameScene::renderGui(float dt)
+	void TestScene::renderGui(float dt)
 	{
 		auto& camera = *getCurrentCamera();
 		auto& light = *getCurrentLight();
 
-		ImGui::Begin("Sandbox");
+		ImGui::Begin("Squishies");
 		{
 			ImGui::Text("ImGui FPS: %.2f", ImGui::GetIO().Framerate);
 

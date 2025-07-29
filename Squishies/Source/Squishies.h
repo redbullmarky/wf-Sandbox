@@ -2,15 +2,15 @@
 #include "Engine.h"
 #include <memory>
 
-namespace Sandbox
+namespace Squishies
 {
 	class TestScene;
 
-	class Sandbox : public wf::Application
+	class Squishies : public wf::Application
 	{
 	public:
-		Sandbox() = default;
-		~Sandbox() = default;
+		Squishies() = default;
+		~Squishies() = default;
 
 		virtual bool init() override;
 		virtual void run() override;

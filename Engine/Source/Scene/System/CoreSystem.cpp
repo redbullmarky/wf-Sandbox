@@ -1,25 +1,29 @@
+#include "pch.h"
 #include "CoreSystem.h"
-#include "Engine.h"
 
-#include "Scene/GameScene.h"
+#include "Scene/Component/Camera.h"
+#include "Scene/Component/Geometry.h"
+#include "Scene/Component/Light.h"
+#include "Scene/Component/Material.h"
+#include "Scene/Component/Transform.h"
 
-namespace Sandbox
+namespace wf::system
 {
-	CoreSystem::CoreSystem(wf::Scene* scene) : wf::ISystem(scene)
+	RenderSystem::RenderSystem(Scene* scene) : ISystem(scene)
 	{
 	}
 
-	bool CoreSystem::init()
+	bool RenderSystem::init()
 	{
 		return true;
 	}
 
-	void CoreSystem::update(float dt)
+	void RenderSystem::update(float dt)
 	{
 		// for any geometry we've not prepared, we'll need to create the VAO/VBOs for it.
 		// if we already have those, and we're working with a dynamic mesh, see if it needs updating and update it
-		entityManager->each<wf::component::Geometry>(
-			[&](wf::component::Geometry& geometry) {
+		entityManager->each<component::Geometry>(
+			[&](component::Geometry& geometry) {
 				// no mesh yet
 				if (!geometry.mesh) return;
 
@@ -36,8 +40,8 @@ namespace Sandbox
 
 		// for any materials we've not prepared, we'll setup the textures/shaders, etc.
 		// for those we have, we'll update the shader uniforms
-		entityManager->each<wf::component::Material>(
-			[&](wf::component::Material& material) {
+		entityManager->each<component::Material>(
+			[&](component::Material& material) {
 				// if we've not got a handle, prep it.
 				if (!material.shader || !material.shader->handle) {
 					uploadMaterialData(material);
@@ -52,9 +56,9 @@ namespace Sandbox
 		// @todo for the above, perhaps we need to attach an internal component to things we've done for speed, but that can wait...
 	}
 
-	void CoreSystem::render(float dt)
+	void RenderSystem::render(float dt)
 	{
-		wf::wgl::clearColour(scene->getBackgroundColour(), true);
+		wgl::clearColour(scene->getBackgroundColour(), true);
 
 		auto& camera = *scene->getCurrentCamera();
 
@@ -62,8 +66,8 @@ namespace Sandbox
 		auto& camera = gameScene->m_lightCamera;*/
 
 		// @todo render meshes with assigned material
-		entityManager->each<wf::component::Geometry, wf::component::Material, wf::component::Transform>(
-			[&](const wf::component::Geometry& geometry, const wf::component::Material& material, const wf::component::Transform& transform) {
+		entityManager->each<component::Geometry, component::Material, component::Transform>(
+			[&](const component::Geometry& geometry, const component::Material& material, const component::Transform& transform) {
 				if (!geometry.mesh || !geometry.mesh->handle || !m_meshBuffers.contains(geometry.mesh->handle)) return;
 				if (!material.shader || !material.shader->handle) return;
 
@@ -71,81 +75,81 @@ namespace Sandbox
 				auto& shader = material.shader;
 				auto& shaderHandle = m_shaders[material.shader->handle];
 
-				wf::wgl::useShader(shaderHandle);
+				wgl::useShader(shaderHandle);
 
 				if (material.hasDiffuseTexture()) {
-					wf::wgl::bindTexture(material.diffuse.map.get()->handle, 0);
+					wgl::bindTexture(material.diffuse.map.get()->handle, 0);
 				}
 				if (material.hasNormalTexture()) {
-					wf::wgl::bindTexture(material.normal.map.get()->handle, 1);
+					wgl::bindTexture(material.normal.map.get()->handle, 1);
 				}
 				if (material.hasSpecularTexture()) {
-					wf::wgl::bindTexture(material.specular.map.get()->handle, 2);
+					wgl::bindTexture(material.specular.map.get()->handle, 2);
 				}
 				if (material.hasShadowMap()) {
-					wf::wgl::bindTexture(material.shadow.map->depthTexture, 3);
+					wgl::bindTexture(material.shadow.map->depthTexture, 3);
 
-					wf::wgl::setShaderUniform(
+					wgl::setShaderUniform(
 						shaderHandle,
 						shader->locs["shadowMapResolution"],
 						(float)material.shadow.map->width
 					);
 
-					wf::wgl::setShaderUniform(
+					wgl::setShaderUniform(
 						shaderHandle,
 						shader->locs["shadowBias"],
 						.005f
 					);
 				}
 
-				wf::Mat4 matModel = transform.getTransformMatrix();
-				wf::Mat4 mvp(camera.getViewProjectionMatrix() * matModel);
+				Mat4 matModel = transform.getTransformMatrix();
+				Mat4 mvp(camera.getViewProjectionMatrix() * matModel);
 
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["lightVP"],
 					scene->getCurrentLight()->getViewProjectionMatrix()
 				);
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["lightDir"],
 					scene->getCurrentLight()->getDirection()
 				);
 
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["viewPos"],
 					camera.position
 				);
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["matModel"],
 					matModel
 				);
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["mvp"],
 					mvp
 				);
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["lightColour"],
 					scene->getCurrentLight()->colour
 				);
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["ambientLevel"],
 					scene->getCurrentLight()->ambientLevel
 				);
 
-				wf::wgl::setCullMode(material.cullMode);
-				wf::wgl::setBlendMode(material.blendMode);
-				wf::wgl::enableDepthTest(material.depthTest); // @todo apparently only supposed to be done once unless necessary according to gpt.
-				wf::wgl::enableDepthMask(material.depthMask);
+				wgl::setCullMode(material.cullMode);
+				wgl::setBlendMode(material.blendMode);
+				wgl::enableDepthTest(material.depthTest); // @todo apparently only supposed to be done once unless necessary according to gpt.
+				wgl::enableDepthMask(material.depthMask);
 
 				// @todo depth func? if we find out what it's for...
 
-				wf::wgl::drawMeshBuffers(
+				wgl::drawMeshBuffers(
 					buffers,
 					static_cast<int>(geometry.mesh->vertices.size()),
 					static_cast<int>(geometry.mesh->indices.size()),
@@ -154,39 +158,39 @@ namespace Sandbox
 			});
 	}
 
-	void CoreSystem::teardown()
+	void RenderSystem::teardown()
 	{
 		// delete material (i.e. textures and shaders)
-		entityManager->each<wf::component::Material>(
-			[&](wf::component::Material& material) {
+		entityManager->each<component::Material>(
+			[&](component::Material& material) {
 				if (!material.shader->handle) return;
 				if (material.diffuse.map && material.diffuse.map->handle.glId) {
-					wf::wgl::destroyTexture(material.diffuse.map.get()->handle);
+					wgl::destroyTexture(material.diffuse.map.get()->handle);
 				}
 				if (material.normal.map && material.normal.map->handle.glId) {
-					wf::wgl::destroyTexture(material.normal.map.get()->handle);
+					wgl::destroyTexture(material.normal.map.get()->handle);
 				}
 				if (material.specular.map && material.specular.map->handle.glId) {
-					wf::wgl::destroyTexture(material.specular.map.get()->handle);
+					wgl::destroyTexture(material.specular.map.get()->handle);
 				}
 
 				if (m_shaders.contains(material.shader->handle)) {
 					auto& shader = m_shaders[material.shader->handle];
-					wf::wgl::destroyShader(shader);
+					wgl::destroyShader(shader);
 					m_shaders.erase(material.shader->handle);
 					material.shader->handle = {};
 				}
 			});
 
 		// delete the VAO/VBOs
-		entityManager->each<wf::component::Geometry>(
-			[&](wf::component::Geometry& geometry) {
+		entityManager->each<component::Geometry>(
+			[&](component::Geometry& geometry) {
 				if (!geometry.mesh->handle) return;
 
 				if (!m_meshBuffers.contains(geometry.mesh->handle)) throw std::runtime_error("Encountered an unmanaged MeshBuffer");
 
 				auto& buffers = m_meshBuffers[geometry.mesh->handle];
-				wf::wgl::destroyMeshBuffers(buffers);
+				wgl::destroyMeshBuffers(buffers);
 				m_meshBuffers.erase(geometry.mesh->handle);
 				geometry.mesh->handle = {};
 			});
@@ -194,82 +198,82 @@ namespace Sandbox
 		// @todo delete FBOs, although we don't yet manage those here
 	}
 
-	void CoreSystem::uploadMesh(wf::component::Geometry& geometry)
+	void RenderSystem::uploadMesh(component::Geometry& geometry)
 	{
-		auto buffers = wf::wgl::createMeshBuffers();
-		wf::wgl::uploadMeshData(buffers, geometry.mesh->vertices, geometry.mesh->indices, geometry.mesh->isDynamic);
+		auto buffers = wgl::createMeshBuffers();
+		wgl::uploadMeshData(buffers, geometry.mesh->vertices, geometry.mesh->indices, geometry.mesh->isDynamic);
 		auto id = ++m_lastId;
 		geometry.mesh->handle = id;
 		m_meshBuffers[id] = buffers;
 	}
 
-	void CoreSystem::updateMeshData(const wf::component::Geometry& geometry)
+	void RenderSystem::updateMeshData(const component::Geometry& geometry)
 	{
 		if (geometry.mesh->isDynamic && (geometry.mesh->needsUpdate || geometry.mesh->autoUpdate)) {
 			auto& buffers = m_meshBuffers[geometry.mesh->handle];
-			wf::wgl::updateMeshData(buffers, geometry.mesh->vertices, geometry.mesh->indices);
+			wgl::updateMeshData(buffers, geometry.mesh->vertices, geometry.mesh->indices);
 		}
 	}
 
-	void CoreSystem::uploadMaterialData(wf::component::Material& material)
+	void RenderSystem::uploadMaterialData(component::Material& material)
 	{
 		if (!material.shader) {
-			material.shader = wf::Shader::create();
+			material.shader = Shader::create();
 		}
 
 		if (!material.shader->handle) {
-			auto shader = wf::wgl::loadShader("resources/shaders/phong.vert", "resources/shaders/phong.frag");
+			auto shader = wgl::loadShader("resources/shaders/phong.vert", "resources/shaders/phong.frag");
 			auto id = ++m_lastId;
 			material.shader->handle = id;
 			m_shaders[id] = shader;
 
 			// transform
-			material.shader->locs["mvp"] = wf::wgl::getShaderUniformLocation(shader, "mvp");
-			material.shader->locs["matModel"] = wf::wgl::getShaderUniformLocation(shader, "matModel");
+			material.shader->locs["mvp"] = wgl::getShaderUniformLocation(shader, "mvp");
+			material.shader->locs["matModel"] = wgl::getShaderUniformLocation(shader, "matModel");
 
 			// textures
-			material.shader->locs["diffuseMap"] = wf::wgl::getShaderUniformLocation(shader, "diffuseMap");
-			material.shader->locs["normalMap"] = wf::wgl::getShaderUniformLocation(shader, "normalMap");
-			material.shader->locs["specularMap"] = wf::wgl::getShaderUniformLocation(shader, "specularMap");
-			material.shader->locs["shadowMap"] = wf::wgl::getShaderUniformLocation(shader, "shadowMap");
+			material.shader->locs["diffuseMap"] = wgl::getShaderUniformLocation(shader, "diffuseMap");
+			material.shader->locs["normalMap"] = wgl::getShaderUniformLocation(shader, "normalMap");
+			material.shader->locs["specularMap"] = wgl::getShaderUniformLocation(shader, "specularMap");
+			material.shader->locs["shadowMap"] = wgl::getShaderUniformLocation(shader, "shadowMap");
 			// flags
-			material.shader->locs["hasDiffuseMap"] = wf::wgl::getShaderUniformLocation(shader, "hasDiffuseMap");
-			material.shader->locs["hasNormalMap"] = wf::wgl::getShaderUniformLocation(shader, "hasNormalMap");
-			material.shader->locs["hasSpecularMap"] = wf::wgl::getShaderUniformLocation(shader, "hasSpecularMap");
-			material.shader->locs["hasShadowMap"] = wf::wgl::getShaderUniformLocation(shader, "hasShadowMap");
+			material.shader->locs["hasDiffuseMap"] = wgl::getShaderUniformLocation(shader, "hasDiffuseMap");
+			material.shader->locs["hasNormalMap"] = wgl::getShaderUniformLocation(shader, "hasNormalMap");
+			material.shader->locs["hasSpecularMap"] = wgl::getShaderUniformLocation(shader, "hasSpecularMap");
+			material.shader->locs["hasShadowMap"] = wgl::getShaderUniformLocation(shader, "hasShadowMap");
 			// material props
-			material.shader->locs["diffuseColour"] = wf::wgl::getShaderUniformLocation(shader, "diffuseColour");
-			material.shader->locs["specularColour"] = wf::wgl::getShaderUniformLocation(shader, "specularColour");
-			material.shader->locs["normalStrength"] = wf::wgl::getShaderUniformLocation(shader, "normalStrength");
-			material.shader->locs["specularShininess"] = wf::wgl::getShaderUniformLocation(shader, "specularShininess");
-			material.shader->locs["specularIntensity"] = wf::wgl::getShaderUniformLocation(shader, "specularIntensity");
+			material.shader->locs["diffuseColour"] = wgl::getShaderUniformLocation(shader, "diffuseColour");
+			material.shader->locs["specularColour"] = wgl::getShaderUniformLocation(shader, "specularColour");
+			material.shader->locs["normalStrength"] = wgl::getShaderUniformLocation(shader, "normalStrength");
+			material.shader->locs["specularShininess"] = wgl::getShaderUniformLocation(shader, "specularShininess");
+			material.shader->locs["specularIntensity"] = wgl::getShaderUniformLocation(shader, "specularIntensity");
 			// lights & camera
-			material.shader->locs["viewPos"] = wf::wgl::getShaderUniformLocation(shader, "viewPos");
-			material.shader->locs["lightDir"] = wf::wgl::getShaderUniformLocation(shader, "lightDir");
-			material.shader->locs["lightColour"] = wf::wgl::getShaderUniformLocation(shader, "lightColour");
-			material.shader->locs["ambientLevel"] = wf::wgl::getShaderUniformLocation(shader, "ambientLevel");
+			material.shader->locs["viewPos"] = wgl::getShaderUniformLocation(shader, "viewPos");
+			material.shader->locs["lightDir"] = wgl::getShaderUniformLocation(shader, "lightDir");
+			material.shader->locs["lightColour"] = wgl::getShaderUniformLocation(shader, "lightColour");
+			material.shader->locs["ambientLevel"] = wgl::getShaderUniformLocation(shader, "ambientLevel");
 			// shadows
-			material.shader->locs["lightVP"] = wf::wgl::getShaderUniformLocation(shader, "lightVP");
-			material.shader->locs["shadowBias"] = wf::wgl::getShaderUniformLocation(shader, "shadowBias");
-			material.shader->locs["shadowMapResolution"] = wf::wgl::getShaderUniformLocation(shader, "shadowMapResolution");
+			material.shader->locs["lightVP"] = wgl::getShaderUniformLocation(shader, "lightVP");
+			material.shader->locs["shadowBias"] = wgl::getShaderUniformLocation(shader, "shadowBias");
+			material.shader->locs["shadowMapResolution"] = wgl::getShaderUniformLocation(shader, "shadowMapResolution");
 		}
 	}
 
-	void CoreSystem::updateMaterialData(const wf::component::Material& material)
+	void RenderSystem::updateMaterialData(const component::Material& material)
 	{
 		if (!material.shader || !material.shader->handle) throw std::runtime_error("NO shader loaded");
 
 		auto& shader = material.shader;
 		auto& shaderHandle = m_shaders[shader->handle];
 
-		wf::wgl::useShader(shaderHandle);
+		wgl::useShader(shaderHandle);
 
 		// DIFFUSE
 		if (shader->isValidLocation("hasDiffuseMap") && shader->isValidLocation("diffuseMap")) {
-			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasDiffuseMap"], material.hasDiffuseTexture());
+			wgl::setShaderUniform(shaderHandle, shader->locs["hasDiffuseMap"], material.hasDiffuseTexture());
 
 			if (material.hasDiffuseTexture()) {
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["diffuseMap"],
 					0
@@ -278,7 +282,7 @@ namespace Sandbox
 		}
 
 		if (shader->isValidLocation("diffuseColour")) {
-			wf::wgl::setShaderUniform(
+			wgl::setShaderUniform(
 				shaderHandle,
 				shader->locs["diffuseColour"],
 				material.diffuse.colour
@@ -287,10 +291,10 @@ namespace Sandbox
 
 		// NORMAL
 		if (shader->isValidLocation("hasNormalMap") && shader->isValidLocation("normalMap")) {
-			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasNormalMap"], material.hasNormalTexture());
+			wgl::setShaderUniform(shaderHandle, shader->locs["hasNormalMap"], material.hasNormalTexture());
 
 			if (material.hasNormalTexture()) {
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["normalMap"],
 					1
@@ -298,7 +302,7 @@ namespace Sandbox
 			}
 
 			if (shader->isValidLocation("normalStrength")) {
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["normalStrength"],
 					material.normal.strength
@@ -308,10 +312,10 @@ namespace Sandbox
 
 		// SPECULAR
 		if (shader->isValidLocation("hasSpecularMap") && shader->isValidLocation("specularMap")) {
-			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasSpecularMap"], material.hasSpecularTexture());
+			wgl::setShaderUniform(shaderHandle, shader->locs["hasSpecularMap"], material.hasSpecularTexture());
 
 			if (material.hasSpecularTexture()) {
-				wf::wgl::setShaderUniform(
+				wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["specularMap"],
 					2
@@ -321,9 +325,9 @@ namespace Sandbox
 
 		// SHADOW
 		if (shader->isValidLocation("hasShadowMap") && shader->isValidLocation("shadowMap")) {
-			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasShadowMap"], material.hasShadowMap());
+			wgl::setShaderUniform(shaderHandle, shader->locs["hasShadowMap"], material.hasShadowMap());
 
-			wf::wgl::setShaderUniform(
+			wgl::setShaderUniform(
 				shaderHandle,
 				shader->locs["shadowMap"],
 				3
@@ -331,14 +335,14 @@ namespace Sandbox
 		}
 
 		if (shader->isValidLocation("specularColour")) {
-			wf::wgl::setShaderUniform(
+			wgl::setShaderUniform(
 				shaderHandle,
 				shader->locs["specularColour"],
 				material.specular.colour
 			);
 		}
 		if (shader->isValidLocation("specularShininess")) {
-			wf::wgl::setShaderUniform(
+			wgl::setShaderUniform(
 				shaderHandle,
 				shader->locs["specularShininess"],
 				material.specular.shininess
@@ -346,7 +350,7 @@ namespace Sandbox
 		}
 
 		if (shader->isValidLocation("specularIntensity")) {
-			wf::wgl::setShaderUniform(
+			wgl::setShaderUniform(
 				shaderHandle,
 				shader->locs["specularIntensity"],
 				material.specular.intensity

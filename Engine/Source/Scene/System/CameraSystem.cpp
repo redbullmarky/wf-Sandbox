@@ -1,7 +1,11 @@
+#include "pch.h"
 #include "CameraSystem.h"
-#include "Engine.h"
 
-namespace Sandbox
+#include "Core/Core.h"
+#include "Scene/Component/Camera.h"
+#include "Scene/Scene.h"
+
+namespace wf::system
 {
 	bool CameraSystem::init()
 	{
@@ -11,7 +15,7 @@ namespace Sandbox
 	void CameraSystem::update(float dt)
 	{
 		// regular freecam
-		if (wf::isKeyHeld(wf::KEY_SHIFT_LEFT)) {
+		if (isKeyHeld(KEY_SHIFT_LEFT)) {
 			scene->getCurrentCamera()->updateFree(dt);
 		}
 	}
