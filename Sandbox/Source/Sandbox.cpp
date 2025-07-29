@@ -28,8 +28,6 @@ namespace Sandbox
 
 	void Sandbox::run()
 	{
-		//auto rt = wf::wgl::createRenderTarget(1024, 1024);
-
 		while (!wf::shouldClose()) {
 			while (wf::isFixedUpdateReady()) {
 				m_scene->fixedUpdate(wf::getFixedTime());
@@ -37,13 +35,7 @@ namespace Sandbox
 			m_scene->update(wf::getDeltaTime());
 
 			if (wf::beginDrawing()) {
-
-				//wf::wgl::bindRenderTarget(rt);
-
 				m_scene->render(wf::getDeltaTime());
-
-				/*wf::wgl::unbindRenderTarget(rt);
-				wf::wgl::blitRenderTarget(rt, 0, 0, wf::getWindow().getWidth(), wf::getWindow().getHeight());*/
 
 				if (wf::beginGui()) {
 					m_scene->renderGui(wf::getDeltaTime());

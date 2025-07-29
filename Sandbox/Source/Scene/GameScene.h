@@ -1,4 +1,6 @@
 #pragma once
+#include "Engine.h"
+
 #include "Core/BaseScene.h"
 
 namespace Sandbox
@@ -10,9 +12,16 @@ namespace Sandbox
 		~GameScene() = default;
 
 		virtual void setup() override;
+		virtual void teardown() override;
+		virtual void render(float dt) override;
 		virtual void renderGui(float dt) override;
 
 	private:
 		void prepareScene();
+
+	private:
+		wf::wgl::RenderTargetHandle m_shadowMap;
+
+		wf::component::Camera m_lightCamera;
 	};
 }

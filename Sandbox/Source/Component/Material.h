@@ -55,6 +55,12 @@ namespace Sandbox::Component
 			float intensity{ 0.f };									// level of specular. defaults to bland.
 		} specular;
 
+		struct Shadow											// shadow map (internals, @todo temporary to get it working)
+		{
+			wf::wgl::RenderTargetHandle* map;						// shadow map
+			bool shadowPass{ false };								// if we're creating the shadows (true) or using them.
+		} shadow;
+
 		BlendMode blendMode = BlendMode::OPAQUE;				// blend mode
 		CullMode cullMode = CullMode::BACK;						// cull mode
 		bool depthMask{ true };									// depth mask
@@ -85,6 +91,14 @@ namespace Sandbox::Component
 		bool hasSpecularTexture() const
 		{
 			return specular.map && specular.map->handle.glId;
+		}
+
+		/**
+		 * @brief Do we have a shadow map we should apply?
+		 */
+		bool hasShadowMap() const
+		{
+			return !shadow.shadowPass && shadow.map && shadow.map->fbo && shadow.map->depthTexture.glId;
 		}
 	};
 }

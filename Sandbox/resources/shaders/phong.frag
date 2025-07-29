@@ -10,11 +10,13 @@ in vec3 fragBitangent;
 uniform sampler2D diffuseMap;
 uniform sampler2D normalMap;
 uniform sampler2D specularMap;
+// uniform sampler2D shadowMap;
 
 // flags
 uniform bool hasDiffuseMap;
 uniform bool hasNormalMap;
 uniform bool hasSpecularMap;
+uniform bool hasShadowMap;
 
 // material props
 uniform vec4 diffuseColour;

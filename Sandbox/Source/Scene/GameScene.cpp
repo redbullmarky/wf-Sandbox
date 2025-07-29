@@ -11,8 +11,44 @@ namespace Sandbox
 {
 	void GameScene::setup()
 	{
+		m_shadowMap = wf::wgl::createRenderTarget(1024, 1024, false, true);
+
 		prepareScene();
+
 		Scene::setup();
+	}
+
+	void GameScene::teardown()
+	{
+		wf::wgl::destroyRenderTarget(m_shadowMap);
+	}
+
+	void GameScene::render(float dt)
+	{
+		auto camera = getCurrentCamera();
+
+		wf::wgl::bindRenderTarget(m_shadowMap);
+		{
+			getEntityManager()->each<Component::Material>(
+				[&](Component::Material& mat) {
+					mat.shadow.shadowPass = true;
+				});
+
+			currentCamera = &m_lightCamera;
+			BaseScene::render(dt);
+
+			getEntityManager()->each<Component::Material>(
+				[&](Component::Material& mat) {
+					mat.shadow.shadowPass = false;
+				});
+		}
+		wf::wgl::unbindRenderTarget(m_shadowMap);
+
+		currentCamera = camera;
+
+		BaseScene::render(dt);
+
+		//wf::wgl::blitRenderTarget(m_shadowMap, 0, 0, wf::getWindow().getWidth(), wf::getWindow().getHeight());
 	}
 
 	void GameScene::prepareScene()
@@ -24,6 +60,9 @@ namespace Sandbox
 			60.f
 		);
 
+		auto cam = createCamera({ -400.f, -400.f, -400.f }, { 0.f, 0.f, 0.f }, true, 1024);
+		m_lightCamera = cam.getComponent<wf::component::Camera>();
+
 		{
 			auto obj = createObject({ -2.f, 0.f, -2.f });
 			obj.addComponent<Component::NameTag>("Triangle");
@@ -31,6 +70,7 @@ namespace Sandbox
 			auto& material = obj.addComponent<Component::Material>();
 			material.diffuse.map = wf::loadTexture("resources/images/brickwall.jpg");
 			material.normal.map = wf::loadTexture("resources/images/brickwall_normal.jpg");
+			material.shadow.map = &m_shadowMap;
 		}
 
 		{
@@ -40,6 +80,7 @@ namespace Sandbox
 			auto& material = obj.addComponent<Component::Material>();
 			material.diffuse.map = wf::loadTexture("resources/images/brickwall.jpg");
 			material.normal.map = wf::loadTexture("resources/images/brickwall_normal.jpg");
+			material.shadow.map = &m_shadowMap;
 		}
 
 		{
@@ -49,6 +90,7 @@ namespace Sandbox
 			auto& material = obj.addComponent<Component::Material>();
 			material.diffuse.map = wf::loadTexture("resources/images/gravel.jpg");
 			material.normal.map = wf::loadTexture("resources/images/gravel_normal.jpg");
+			material.shadow.map = &m_shadowMap;
 		}
 
 		{
@@ -57,6 +99,7 @@ namespace Sandbox
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
 			auto& material = obj.addComponent<Component::Material>();
 			material.diffuse.map = wf::loadTexture("resources/images/earth.jpg");
+			material.shadow.map = &m_shadowMap;
 		}
 	}
 

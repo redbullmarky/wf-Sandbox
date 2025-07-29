@@ -83,6 +83,9 @@ namespace Sandbox
 				if (material.hasSpecularTexture()) {
 					wf::wgl::bindTexture(material.specular.map.get()->handle, 2);
 				}
+				if (material.hasShadowMap()) {
+					wf::wgl::bindTexture(material.shadow.map->depthTexture, 3);
+				}
 
 				wf::Vec3 lightDir = wf::Vec3{ 0.f, -1.f, -1.f };
 				wf::Vec3 viewPos = camera.position;
@@ -251,10 +254,12 @@ namespace Sandbox
 			material.shader->locs["diffuseMap"] = wf::wgl::getShaderUniformLocation(shader, "diffuseMap");
 			material.shader->locs["normalMap"] = wf::wgl::getShaderUniformLocation(shader, "normalMap");
 			material.shader->locs["specularMap"] = wf::wgl::getShaderUniformLocation(shader, "specularMap");
+			material.shader->locs["shadowMap"] = wf::wgl::getShaderUniformLocation(shader, "shadowMap");
 			// flags
 			material.shader->locs["hasDiffuseMap"] = wf::wgl::getShaderUniformLocation(shader, "hasDiffuseMap");
 			material.shader->locs["hasNormalMap"] = wf::wgl::getShaderUniformLocation(shader, "hasNormalMap");
 			material.shader->locs["hasSpecularMap"] = wf::wgl::getShaderUniformLocation(shader, "hasSpecularMap");
+			material.shader->locs["hasShadowMap"] = wf::wgl::getShaderUniformLocation(shader, "hasShadowMap");
 			// material props
 			material.shader->locs["diffuseColour"] = wf::wgl::getShaderUniformLocation(shader, "diffuseColour");
 			material.shader->locs["specularColour"] = wf::wgl::getShaderUniformLocation(shader, "specularColour");
@@ -331,6 +336,17 @@ namespace Sandbox
 					2
 				);
 			}
+		}
+
+		// SHADOW
+		if (shader->isValidLocation("hasShadowMap") && shader->isValidLocation("shadowMap")) {
+			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasShadowMap"], material.hasShadowMap());
+
+			wf::wgl::setShaderUniform(
+				shaderHandle,
+				shader->locs["shadowMap"],
+				3
+			);
 		}
 
 		if (shader->isValidLocation("specularColour")) {
