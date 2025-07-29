@@ -24,7 +24,6 @@ namespace wf
 		virtual void update(float dt) {}
 		virtual void fixedUpdate(float dt) {}
 		virtual void render(float dt) {}
-		virtual void renderGui(float dt) {}
 
 	protected:
 		Scene* scene;

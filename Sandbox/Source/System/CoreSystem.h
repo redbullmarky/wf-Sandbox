@@ -18,7 +18,6 @@ namespace Sandbox
 		virtual bool init() override;
 		virtual void update(float dt) override;
 		virtual void render(float dt) override;
-		virtual void renderGui(float dt) override;
 		virtual void teardown() override;
 
 	private:

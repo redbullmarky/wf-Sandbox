@@ -1,10 +1,10 @@
 #include "CoreSystem.h"
+#include "Engine.h"
 
 #include "Component/Geometry.h"
 #include "Component/Material.h"
 
 #include <GL/glew.h>
-#include <imgui.h>
 
 namespace Sandbox
 {
@@ -73,7 +73,16 @@ namespace Sandbox
 
 				wf::wgl::useShader(shaderHandle);
 
-				// @todo textures
+
+				if (material.hasDiffuseTexture()) {
+					wf::wgl::bindTexture(material.diffuse.map.get()->handle, 0);
+				}
+				if (material.hasNormalTexture()) {
+					wf::wgl::bindTexture(material.normal.map.get()->handle, 1);
+				}
+				if (material.hasSpecularTexture()) {
+					wf::wgl::bindTexture(material.specular.map.get()->handle, 2);
+				}
 
 				wf::Vec3 lightDir = wf::Vec3{ 0.f, -1.f, -1.f };
 				wf::Vec3 viewPos = camera.position;
@@ -163,14 +172,6 @@ namespace Sandbox
 		// @todo sprites
 		// @todo gui (frontend)
 		// @todo imgui
-	}
-
-	void CoreSystem::renderGui(float dt)
-	{
-		ImGui::Begin("Sandbox");
-		static float foo{ 0.f };
-		ImGui::InputFloat("Hey", &foo);
-		ImGui::End();
 	}
 
 	void CoreSystem::teardown()
@@ -282,7 +283,6 @@ namespace Sandbox
 			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasDiffuseMap"], material.hasDiffuseTexture());
 
 			if (material.hasDiffuseTexture()) {
-				wf::wgl::bindTexture(material.diffuse.map.get()->handle, 0);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["diffuseMap"],
@@ -304,7 +304,6 @@ namespace Sandbox
 			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasNormalMap"], material.hasNormalTexture());
 
 			if (material.hasNormalTexture()) {
-				wf::wgl::bindTexture(material.normal.map.get()->handle, 1);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["normalMap"],
@@ -326,7 +325,6 @@ namespace Sandbox
 			wf::wgl::setShaderUniform(shaderHandle, shader->locs["hasSpecularMap"], material.hasSpecularTexture());
 
 			if (material.hasSpecularTexture()) {
-				wf::wgl::bindTexture(material.specular.map.get()->handle, 2);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["specularMap"],

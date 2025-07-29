@@ -39,5 +39,7 @@ namespace wf::component
 		void yaw(float angle, bool rotateAroundTarget);
 		void pitch(float angle, bool lockView, bool rotateAroundTarget, bool rotateUp);
 		void roll(float angle);
+
+		void updateFree(float dt, float moveSpeed = 1.f, float lookSpeed = 1.f, float zoomSpeed = 1.f);
 	};
 }

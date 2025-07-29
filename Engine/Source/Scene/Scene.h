@@ -69,7 +69,7 @@ namespace wf
 		/**
 		 * @brief A place for ImGui to do its thing
 		 */
-		virtual void renderGui(float dt);
+		virtual void renderGui(float dt) {}
 
 		/**
 		 * @brief Set the solid colour used to clear the background before render

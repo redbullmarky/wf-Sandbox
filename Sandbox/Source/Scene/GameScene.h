@@ -10,6 +10,7 @@ namespace Sandbox
 		~GameScene() = default;
 
 		virtual void setup() override;
+		virtual void renderGui(float dt) override;
 
 	private:
 		void prepareScene();

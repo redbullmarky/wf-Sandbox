@@ -49,16 +49,9 @@ namespace Sandbox
 					m_scene->renderGui(wf::getDeltaTime());
 					wf::endGui();
 				}
-				else {
-					throw std::runtime_error("balls");
-				}
 
 				wf::endDrawing();
 			}
-			else {
-				throw std::runtime_error("oh");
-			}
-
 		}
 
 		//wf::wgl::destroyRenderTarget(rt);

@@ -9,6 +9,8 @@
 
 #include "Geometry/Geometry.h"
 #include "Geometry/Mesh.h"
+#include "Geometry/MeshFactory.h"
+#include "Geometry/MeshUtils.h"
 
 #include "Math/Math.h"
 

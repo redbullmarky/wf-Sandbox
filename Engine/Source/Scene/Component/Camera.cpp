@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Camera.h"
+#include "Core/Core.h"
 
 namespace wf::component
 {
@@ -165,5 +166,69 @@ namespace wf::component
 	void Camera::roll(float angle)
 	{
 		up = glm::angleAxis(angle, getForward()) * up;
+	}
+
+	void Camera::updateFree(float dt, float moveSpeed, float lookSpeed, float zoomSpeed)
+	{
+		// base speeds until we figure out stuff
+		float moveBase{ 3.f * dt };
+		float lookBase{ 10.f * dt };
+		float zoomBase{ 250.f * dt };
+
+		// Calculate forward and right from target - position
+		Vec3 forward = getForward();
+		Vec3 right = getRight();
+
+		// Mouse look: rotate target around position
+		Vec2 delta = wf::getMouseDelta() * .002f * lookSpeed;
+		if (delta.x != 0.0f || delta.y != 0.0f) {
+			// Horizontal rotation (Y axis)
+			glm::mat4 rotY = glm::rotate(glm::mat4(1.0f), -delta.x, up);
+			forward = glm::vec3(rotY * glm::vec4(forward, 0.0f));
+
+			// Vertical rotation (right axis)
+			glm::mat4 rotX = glm::rotate(glm::mat4(1.0f), -delta.y, right);
+			forward = glm::vec3(rotX * glm::vec4(forward, 0.0f));
+
+			target = position + forward;
+		}
+
+		// WASD movement
+		if (wf::isKeyHeld(SDL_SCANCODE_W)) {
+			position += forward * moveBase * moveSpeed;
+		}
+		if (wf::isKeyHeld(SDL_SCANCODE_S)) {
+			position -= forward * moveBase * moveSpeed;
+		}
+		if (wf::isKeyHeld(SDL_SCANCODE_A)) {
+			position -= right * moveBase * moveSpeed;
+		}
+		if (wf::isKeyHeld(SDL_SCANCODE_D)) {
+			position += right * moveBase * moveSpeed;
+		}
+
+		// Vertical movement
+		if (wf::isKeyHeld(SDL_SCANCODE_SPACE)) {
+			position += up * moveBase * moveSpeed;
+		}
+		if (wf::isKeyHeld(SDL_SCANCODE_LCTRL)) {
+			position -= up * moveBase * moveSpeed;
+		}
+
+		// Update target after movement
+		target = position + forward;
+
+		// Mouse wheel zoom (FOV or ortho width)
+		Vec2 wheel = wf::getMouseWheel();
+		if (wheel.y != 0.0f) {
+			if (orthographic) {
+				orthoWidth -= wheel.y * zoomBase * zoomSpeed;
+				orthoWidth = std::max(0.1f, orthoWidth);
+			}
+			else {
+				fovDegrees -= wheel.y * zoomBase * zoomSpeed;
+				fovDegrees = glm::clamp(fovDegrees, 10.0f, 150.0f);
+			}
+		}
 	}
 }
