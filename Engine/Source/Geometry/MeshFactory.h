@@ -10,7 +10,7 @@ namespace wf
 
 	namespace mesh
 	{
-		std::shared_ptr<Mesh> createSimplePlane();
+		std::shared_ptr<Mesh> createSimplePlane(float size = 50.f);
 
 		/**
 		 * @brief Generate a simple cube with 8 vertices

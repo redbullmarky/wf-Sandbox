@@ -19,9 +19,10 @@ namespace Sandbox
 	private:
 		void prepareScene();
 
+	public:
+		wf::component::Camera m_lightCamera;
+
 	private:
 		wf::wgl::RenderTargetHandle m_shadowMap;
-
-		wf::component::Camera m_lightCamera;
 	};
 }

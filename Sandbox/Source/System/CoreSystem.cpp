@@ -4,6 +4,8 @@
 #include "Component/Geometry.h"
 #include "Component/Material.h"
 
+#include "Scene/GameScene.h"
+
 #include <GL/glew.h>
 
 namespace Sandbox
@@ -61,6 +63,9 @@ namespace Sandbox
 
 		auto& camera = *scene->getCurrentCamera();
 
+		/*GameScene* gameScene = static_cast<GameScene*>(scene);
+		auto& camera = gameScene->m_lightCamera;*/
+
 		// @todo render meshes with assigned material
 		entityManager->each<Component::Geometry, Component::Material, wf::component::Transform>(
 			[&](const Component::Geometry& geometry, const Component::Material& material, const wf::component::Transform& transform) {
@@ -72,7 +77,6 @@ namespace Sandbox
 				auto& shaderHandle = m_shaders[material.shader->handle];
 
 				wf::wgl::useShader(shaderHandle);
-
 
 				if (material.hasDiffuseTexture()) {
 					wf::wgl::bindTexture(material.diffuse.map.get()->handle, 0);
@@ -87,16 +91,28 @@ namespace Sandbox
 					wf::wgl::bindTexture(material.shadow.map->depthTexture, 3);
 				}
 
-				wf::Vec3 lightDir = wf::Vec3{ 0.f, -1.f, -1.f };
+				wf::Vec3 lightDir = glm::normalize(scene->getCurrentLight()->direction);
+				//wf::Mat4 lightVP = scene->getCurrentLight()->getViewProjectionMatrix();
+
+				auto* gameScene = static_cast<GameScene*>(scene);
+				wf::Mat4 lightVP = gameScene->m_lightCamera.getViewProjectionMatrix(wf::getAspectRatio());
+
 				wf::Vec3 viewPos = camera.position;
 				wf::Mat4 vp = camera.getViewProjectionMatrix(wf::getAspectRatio());
-				wf::Mat4 mvp(vp * transform.getTransformMatrix());
+				wf::Mat4 matModel = transform.getTransformMatrix();
+				wf::Mat4 mvp(vp * matModel);
 
+				wf::wgl::setShaderUniform(
+					shaderHandle,
+					shader->locs["lightVP"],
+					lightVP
+				);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["lightDir"],
 					lightDir
 				);
+
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["viewPos"],
@@ -105,7 +121,7 @@ namespace Sandbox
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["matModel"],
-					transform.getTransformMatrix()
+					matModel
 				);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
@@ -115,12 +131,12 @@ namespace Sandbox
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["lightColour"],
-					wf::WHITE
+					scene->getCurrentLight()->colour
 				);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["ambientLevel"],
-					0.5f
+					scene->getCurrentLight()->ambientLevel
 				);
 
 				// @todo we'll need to shifty this gl stuff out of here...
@@ -268,6 +284,7 @@ namespace Sandbox
 			material.shader->locs["specularIntensity"] = wf::wgl::getShaderUniformLocation(shader, "specularIntensity");
 			// lights & camera
 			material.shader->locs["viewPos"] = wf::wgl::getShaderUniformLocation(shader, "viewPos");
+			material.shader->locs["lightVP"] = wf::wgl::getShaderUniformLocation(shader, "lightVP");
 			material.shader->locs["lightDir"] = wf::wgl::getShaderUniformLocation(shader, "lightDir");
 			material.shader->locs["lightColour"] = wf::wgl::getShaderUniformLocation(shader, "lightColour");
 			material.shader->locs["ambientLevel"] = wf::wgl::getShaderUniformLocation(shader, "ambientLevel");

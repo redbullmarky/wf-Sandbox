@@ -26,7 +26,6 @@ namespace wf::component
 		Mat4 getProjectionMatrix(float aspectRatio) const;
 		Mat4 getViewProjectionMatrix(float aspectRatio) const;
 
-
 		Vec3 getForward() const;
 		Vec3 getUp() const;
 		Vec3 getRight() const;

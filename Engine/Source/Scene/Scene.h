@@ -12,6 +12,7 @@ namespace wf
 	namespace component
 	{
 		struct Camera;
+		struct Light;
 	}
 
 	struct SceneConfig
@@ -102,6 +103,16 @@ namespace wf
 		component::Camera* getCurrentCamera();
 
 		/**
+		 * @brief Create a simple light @todo only one for now for testing shadows, we'll need more.
+		 */
+		Entity createLight(const Vec3& position, const Vec3& target);
+
+		/**
+		 * @brief Fetch the main light. @todo see createLight()
+		 */
+		component::Light* getCurrentLight();
+
+		/**
 		 * @brief Return the entity manager attached to this scene
 		 */
 		EntityManager* getEntityManager();
@@ -121,6 +132,7 @@ namespace wf
 		EntityManager entityManager;
 		SceneConfig config;
 		component::Camera* currentCamera{ nullptr };
+		component::Light* currentLight{ nullptr };
 
 	private:
 		std::vector<std::unique_ptr<ISystem>> m_systems;

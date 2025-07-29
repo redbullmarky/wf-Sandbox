@@ -11,11 +11,12 @@ namespace Sandbox
 {
 	void GameScene::setup()
 	{
-		m_shadowMap = wf::wgl::createRenderTarget(1024, 1024, false, true);
+		m_shadowMap = wf::wgl::createRenderTarget(2048, 2048, false, true);
 
 		prepareScene();
 
 		Scene::setup();
+		//currentCamera = &m_lightCamera; // @temp @todo for visualising the light camera.
 	}
 
 	void GameScene::teardown()
@@ -26,6 +27,7 @@ namespace Sandbox
 	void GameScene::render(float dt)
 	{
 		auto camera = getCurrentCamera();
+		auto light = getCurrentLight();
 
 		wf::wgl::bindRenderTarget(m_shadowMap);
 		{
@@ -33,6 +35,12 @@ namespace Sandbox
 				[&](Component::Material& mat) {
 					mat.shadow.shadowPass = true;
 				});
+
+			// @todo probs need to tighten this up, but it seems this means the light camera tracks the main camera
+			// likely to not waste resolution on things nowhere near the view?
+			// but...it does seem to "animate", so will need to figure out why.
+		/*	m_lightCamera.target = camera->position;
+			m_lightCamera.position = camera->position - (light->direction * 10.f);*/
 
 			currentCamera = &m_lightCamera;
 			BaseScene::render(dt);
@@ -53,6 +61,8 @@ namespace Sandbox
 
 	void GameScene::prepareScene()
 	{
+		setBackgroundColour(wf::LIGHTBLUE);
+
 		createCamera(
 			wf::Vec3{ -3.f, 5.f, 3.f },
 			wf::Vec3{ 2.f, -3.f, 1.f },
@@ -60,11 +70,32 @@ namespace Sandbox
 			60.f
 		);
 
-		auto cam = createCamera({ -400.f, -400.f, -400.f }, { 0.f, 0.f, 0.f }, true, 1024);
+
+		wf::Vec3 lpos{ 50.f, 50.f, -50.f };
+
+		createLight(
+			lpos,
+			wf::Vec3{ 0.f, 0.f, 0.f }
+		);
+
+		auto cam = createCamera(lpos, { 0.f, 0.f, 0.f }, true, 100);
 		m_lightCamera = cam.getComponent<wf::component::Camera>();
+		m_lightCamera.farPlane = 500.f;
+
+		/*m_lightCamera.nearPlane = 20.f;
+		m_lightCamera.farPlane = 10000.f;*/
 
 		{
-			auto obj = createObject({ -2.f, 0.f, -2.f });
+			auto obj = createObject();
+			obj.addComponent<Component::NameTag>("Plane");
+			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createSimplePlane());
+			auto& material = obj.addComponent<Component::Material>();
+			material.diffuse.map = wf::loadTexture("resources/images/grass12.png");
+			material.shadow.map = &m_shadowMap;
+		}
+
+		{
+			auto obj = createObject({ -2.f, 1.f, -2.f });
 			obj.addComponent<Component::NameTag>("Triangle");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createHelloTriangle());
 			auto& material = obj.addComponent<Component::Material>();
@@ -74,7 +105,7 @@ namespace Sandbox
 		}
 
 		{
-			auto obj = createObject({ 2.f, 0.f, -2.f });
+			auto obj = createObject({ 2.f, .5f, -2.f });
 			obj.addComponent<Component::NameTag>("Scruffcube");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createCube({ 1.f, 1.f, 1.f }));
 			auto& material = obj.addComponent<Component::Material>();
@@ -84,7 +115,7 @@ namespace Sandbox
 		}
 
 		{
-			auto obj = createObject({ -2.f, 0.f, 2.f });
+			auto obj = createObject({ -2.f, .5f, 2.f });
 			obj.addComponent<Component::NameTag>("Cube");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
 			auto& material = obj.addComponent<Component::Material>();
@@ -94,7 +125,7 @@ namespace Sandbox
 		}
 
 		{
-			auto obj = createObject({ 2.f, 0.f, 2.f });
+			auto obj = createObject({ 2.f, 1.f, 2.f });
 			obj.addComponent<Component::NameTag>("Globe");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
 			auto& material = obj.addComponent<Component::Material>();
@@ -106,13 +137,26 @@ namespace Sandbox
 	void GameScene::renderGui(float dt)
 	{
 		auto& camera = *getCurrentCamera();
+		auto& light = *getCurrentLight();
 
 		ImGui::Begin("Sandbox");
 		{
 			ImGui::Text("ImGui FPS: %.2f", ImGui::GetIO().Framerate);
 
+			ImGui::SeparatorText("Light");
+			ImGui::DragFloat3("LightPos", &light.position.x);
+			ImGui::DragFloat3("LightDir", &light.direction.x, .1f);
+			ImGui::SliderFloat("Ambient", &light.ambientLevel, 0.f, 1.f);
+
+			ImGui::SeparatorText("Camera");
 			ImGui::DragFloat3("CamPos", &camera.position.x);
 			ImGui::DragFloat3("CamTar", &camera.target.x);
+
+			ImGui::SeparatorText("Light Camera");
+			ImGui::DragFloat3("LightCamPos", &m_lightCamera.position.x);
+			ImGui::DragFloat3("LightCamTar", &m_lightCamera.target.x);
+			ImGui::DragFloat("Nplane", &m_lightCamera.nearPlane, .1f, .1f, 1000.f);
+			ImGui::DragFloat("Fplane", &m_lightCamera.farPlane, .1f, .1f, 1000.f);
 
 			getEntityManager()->each<wf::component::Transform, Component::Material, Component::NameTag>(
 				[&](wf::EntityID id, wf::component::Transform& transform, Component::Material& material, const Component::NameTag& nametag) {

@@ -21,6 +21,7 @@
 #include "Render/Texture.h"
 
 #include "Scene/Component/Camera.h"
+#include "Scene/Component/Light.h"
 #include "Scene/Component/Transform.h"
 #include "Scene/Common.h"
 #include "Scene/Entity.h"

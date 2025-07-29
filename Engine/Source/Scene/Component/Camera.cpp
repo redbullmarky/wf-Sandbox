@@ -33,13 +33,12 @@ namespace wf::component
 	Mat4 Camera::getProjectionMatrix(float aspectRatio) const
 	{
 		if (orthographic) {
-			float top = fovDegrees / 2.f;
-			float right = top * aspectRatio;
-
-			// Left, Right, Bottom, Top, Near, Far
+			float halfWidth = orthoWidth / 2.f;
+			float halfHeight = halfWidth / aspectRatio;
+			//printf("%.2f %.2f\n", halfWidth, halfHeight);
 			return Mat4{ glm::ortho(
-				-right, right,
-				-top, top,
+				-halfWidth, halfWidth,
+				-halfHeight, halfHeight,
 				nearPlane, farPlane
 			) };
 		}

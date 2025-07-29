@@ -11,13 +11,13 @@
 
 namespace wf::mesh
 {
-	std::shared_ptr<Mesh> createSimplePlane()
+	std::shared_ptr<Mesh> createSimplePlane(float size)
 	{
 		auto mesh = Mesh::create();
 
 		mesh->vertices.resize(4);
 
-		float w = 250.f;
+		float w = size / 2.f;
 
 		mesh->vertices[0].position = Vec3{ -w, 0.f, -w };
 		mesh->vertices[1].position = Vec3{ w, 0.f, -w };
@@ -33,7 +33,7 @@ namespace wf::mesh
 		for (auto& v : mesh->vertices)
 			v.normal = normal;
 
-		mesh->indices = { 0, 1, 2, 2, 3, 0 };
+		mesh->indices = { 0, 2, 1, 2, 0, 3 };
 
 		return mesh;
 	}

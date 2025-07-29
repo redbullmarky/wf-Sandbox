@@ -2,6 +2,7 @@
 #include "Scene.h"
 
 #include "Component/Camera.h"
+#include "Component/Light.h"
 #include "Component/Transform.h"
 #include "Entity.h"
 
@@ -116,6 +117,27 @@ namespace wf
 	component::Camera* Scene::getCurrentCamera()
 	{
 		return currentCamera;
+	}
+
+	Entity Scene::createLight(const Vec3& position, const Vec3& target)
+	{
+		auto object = createObject();
+
+		component::Light light;
+		light.position = position;
+		light.direction = glm::normalize(target - position);
+
+		auto& lightCmp = object.addComponent<component::Light>(light);
+		if (!currentLight) {
+			currentLight = &lightCmp;
+		}
+
+		return object;
+	}
+
+	component::Light* Scene::getCurrentLight()
+	{
+		return currentLight;
 	}
 
 	EntityManager* Scene::getEntityManager()
