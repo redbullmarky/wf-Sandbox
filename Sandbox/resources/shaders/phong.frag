@@ -30,7 +30,11 @@ uniform vec3 viewPos;
 uniform vec3 lightDir;
 uniform vec4 lightColour;
 uniform float ambientLevel;
-uniform mat4 lightVP;           // for shadows
+
+// SHADOWS
+uniform mat4 lightVP;
+uniform float shadowBias;
+uniform float shadowMapResolution;
 
 out vec4 finalColour;
 
@@ -82,11 +86,8 @@ void main()
         vec2 sampleCoords = fragPosLightSpace.xy;
         float curDepth = fragPosLightSpace.z;
 
-        float shadowBiasScale = 0.0005;
-        float shadowMapResolution = 2048;
-
         // Bias to prevent self-shadowing (shadow acne)
-        float biasScale = (shadowBiasScale > 0.0) ? shadowBiasScale : 0.0005;
+        float biasScale = (shadowBias > 0.0) ? shadowBias : 0.0005;
         float bias = max(biasScale * (1.0 - dot(normal, -lightDir)), biasScale * 0.1);
 
         // Percentage-Closer Filtering (PCF)

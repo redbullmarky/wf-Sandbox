@@ -89,6 +89,18 @@ namespace Sandbox
 				}
 				if (material.hasShadowMap()) {
 					wf::wgl::bindTexture(material.shadow.map->depthTexture, 3);
+
+					wf::wgl::setShaderUniform(
+						shaderHandle,
+						shader->locs["shadowMapResolution"],
+						(float)material.shadow.map->width
+					);
+
+					wf::wgl::setShaderUniform(
+						shaderHandle,
+						shader->locs["shadowBias"],
+						.005f
+					);
 				}
 
 				wf::Mat4 matModel = transform.getTransformMatrix();
@@ -276,10 +288,13 @@ namespace Sandbox
 			material.shader->locs["specularIntensity"] = wf::wgl::getShaderUniformLocation(shader, "specularIntensity");
 			// lights & camera
 			material.shader->locs["viewPos"] = wf::wgl::getShaderUniformLocation(shader, "viewPos");
-			material.shader->locs["lightVP"] = wf::wgl::getShaderUniformLocation(shader, "lightVP");
 			material.shader->locs["lightDir"] = wf::wgl::getShaderUniformLocation(shader, "lightDir");
 			material.shader->locs["lightColour"] = wf::wgl::getShaderUniformLocation(shader, "lightColour");
 			material.shader->locs["ambientLevel"] = wf::wgl::getShaderUniformLocation(shader, "ambientLevel");
+			// shadows
+			material.shader->locs["lightVP"] = wf::wgl::getShaderUniformLocation(shader, "lightVP");
+			material.shader->locs["shadowBias"] = wf::wgl::getShaderUniformLocation(shader, "shadowBias");
+			material.shader->locs["shadowMapResolution"] = wf::wgl::getShaderUniformLocation(shader, "shadowMapResolution");
 		}
 	}
 

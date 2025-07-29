@@ -36,12 +36,6 @@ namespace Sandbox
 					mat.shadow.shadowPass = true;
 				});
 
-			// @todo probs need to tighten this up, but it seems this means the light camera tracks the main camera
-			// likely to not waste resolution on things nowhere near the view?
-			// but...it does seem to "animate", so will need to figure out why.
-		/*	m_lightCamera.target = camera->position;
-			m_lightCamera.position = camera->position - (light->direction * 10.f);*/
-
 			currentCamera = &currentLight->lightCam;
 			BaseScene::render(dt);
 
@@ -71,11 +65,10 @@ namespace Sandbox
 		);
 
 		auto light = createLight(
-			wf::Vec3{ 0.f, 50.f, 0.f },// { 50.f, 50.f, -50.f },
+			wf::Vec3{ 20.f, 50.f, 20.f },
 			wf::Vec3{ 0.f, 0.f, 0.f }
 		);
-		light->lightCam.farPlane = 100.f;
-
+		light->lightCam.orthoWidth = 40.f;
 
 		{
 			auto obj = createObject();
@@ -86,8 +79,9 @@ namespace Sandbox
 			material.shadow.map = &m_shadowMap;
 		}
 
+		// ROW
 		{
-			auto obj = createObject({ -2.f, 1.f, -2.f });
+			auto obj = createObject({ -2.f, 1.f, -4.f });
 			obj.addComponent<Component::NameTag>("Triangle");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createHelloTriangle());
 			auto& material = obj.addComponent<Component::Material>();
@@ -97,7 +91,7 @@ namespace Sandbox
 		}
 
 		{
-			auto obj = createObject({ 2.f, .5f, -2.f });
+			auto obj = createObject({ 2.f, .5f, -4.f });
 			obj.addComponent<Component::NameTag>("Scruffcube");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createCube({ 1.f, 1.f, 1.f }));
 			auto& material = obj.addComponent<Component::Material>();
@@ -107,7 +101,18 @@ namespace Sandbox
 		}
 
 		{
-			auto obj = createObject({ -2.f, .5f, 2.f });
+			auto obj = createObject({ 6.f, .5f, -4.f });
+			obj.addComponent<Component::NameTag>("Waterbox");
+			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
+			auto& material = obj.addComponent<Component::Material>();
+			material.diffuse.map = wf::loadTexture("resources/images/water2.jpg");
+			material.specular.intensity = 1.5f;
+			material.shadow.map = &m_shadowMap;
+		}
+
+		// ROW
+		{
+			auto obj = createObject({ -2.f, .5f, 0.f });
 			obj.addComponent<Component::NameTag>("Cube");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
 			auto& material = obj.addComponent<Component::Material>();
@@ -117,11 +122,33 @@ namespace Sandbox
 		}
 
 		{
-			auto obj = createObject({ 2.f, 1.f, 2.f });
+			auto obj = createObject({ 2.f, 1.f, 0.f });
 			obj.addComponent<Component::NameTag>("Globe");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
 			auto& material = obj.addComponent<Component::Material>();
 			material.diffuse.map = wf::loadTexture("resources/images/earth.jpg");
+			material.shadow.map = &m_shadowMap;
+		}
+
+		// ROW
+		{
+			auto obj = createObject({ -2.f, .5f, 4.f });
+			obj.addComponent<Component::NameTag>("Cube 2");
+			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
+			auto& material = obj.addComponent<Component::Material>();
+			material.diffuse.map = wf::loadTexture("resources/images/brickwall.jpg");
+			material.normal.map = wf::loadTexture("resources/images/brickwall_normal.jpg");
+			material.shadow.map = &m_shadowMap;
+		}
+
+		{
+			auto obj = createObject({ 2.f, 1.f, 4.f });
+			obj.addComponent<Component::NameTag>("Sphere");
+			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
+			auto& material = obj.addComponent<Component::Material>();
+			material.diffuse.colour = wf::RED;
+			material.normal.map = wf::loadTexture("resources/images/tileable-TT7002066_nm.png");
+			material.specular.intensity = 1.5f;
 			material.shadow.map = &m_shadowMap;
 		}
 	}
@@ -143,6 +170,7 @@ namespace Sandbox
 				ImGui::Text("Dir: %.2f %.2f %.2f", light.getDirection().x, light.getDirection().y, light.getDirection().z);
 				ImGui::DragFloat("Nearplane", &light.lightCam.nearPlane, .1f, .1f, 1000.f);
 				ImGui::DragFloat("Farplane", &light.lightCam.farPlane, .1f, .1f, 1000.f);
+				ImGui::DragFloat("Width", &light.lightCam.orthoWidth, 1.f, 1.f, 1000.f);
 				ImGui::SliderFloat("Ambient", &light.ambientLevel, 0.f, 1.f);
 			}
 			ImGui::PopID();
