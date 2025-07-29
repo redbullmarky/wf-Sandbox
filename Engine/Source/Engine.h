@@ -11,6 +11,7 @@
 #include "Geometry/Mesh.h"
 #include "Geometry/MeshFactory.h"
 #include "Geometry/MeshUtils.h"
+#include "Geometry/Model.h"
 
 #include "Math/Math.h"
 
