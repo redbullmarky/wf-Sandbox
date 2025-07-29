@@ -1,32 +1,29 @@
 #include "pch.h"
 #include "Light.h"
 
-#include "Core/Core.h"
-#include "Geometry/Geometry.h"
 
 namespace wf::component
 {
-	Mat4 Light::getViewMatrix() const
+	Light::Light(const Vec3& position, const Vec3& target, LightType type)
+		: type(type)
 	{
-		return Mat4{ glm::lookAt(position, position + direction, Vec3{ 0.f, 1.f, 0.f }) };
+		switch (type) {
+		case LightType::DIRECTIONAL:
+			lightCam = Camera::createOrthographic(position, target, 50.f);
+			lightCam.farPlane = 500.f;
+			break;
+		default:
+			lightCam = Camera::createPerspective(position, target, 90.f);
+		}
 	}
 
-	Mat4 Light::getProjectionMatrix() const
+	Vec3 Light::getDirection() const
 	{
-		// @todo assumes orthographic
-
-		float top = 30.f / 2.f;
-		float right = top * wf::getAspectRatio();
-
-		return Mat4{ glm::ortho(
-			-right, right,
-			-top, top,
-			.1f, 10000.f
-		) };
+		return lightCam.getDirection();
 	}
 
 	Mat4 Light::getViewProjectionMatrix() const
 	{
-		return getProjectionMatrix() * getViewMatrix();
+		return lightCam.getViewProjectionMatrix();
 	}
 }

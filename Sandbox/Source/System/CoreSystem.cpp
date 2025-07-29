@@ -91,32 +91,24 @@ namespace Sandbox
 					wf::wgl::bindTexture(material.shadow.map->depthTexture, 3);
 				}
 
-				wf::Vec3 lightDir = glm::normalize(scene->getCurrentLight()->direction);
-				//wf::Mat4 lightVP = scene->getCurrentLight()->getViewProjectionMatrix();
-
-				auto* gameScene = static_cast<GameScene*>(scene);
-				wf::Mat4 lightVP = gameScene->m_lightCamera.getViewProjectionMatrix(wf::getAspectRatio());
-
-				wf::Vec3 viewPos = camera.position;
-				wf::Mat4 vp = camera.getViewProjectionMatrix(wf::getAspectRatio());
 				wf::Mat4 matModel = transform.getTransformMatrix();
-				wf::Mat4 mvp(vp * matModel);
+				wf::Mat4 mvp(camera.getViewProjectionMatrix() * matModel);
 
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["lightVP"],
-					lightVP
+					scene->getCurrentLight()->getViewProjectionMatrix()
 				);
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["lightDir"],
-					lightDir
+					scene->getCurrentLight()->getDirection()
 				);
 
 				wf::wgl::setShaderUniform(
 					shaderHandle,
 					shader->locs["viewPos"],
-					viewPos
+					camera.position
 				);
 				wf::wgl::setShaderUniform(
 					shaderHandle,

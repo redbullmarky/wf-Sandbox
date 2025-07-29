@@ -22,9 +22,11 @@ namespace wf::component
 		static Camera createPerspective(Vec3 position, Vec3 target, float fovDegrees = 60.f);
 		static Camera createOrthographic(Vec3 position, Vec3 target, float width);
 
+		Vec3 getDirection() const;
+
 		Mat4 getViewMatrix() const;
-		Mat4 getProjectionMatrix(float aspectRatio) const;
-		Mat4 getViewProjectionMatrix(float aspectRatio) const;
+		Mat4 getProjectionMatrix() const;
+		Mat4 getViewProjectionMatrix() const;
 
 		Vec3 getForward() const;
 		Vec3 getUp() const;

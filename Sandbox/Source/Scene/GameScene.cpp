@@ -42,7 +42,7 @@ namespace Sandbox
 		/*	m_lightCamera.target = camera->position;
 			m_lightCamera.position = camera->position - (light->direction * 10.f);*/
 
-			currentCamera = &m_lightCamera;
+			currentCamera = &currentLight->lightCam;
 			BaseScene::render(dt);
 
 			getEntityManager()->each<Component::Material>(
@@ -70,20 +70,12 @@ namespace Sandbox
 			60.f
 		);
 
-
-		wf::Vec3 lpos{ 50.f, 50.f, -50.f };
-
-		createLight(
-			lpos,
+		auto light = createLight(
+			wf::Vec3{ 0.f, 50.f, 0.f },// { 50.f, 50.f, -50.f },
 			wf::Vec3{ 0.f, 0.f, 0.f }
 		);
+		light->lightCam.farPlane = 100.f;
 
-		auto cam = createCamera(lpos, { 0.f, 0.f, 0.f }, true, 100);
-		m_lightCamera = cam.getComponent<wf::component::Camera>();
-		m_lightCamera.farPlane = 500.f;
-
-		/*m_lightCamera.nearPlane = 20.f;
-		m_lightCamera.farPlane = 10000.f;*/
 
 		{
 			auto obj = createObject();
@@ -143,20 +135,25 @@ namespace Sandbox
 		{
 			ImGui::Text("ImGui FPS: %.2f", ImGui::GetIO().Framerate);
 
-			ImGui::SeparatorText("Light");
-			ImGui::DragFloat3("LightPos", &light.position.x);
-			ImGui::DragFloat3("LightDir", &light.direction.x, .1f);
-			ImGui::SliderFloat("Ambient", &light.ambientLevel, 0.f, 1.f);
+			ImGui::PushID("Light");
+			{
+				ImGui::SeparatorText("Light");
+				ImGui::DragFloat3("Pos", &light.lightCam.position.x);
+				ImGui::DragFloat3("Target", &light.lightCam.target.x, .1f);
+				ImGui::Text("Dir: %.2f %.2f %.2f", light.getDirection().x, light.getDirection().y, light.getDirection().z);
+				ImGui::DragFloat("Nearplane", &light.lightCam.nearPlane, .1f, .1f, 1000.f);
+				ImGui::DragFloat("Farplane", &light.lightCam.farPlane, .1f, .1f, 1000.f);
+				ImGui::SliderFloat("Ambient", &light.ambientLevel, 0.f, 1.f);
+			}
+			ImGui::PopID();
 
-			ImGui::SeparatorText("Camera");
-			ImGui::DragFloat3("CamPos", &camera.position.x);
-			ImGui::DragFloat3("CamTar", &camera.target.x);
-
-			ImGui::SeparatorText("Light Camera");
-			ImGui::DragFloat3("LightCamPos", &m_lightCamera.position.x);
-			ImGui::DragFloat3("LightCamTar", &m_lightCamera.target.x);
-			ImGui::DragFloat("Nplane", &m_lightCamera.nearPlane, .1f, .1f, 1000.f);
-			ImGui::DragFloat("Fplane", &m_lightCamera.farPlane, .1f, .1f, 1000.f);
+			ImGui::PushID("Camera");
+			{
+				ImGui::SeparatorText("Camera");
+				ImGui::DragFloat3("Pos", &camera.position.x);
+				ImGui::DragFloat3("Target", &camera.target.x);
+			}
+			ImGui::PopID();
 
 			getEntityManager()->each<wf::component::Transform, Component::Material, Component::NameTag>(
 				[&](wf::EntityID id, wf::component::Transform& transform, Component::Material& material, const Component::NameTag& nametag) {

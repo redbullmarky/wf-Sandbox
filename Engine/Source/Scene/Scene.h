@@ -95,7 +95,7 @@ namespace wf
 		/**
 		 * @brief Create a perspective (default) or ortho camera. If it's the first camera, it'll also be used as the default
 		 */
-		Entity createCamera(const Vec3& position, const Vec3& target, bool ortho = false, float fovOrWidth = -1.f);
+		component::Camera* createCamera(const Vec3& position, const Vec3& target, bool ortho = false, float fovOrWidth = -1.f);
 
 		/**
 		 * @brief Fetch the camera currently in use
@@ -105,7 +105,7 @@ namespace wf
 		/**
 		 * @brief Create a simple light @todo only one for now for testing shadows, we'll need more.
 		 */
-		Entity createLight(const Vec3& position, const Vec3& target);
+		component::Light* createLight(const Vec3& position, const Vec3& target);
 
 		/**
 		 * @brief Fetch the main light. @todo see createLight()

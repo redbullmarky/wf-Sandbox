@@ -85,7 +85,7 @@ namespace wf
 		return ob;
 	}
 
-	Entity Scene::createCamera(const Vec3& position, const Vec3& target, bool ortho, float fovOrWidth)
+	component::Camera* Scene::createCamera(const Vec3& position, const Vec3& target, bool ortho, float fovOrWidth)
 	{
 		auto object = createObject(position);
 
@@ -111,7 +111,7 @@ namespace wf
 			currentCamera = &camera;
 		}
 
-		return object;
+		return &camera;
 	}
 
 	component::Camera* Scene::getCurrentCamera()
@@ -119,20 +119,18 @@ namespace wf
 		return currentCamera;
 	}
 
-	Entity Scene::createLight(const Vec3& position, const Vec3& target)
+	component::Light* Scene::createLight(const Vec3& position, const Vec3& target)
 	{
 		auto object = createObject();
 
-		component::Light light;
-		light.position = position;
-		light.direction = glm::normalize(target - position);
+		component::Light light(position, target);
 
 		auto& lightCmp = object.addComponent<component::Light>(light);
 		if (!currentLight) {
 			currentLight = &lightCmp;
 		}
 
-		return object;
+		return &lightCmp;
 	}
 
 	component::Light* Scene::getCurrentLight()

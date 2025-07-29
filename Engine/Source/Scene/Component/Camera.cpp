@@ -24,18 +24,31 @@ namespace wf::component
 		};
 	}
 
+	Vec3 Camera::getDirection() const
+	{
+		return glm::normalize(target - position);
+	}
+
 	Mat4 Camera::getViewMatrix() const
 	{
 		Vec3 forward = glm::normalize(target - position);
-		return Mat4{ glm::lookAt(position, position + forward, up) };
+
+		// Prevent lookAt singularity when forward is nearly parallel to up vector
+		// by choosing an alternative up vector to avoid zero cross product.
+		Vec3 safeUp = up;
+		if (glm::abs(glm::dot(forward, glm::normalize(up))) > 0.999f) {
+			safeUp = Vec3{ 0.f, 0.f, 1.f };
+		}
+
+		return Mat4{ glm::lookAt(position, position + forward, safeUp) };
 	}
 
-	Mat4 Camera::getProjectionMatrix(float aspectRatio) const
+	Mat4 Camera::getProjectionMatrix() const
 	{
 		if (orthographic) {
 			float halfWidth = orthoWidth / 2.f;
-			float halfHeight = halfWidth / aspectRatio;
-			//printf("%.2f %.2f\n", halfWidth, halfHeight);
+			float halfHeight = halfWidth / wf::getAspectRatio();
+
 			return Mat4{ glm::ortho(
 				-halfWidth, halfWidth,
 				-halfHeight, halfHeight,
@@ -43,13 +56,13 @@ namespace wf::component
 			) };
 		}
 		else {
-			return Mat4{ glm::perspective(glm::radians(fovDegrees), aspectRatio, nearPlane, farPlane) };
+			return Mat4{ glm::perspective(glm::radians(fovDegrees), wf::getAspectRatio(), nearPlane, farPlane) };
 		}
 	}
 
-	Mat4 Camera::getViewProjectionMatrix(float aspectRatio) const
+	Mat4 Camera::getViewProjectionMatrix() const
 	{
-		return getProjectionMatrix(aspectRatio) * getViewMatrix();
+		return getProjectionMatrix() * getViewMatrix();
 	}
 
 	Vec3 Camera::getForward() const
