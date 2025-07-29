@@ -70,12 +70,22 @@ namespace Sandbox
 		);
 		light->lightCam.orthoWidth = 40.f;
 
+		// textures
+		auto grassTex = wf::loadTexture("resources/images/grass12.png");
+		auto brickTex = wf::loadTexture("resources/images/brickwall.jpg");
+		auto brickNorm = wf::loadTexture("resources/images/brickwall_normal.jpg");
+		auto waterTex = wf::loadTexture("resources/images/water2.jpg");
+		auto gravelTex = wf::loadTexture("resources/images/gravel.jpg");
+		auto gravelNorm = wf::loadTexture("resources/images/gravel_normal.jpg");
+		auto earthTex = wf::loadTexture("resources/images/earth.jpg");
+		auto scuffyNorm = wf::loadTexture("resources/images/tileable-TT7002066_nm.png");
+
 		{
 			auto obj = createObject();
 			obj.addComponent<Component::NameTag>("Plane");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createSimplePlane());
 			auto& material = obj.addComponent<Component::Material>();
-			material.diffuse.map = wf::loadTexture("resources/images/grass12.png");
+			material.diffuse.map = grassTex;
 			material.shadow.map = &m_shadowMap;
 		}
 
@@ -85,8 +95,8 @@ namespace Sandbox
 			obj.addComponent<Component::NameTag>("Triangle");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createHelloTriangle());
 			auto& material = obj.addComponent<Component::Material>();
-			material.diffuse.map = wf::loadTexture("resources/images/brickwall.jpg");
-			material.normal.map = wf::loadTexture("resources/images/brickwall_normal.jpg");
+			material.diffuse.map = brickTex;
+			material.normal.map = brickNorm;
 			material.shadow.map = &m_shadowMap;
 		}
 
@@ -95,8 +105,8 @@ namespace Sandbox
 			obj.addComponent<Component::NameTag>("Scruffcube");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createCube({ 1.f, 1.f, 1.f }));
 			auto& material = obj.addComponent<Component::Material>();
-			material.diffuse.map = wf::loadTexture("resources/images/brickwall.jpg");
-			material.normal.map = wf::loadTexture("resources/images/brickwall_normal.jpg");
+			material.diffuse.map = brickTex;
+			material.normal.map = brickNorm;
 			material.shadow.map = &m_shadowMap;
 		}
 
@@ -105,7 +115,7 @@ namespace Sandbox
 			obj.addComponent<Component::NameTag>("Waterbox");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
 			auto& material = obj.addComponent<Component::Material>();
-			material.diffuse.map = wf::loadTexture("resources/images/water2.jpg");
+			material.diffuse.map = waterTex;
 			material.specular.intensity = 1.5f;
 			material.shadow.map = &m_shadowMap;
 		}
@@ -116,8 +126,8 @@ namespace Sandbox
 			obj.addComponent<Component::NameTag>("Cube");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
 			auto& material = obj.addComponent<Component::Material>();
-			material.diffuse.map = wf::loadTexture("resources/images/gravel.jpg");
-			material.normal.map = wf::loadTexture("resources/images/gravel_normal.jpg");
+			material.diffuse.map = gravelTex;
+			material.normal.map = gravelNorm;
 			material.shadow.map = &m_shadowMap;
 		}
 
@@ -126,7 +136,7 @@ namespace Sandbox
 			obj.addComponent<Component::NameTag>("Globe");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
 			auto& material = obj.addComponent<Component::Material>();
-			material.diffuse.map = wf::loadTexture("resources/images/earth.jpg");
+			material.diffuse.map = earthTex;
 			material.shadow.map = &m_shadowMap;
 		}
 
@@ -136,8 +146,8 @@ namespace Sandbox
 			obj.addComponent<Component::NameTag>("Cube 2");
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
 			auto& material = obj.addComponent<Component::Material>();
-			material.diffuse.map = wf::loadTexture("resources/images/brickwall.jpg");
-			material.normal.map = wf::loadTexture("resources/images/brickwall_normal.jpg");
+			material.diffuse.map = brickTex;
+			material.normal.map = brickNorm;
 			material.shadow.map = &m_shadowMap;
 		}
 
@@ -147,7 +157,7 @@ namespace Sandbox
 			auto& geometry = obj.addComponent<Component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
 			auto& material = obj.addComponent<Component::Material>();
 			material.diffuse.colour = wf::RED;
-			material.normal.map = wf::loadTexture("resources/images/tileable-TT7002066_nm.png");
+			material.normal.map = scuffyNorm;
 			material.specular.intensity = 1.5f;
 			material.shadow.map = &m_shadowMap;
 		}
