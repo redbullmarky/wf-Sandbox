@@ -1,6 +1,7 @@
 #include "Squishies.h"
 #include "Engine.h"
 
+#include "Scene/GameScene.h"
 #include "Scene/TestScene.h"
 
 namespace Squishies
@@ -13,7 +14,7 @@ namespace Squishies
 
 		wf::initGui();
 
-		m_scene = std::make_shared<TestScene>();
+		m_scene = std::make_shared<GameScene>();
 		if (!m_scene->init()) {
 			return false;
 		}

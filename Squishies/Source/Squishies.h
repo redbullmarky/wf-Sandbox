@@ -4,8 +4,6 @@
 
 namespace Squishies
 {
-	class TestScene;
-
 	class Squishies : public wf::Application
 	{
 	public:
@@ -17,6 +15,6 @@ namespace Squishies
 		virtual void shutdown() override;
 
 	private:
-		std::shared_ptr<TestScene> m_scene;
+		std::shared_ptr<wf::Scene> m_scene;
 	};
 }
