@@ -11,11 +11,6 @@ namespace wf
 		unsigned char g{ 255 };
 		unsigned char b{ 255 };
 		unsigned char a{ 255 };
-
-		Colour normalised() const
-		{
-			return Colour{ r * 255, g * 255, b * 255, a * 255 };
-		}
 	};
 
 	struct Colour
@@ -62,7 +57,7 @@ namespace wf
 		 */
 		static Colour from(const ColourDenorm& from)
 		{
-			return from.normalised();
+			return { from.r / 255.f, from.g / 255.f, from.b / 255.f, from.a / 255.f };
 		}
 
 		ColourDenorm denormalised() const

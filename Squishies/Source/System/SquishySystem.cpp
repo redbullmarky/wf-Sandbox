@@ -5,6 +5,8 @@
 
 #include <vector>
 
+#include "GL/glew.h"
+
 namespace Squishies
 {
 	bool SquishySystem::init()
