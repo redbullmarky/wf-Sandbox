@@ -1,7 +1,5 @@
 #include "Collider.h"
 
-#include "Utils/Debug.h"
-
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtx/norm.hpp>

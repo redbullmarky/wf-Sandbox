@@ -3,7 +3,6 @@
 
 #include "Component/Squishy.h"
 #include "System/SquishySystem.h"
-#include "Utils/Debug.h"
 
 #include <imgui.h>
 #include <glm/glm.hpp>
@@ -37,7 +36,7 @@ namespace Squishies
 		);
 
 		// prepare the debugger to track the camera
-		Debug::instance().setCamera(getCurrentCamera());
+		wf::Debug::instance().setCamera(getCurrentCamera());
 
 		auto light = createLight(
 			wf::Vec3{ 20.f, 20.f, 20.f },
@@ -56,7 +55,7 @@ namespace Squishies
 			material.diffuse.map = grassTex;
 		}
 
-		int points = 7; // number of points on the squishies
+		int points = 9; // number of points on the squishies
 
 		{
 			auto obj = createObject({ -2.f, -5.f, 0.f });
@@ -70,7 +69,7 @@ namespace Squishies
 		}
 
 		{
-			auto obj = createObject({ -1.f, -3.f, 0.f });
+			auto obj = createObject({ -1.2f, -3.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 2");
 			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, points));
 			geometry.mesh->isDynamic = true;
@@ -173,17 +172,9 @@ namespace Squishies
 						ImGui::SliderFloat("JointD", &squishy.jointDamping, 1.f, 150.f);
 
 						ImGui::Text("Derived pos: %.2f %.2f %.2f", squishy.derivedPosition.x, squishy.derivedPosition.y, squishy.derivedPosition.z);
-						Debug::filledCircle(squishy.derivedPosition, 5.f, wf::YELLOW);
-						Debug::rect(squishy.boundingBox, 2.f, wf::WHITE);
 
-						float lowesty = 10000.f;
-						for (auto& pt : squishy.points) {
-							if (pt.position.y < lowesty) {
-								lowesty = pt.position.y;
-							}
-							Debug::filledCircle(pt.position, 5.f, pt.insideAnother ? wf::RED : wf::YELLOW);
-						}
-						ImGui::Text("Lowest Y: %.2f", lowesty);
+						wf::Debug::filledCircle(squishy.derivedPosition, 5.f, wf::YELLOW); // derived position
+						//wf::Debug::rect(squishy.boundingBox, 2.f, wf::WHITE); // bounding box
 					}
 
 					ImGui::PopID();
@@ -191,6 +182,7 @@ namespace Squishies
 		}
 		ImGui::End();
 
-		Debug::render();
+		// any debug points we have, render now..
+		wf::Debug::render();
 	}
 }

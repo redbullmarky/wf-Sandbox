@@ -20,6 +20,7 @@
 #include "Math/SimplexNoise.h"
 
 #include "Misc/Colour.h"
+#include "Misc/Debug.h"
 
 #include "Render/Shader.h"
 #include "Render/Texture.h"
