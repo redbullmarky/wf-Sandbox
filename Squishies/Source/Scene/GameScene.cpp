@@ -1,8 +1,10 @@
 #include "GameScene.h"
 #include "Engine.h"
 
+#include "Component/Player.h"
 #include "Component/Squishy.h"
 #include "System/SquishySystem.h"
+#include "System/MovementSystem.h"
 
 #include <imgui.h>
 #include <glm/glm.hpp>
@@ -14,6 +16,7 @@ namespace Squishies
 		addSystem<wf::system::RenderSystem>();
 		addSystem<wf::system::CameraSystem>();
 		addSystem<SquishySystem>();
+		addSystem<MovementSystem>();
 
 		return wf::Scene::init();
 	}
@@ -65,6 +68,7 @@ namespace Squishies
 			material.diffuse.colour = wf::RED;
 			material.specular.intensity = 1.5f;
 			obj.addComponent<Component::Squishy>(radius, points);
+			obj.addComponent<Component::Player>();
 		}
 
 		{
@@ -118,6 +122,8 @@ namespace Squishies
 		ImGui::Begin("Squishies");
 		{
 			ImGui::Text("ImGui FPS: %.2f", ImGui::GetIO().Framerate);
+			ImGui::Text("Gui focussed: %s", wf::isGuiFocussed() ? "Yes" : "No");
+			ImGui::Text("Cursor visible: %s", wf::isCursorVisible() ? "Yes" : "No");
 
 			ImGui::PushID("Light");
 			{
@@ -168,8 +174,8 @@ namespace Squishies
 
 						ImGui::Text("Derived pos: %.2f %.2f %.2f", squishy.derivedPosition.x, squishy.derivedPosition.y, squishy.derivedPosition.z);
 
-						wf::Debug::filledCircle(squishy.derivedPosition, 5.f, wf::YELLOW); // derived position
-						//wf::Debug::rect(squishy.boundingBox, 2.f, wf::WHITE); // bounding box
+						// wf::Debug::filledCircle(squishy.derivedPosition, 5.f, wf::YELLOW); // derived position
+						// wf::Debug::rect(squishy.boundingBox, 2.f, wf::WHITE); // bounding box
 					}
 
 					ImGui::PopID();

@@ -4,6 +4,8 @@
 #include "Scene/GameScene.h"
 #include "Scene/TestScene.h"
 
+#include <SDL3/SDL.h>
+
 namespace Squishies
 {
 	bool Squishies::init()
@@ -21,15 +23,21 @@ namespace Squishies
 
 		m_scene->setup();
 
+
 		return true;
 	}
 
 	void Squishies::run()
 	{
+		auto cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
+
 		while (!wf::shouldClose()) {
+			SDL_SetCursor(cursor);
+
 			while (wf::isFixedUpdateReady()) {
 				m_scene->fixedUpdate(wf::getFixedTime());
 			}
+
 			m_scene->update(wf::getDeltaTime());
 
 			if (wf::beginDrawing()) {
@@ -43,6 +51,8 @@ namespace Squishies
 				wf::endDrawing();
 			}
 		}
+
+		SDL_DestroyCursor(cursor);
 	}
 
 	void Squishies::shutdown()

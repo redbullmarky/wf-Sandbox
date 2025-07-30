@@ -5,6 +5,9 @@
 
 namespace Squishies
 {
+	/**
+	 * @brief Main Squishy system for handling the creation and physics of the Squishies
+	 */
 	class SquishySystem : public wf::ISystem
 	{
 	public:

@@ -89,18 +89,17 @@ namespace Squishies
 		}
 
 		// next build out the joints
-		// first the basic edges
-		for (size_t i = 0; i < points.size(); i++) {
-			size_t j = (i + 1) % points.size();
-			float dist = glm::distance(softbody.points[i].position, softbody.points[j].position);
-			softbody.joints.emplace_back(i, j, dist);
-		}
+		int strength = 3;
 
-		// extra support
 		for (size_t i = 0; i < points.size(); i++) {
-			size_t j = (i + 2) % points.size();
-			float dist = glm::distance(softbody.points[i].position, softbody.points[j].position);
-			softbody.joints.emplace_back(i, j, dist);
+			if (strength <= 0) break;
+
+			for (size_t step = 1; step <= strength; step++) {
+				if (step >= points.size()) break; // don't loop entire shape
+				size_t j = (i + step) % points.size();
+				float dist = glm::distance(softbody.points[i].position, softbody.points[j].position);
+				softbody.joints.emplace_back(i, j, dist);
+			}
 		}
 
 		softbody.updateDerivedData();

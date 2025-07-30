@@ -119,6 +119,21 @@ namespace wf
 		return g_gameState.inputHandler.isKeyHeld(key);
 	}
 
+	void showCursor(bool show)
+	{
+		if (show) {
+			SDL_ShowCursor();
+		}
+		else {
+			SDL_HideCursor();
+		}
+	}
+
+	bool isCursorVisible()
+	{
+		return SDL_CursorVisible();
+	}
+
 	bool isMouseButtonPressed(int button)
 	{
 		return g_gameState.inputHandler.isMouseButtonPressed(button);

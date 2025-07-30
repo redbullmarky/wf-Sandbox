@@ -75,6 +75,9 @@ namespace wf
 		ImGui::NewFrame();
 		ImGui::DockSpaceOverViewport(0, NULL, ImGuiDockNodeFlags_PassthruCentralNode);
 
+		// allow custom control of mouse cursor & visibility, else it's just ignored
+		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
+
 		m_inFrame = true;
 		m_renderReady = false;
 		return true;

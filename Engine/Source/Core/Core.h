@@ -57,6 +57,8 @@ namespace wf
 	bool isKeyReleased(KeyCode key);
 	bool isKeyHeld(KeyCode key);
 
+	void showCursor(bool show = true);
+	bool isCursorVisible();
 	bool isMouseButtonPressed(int button);
 	bool isMouseButtonReleased(int button);
 	bool isMouseButtonHeld(int button);
