@@ -11,7 +11,6 @@ namespace Squishies
 		virtual bool init() override;
 		virtual void setup() override;
 		virtual void update(float dt) override;
-		virtual void render(float dt) override;
 		virtual void fixedUpdate(float dt) override;
 
 	private:

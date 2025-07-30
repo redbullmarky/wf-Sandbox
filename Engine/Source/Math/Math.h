@@ -40,5 +40,6 @@ namespace wf
 		Vec3 midpoint() const;
 	};
 
+	Vec2 getSpringForce(Vec2 p1, Vec2 v1, Vec2 p2, Vec2 v2, float k, float damping, float rest);
 	Vec3 getSpringForce(Vec3 p1, Vec3 v1, Vec3 p2, Vec3 v2, float k, float damping, float rest);
 }

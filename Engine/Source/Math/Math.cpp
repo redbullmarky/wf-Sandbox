@@ -65,6 +65,20 @@ namespace wf
 		return (min + max) * .5f;
 	}
 
+	Vec2 getSpringForce(Vec2 p1, Vec2 v1, Vec2 p2, Vec2 v2, float k, float damping, float rest)
+	{
+		auto ret = getSpringForce(
+			Vec3{ p1.x, p1.y, 0.f },
+			Vec3{ v1.x, v1.y, 0.f },
+			Vec3{ p2.x, p2.y, 0.f },
+			Vec3{ p2.x, p2.y, 0.f },
+			k,
+			damping,
+			rest
+		);
+		return { ret.x, ret.y };
+	}
+
 	Vec3 getSpringForce(Vec3 p1, Vec3 v1, Vec3 p2, Vec3 v2, float k, float damping, float rest)
 	{
 		Vec3 distanceV = p1 - p2;

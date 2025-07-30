@@ -12,6 +12,7 @@ namespace Squishies
 		virtual bool init() override;
 		virtual void setup() override;
 		virtual void teardown() override;
+		virtual void render(float dt) override;
 		virtual void renderGui(float dt) override;
 	};
 }

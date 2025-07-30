@@ -21,11 +21,17 @@ namespace Squishies
 	{
 		setBackgroundColour(wf::LIGHTBLUE);
 
-		createCamera(
+		/*createCamera(
 			wf::Vec3{ 0.f, -2.f, 65.f },
 			wf::Vec3{ 0.f, -2.f, 0.f },
 			true,
 			30.f
+		);*/
+		createCamera(
+			wf::Vec3{ 0.f, -2.f, 15.f },
+			wf::Vec3{ 0.f, -5.f, 0.f },
+			false,
+			50.f
 		);
 
 		auto light = createLight(
@@ -48,16 +54,16 @@ namespace Squishies
 		{
 			auto obj = createObject({ -2.f, 5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 1");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, 15));
+			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, 5));
 			geometry.mesh->isDynamic = true;
 			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.colour = wf::ORANGE;
+			material.diffuse.colour = wf::RED;
+			material.diffuse.colour.a = .7f;
 			material.specular.intensity = 1.5f;
-			material.cullMode = wf::wgl::CullMode::NONE;
 			obj.addComponent<Component::Squishy>();
 		}
 
-		{
+		/*{
 			auto obj = createObject({ 2.f, 5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 2");
 			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, 15));
@@ -77,7 +83,7 @@ namespace Squishies
 			material.diffuse.colour = wf::BLUE;
 			material.specular.intensity = 1.5f;
 			obj.addComponent<Component::Squishy>();
-		}
+		}*/
 
 		wf::Scene::setup();
 	}
@@ -85,6 +91,11 @@ namespace Squishies
 	void GameScene::teardown()
 	{
 		wf::Scene::teardown();
+	}
+
+	void GameScene::render(float dt)
+	{
+		wf::Scene::render(dt);
 	}
 
 	void GameScene::renderGui(float dt)
@@ -135,6 +146,14 @@ namespace Squishies
 					if (ent.hasComponent<Component::Squishy>()) {
 						auto& squishy = ent.getComponent<Component::Squishy>();
 						ImGui::Text("Derived pos: %.2f %.2f %.2f", squishy.derivedPosition.x, squishy.derivedPosition.y, squishy.derivedPosition.z);
+
+						float lowesty = 10000.f;
+						for (auto& pt : squishy.points) {
+							if (pt.position.y < lowesty) {
+								lowesty = pt.position.y;
+							}
+						}
+						ImGui::Text("Lowest Y: %.2f", lowesty);
 					}
 
 					ImGui::PopID();

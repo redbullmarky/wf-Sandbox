@@ -16,6 +16,7 @@ namespace Squishies::Component
 {
 	struct PointMass
 	{
+		wf::Vec3 position{};										// point position
 		wf::Vec3 velocity{};										// current velocity for the point
 		wf::Vec3 force{};											// all forces (external & internal) applied
 		float mass{ 1.f };											// point mass
@@ -23,6 +24,7 @@ namespace Squishies::Component
 
 		wf::Vec3 lastPosition{};									// keeping tabs on last position for stability
 		wf::Vec3 originalPosition{};								// the original vertex position for shape matching
+		wf::Vec3 globalPosition{};									// after transforming the original using derived vals
 	};
 
 	/**
@@ -38,10 +40,10 @@ namespace Squishies::Component
 		bool kinematic{ false };
 		bool shapeMatching{ true };									// whether shape matching is enabled
 
-		float jointK{ 500.f };										// spring strength and damping for joints
+		float jointK{ 300.f };										// spring strength and damping for joints
 		float jointDamping{ 10.f };
 
-		float shapeMatchK{ 50.f };									// spring strength and damping for shape matching
+		float shapeMatchK{ 150.f };									// spring strength and damping for shape matching
 		float shapeMatchDamping{ 5.f };
 
 		wf::Vec3 derivedPosition{};									// calculated position of the body as a whole
@@ -54,6 +56,16 @@ namespace Squishies::Component
 		/**
 		 * @brief Updates the percieved position, rotation and velocity based on how the points have moved
 		 */
-		void updateDerivedData(const wf::Mesh* mesh);
+		void updateDerivedData();
+
+		/**
+		 * @brief Regenerate the bounding box data
+		 */
+		void updateBoundingBox();
+
+		/**
+		 * @brief Update our global (world position) derived shape
+		 */
+		void updateGlobalShape();
 	};
 }

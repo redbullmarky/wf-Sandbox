@@ -3,17 +3,15 @@
 
 namespace Squishies::Component
 {
-	void Squishy::updateDerivedData(const wf::Mesh* mesh)
+	void Squishy::updateDerivedData()
 	{
-		auto& verts = mesh->vertices;
-
 		// first figure out the center and velocity
-		const float invPCount = 1.f / verts.size();
+		const float invPCount = 1.f / this->points.size();
 		wf::Vec3 center{};
 		wf::Vec3 velocity{};
 
-		for (size_t i = 0; i < verts.size(); i++) {
-			center += verts[i].position;
+		for (size_t i = 0; i < this->points.size(); i++) {
+			center += this->points[i].position;
 			velocity += this->points[i].velocity;
 		}
 
@@ -25,9 +23,9 @@ namespace Squishies::Component
 		// Project all positions to X/Y plane and calculate average angle offset
 		float angleSum = 0.f;
 
-		for (size_t i = 0; i < verts.size(); i++) {
+		for (size_t i = 0; i < this->points.size(); i++) {
 			glm::vec2 base2 = glm::vec2(this->points[i].originalPosition);
-			glm::vec2 curr2 = glm::vec2(verts[i].position - this->derivedPosition);
+			glm::vec2 curr2 = glm::vec2(this->points[i].position - this->derivedPosition);
 
 			float baseAngle = atan2(base2.y, base2.x);
 			float currAngle = atan2(curr2.y, curr2.x);
@@ -38,7 +36,24 @@ namespace Squishies::Component
 			angleSum += delta;
 		}
 
-		float avgAngle = angleSum / verts.size();
+		float avgAngle = angleSum / this->points.size();
 		this->derivedRotation = glm::angleAxis(avgAngle, glm::vec3(0, 0, 1));
+	}
+
+	void Squishy::updateBoundingBox()
+	{
+		boundingBox.reset();
+
+		for (auto& v : this->points) {
+			boundingBox.extend(v.position);
+		}
+	}
+
+	void Squishy::updateGlobalShape()
+	{
+		for (auto& pt : this->points) {
+			pt.globalPosition = pt.originalPosition + this->derivedPosition;
+			// @todo apply rotation
+		}
 	}
 }
