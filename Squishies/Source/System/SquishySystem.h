@@ -20,8 +20,7 @@ namespace Squishies
 		void integrate(float dt);
 		void hardConstraints();
 		void metaUpdates();
-		void collisionDetection();
-		void collisionResponse();
+		void handleCollisions();
 		void postUpdates();
 
 	private:

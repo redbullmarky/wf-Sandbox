@@ -1,16 +1,21 @@
 #include "Squishy.h"
 #include "Engine.h"
 
+#include <glm/glm.hpp>
+
 namespace Squishies::Component
 {
 	void Squishy::updateDerivedData()
 	{
+		// skip the center
+		size_t pointCount = this->points.size() - 1;
+
 		// first figure out the center and velocity
-		const float invPCount = 1.f / this->points.size();
+		const float invPCount = 1.f / pointCount;
 		wf::Vec3 center{};
 		wf::Vec3 velocity{};
 
-		for (size_t i = 0; i < this->points.size(); i++) {
+		for (size_t i = 1; i < this->points.size(); i++) {
 			center += this->points[i].position;
 			velocity += this->points[i].velocity;
 		}
@@ -23,7 +28,7 @@ namespace Squishies::Component
 		// Project all positions to X/Y plane and calculate average angle offset
 		float angleSum = 0.f;
 
-		for (size_t i = 0; i < this->points.size(); i++) {
+		for (size_t i = 1; i < this->points.size(); i++) {
 			glm::vec2 base2 = glm::vec2(this->points[i].originalPosition);
 			glm::vec2 curr2 = glm::vec2(this->points[i].position - this->derivedPosition);
 
@@ -36,7 +41,7 @@ namespace Squishies::Component
 			angleSum += delta;
 		}
 
-		float avgAngle = angleSum / this->points.size();
+		float avgAngle = angleSum / pointCount;
 		this->derivedRotation = glm::angleAxis(avgAngle, glm::vec3(0, 0, 1));
 	}
 
@@ -95,10 +100,14 @@ namespace Squishies::Component
 			this->edges.resize(this->points.size());
 		}
 
-		for (size_t i = 0; i < this->points.size(); i++) {
-			size_t j = (i + 1) % this->points.size();
+		// skip the first vertex as it's the center
+		for (size_t i = 1; i < this->points.size(); i++) {
+			size_t j = (i == this->points.size() - 1) ? 1 : i + 1;
 
-			this->edges[i].update(this->points[i].position, this->points[j].position);
+			this->edges[i - 1].update(this->points[i].position, this->points[j].position);
+
+			wf::Vec3 center = (this->points[i].position + this->points[j].position) * 0.5f;
+			wf::Vec3 normal = glm::normalize(wf::Vec3{ -this->edges[i - 1].dir.y, this->edges[i - 1].dir.x, 0.f });
 		}
 	}
 }

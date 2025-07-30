@@ -56,10 +56,12 @@ namespace Squishies
 			material.diffuse.map = grassTex;
 		}
 
+		int points = 7; // number of points on the squishies
+
 		{
-			auto obj = createObject({ -2.f, 3.f, 0.f });
+			auto obj = createObject({ -2.f, -5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 1");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, 15));
+			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, points));
 			geometry.mesh->isDynamic = true;
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::RED;
@@ -68,9 +70,9 @@ namespace Squishies
 		}
 
 		{
-			auto obj = createObject({ -1.f, 5.f, 0.f });
+			auto obj = createObject({ -1.f, -3.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 2");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, 15));
+			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, points));
 			geometry.mesh->isDynamic = true;
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::BLUE;
@@ -188,5 +190,7 @@ namespace Squishies
 				});
 		}
 		ImGui::End();
+
+		Debug::render();
 	}
 }

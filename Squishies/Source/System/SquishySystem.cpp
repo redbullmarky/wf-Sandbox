@@ -42,8 +42,7 @@ namespace Squishies
 		integrate(dt);
 		hardConstraints();
 		metaUpdates();
-		collisionDetection();
-		collisionResponse();
+		handleCollisions();
 		postUpdates();
 	}
 
@@ -129,6 +128,9 @@ namespace Squishies
 		}
 
 		softbody.updateDerivedData();
+		softbody.updateEdges();
+		softbody.updateBoundingBox();
+
 
 		// @todo maybe we need to keep tabs on the inner points. if there are points where basically 
 	}
@@ -305,12 +307,18 @@ namespace Squishies
 	}
 
 	// 5. COLLISIONS: for each body and each other body
-	//		check collision and add to list
-	void SquishySystem::collisionDetection()
+	//		- check collision and add to list
+	//		- process all collisions when we've checked the lot
+	//
+	// @todo collision response
+	void SquishySystem::handleCollisions()
 	{
 		auto view = entityManager->find<Component::Squishy>();
+
+		// make sure we're starting fresh
 		m_collider.reset();
 
+		// loop the objects and see what's colliding
 		view.each(
 			[&](wf::EntityID id, Component::Squishy& squishy) {
 				view.each(
@@ -321,18 +329,12 @@ namespace Squishies
 						squishy.colliding = m_collider.check(squishy, squishy2);
 					});
 			});
+
+		// now handle any collisions we found
+		m_collider.respond();
 	}
 
-	// 6. COLLISON RESPONSE: for each collision
-	//		resolve the collision
-	//
-	// @todo
-	void SquishySystem::collisionResponse()
-	{
-
-	}
-
-	// 7. POST-UPDATES: foreach body
+	// 6. POST-UPDATES: foreach body
 	//		1. reset collision box
 	//		2. foreach point
 	//			1. damp velocity by 0.999f

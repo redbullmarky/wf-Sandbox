@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine.h"
 #include "Utils/Bitfield.h"
+#include "Utils/Debug.h"
 
 #include <bitset>
 #include <vector>
@@ -50,8 +51,13 @@ namespace Squishies::Component
 		{
 			p1 = newP1;
 			p2 = newP2;
-			dir = p2 - p1;
+			dir = p1 - p2; // @todo winding order
 			length = glm::length(dir);
+
+			wf::Vec3 center = (p1 + p2) * 0.5f;
+			wf::Vec3 normal = glm::normalize(wf::Vec3{ -dir.y, dir.x, 0.f });
+
+			// Debug::line(center, center + normal * .2f, 2.f, wf::WHITE);
 		}
 
 		bool operator==(const Edge& rhs) const { return p1 == rhs.p1 && p2 == rhs.p2 && dir == rhs.dir; }
