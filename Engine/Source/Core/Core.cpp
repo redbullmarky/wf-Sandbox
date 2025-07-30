@@ -1,10 +1,11 @@
 #include "pch.h"
 #include "Core.h"
+
 #include "GL.h"
+#include "Gui.h"
 #include "Render/Texture.h"
 
 #include <SDL3/SDL.h>
-#include "Gui.h"
 
 namespace wf
 {
@@ -147,6 +148,34 @@ namespace wf
 	bool isMouseButtonHeld(int button)
 	{
 		return g_gameState.inputHandler.isMouseButtonHeld(button);
+	}
+
+	Vec3 getMouseWorldPosition(const component::Camera& camera)
+	{
+		Vec2 mousePos = getMousePosition();
+		Vec2 screenSize = getWindow().getSize();
+
+		Vec2 ndc{
+			(mousePos.x / screenSize.x) * 2.0f - 1.0f,
+			1.0f - (mousePos.y / screenSize.y) * 2.0f
+		};
+
+		Vec4 clipNear(ndc.x, ndc.y, -1.0f, 1.0f);
+		Vec4 clipFar(ndc.x, ndc.y, 1.0f, 1.0f);
+
+		Mat4 invVP = Mat4(glm::inverse(camera.getViewProjectionMatrix().matrix));
+
+		Vec4 worldNear = invVP.matrix * clipNear;
+		Vec4 worldFar = invVP.matrix * clipFar;
+
+		worldNear /= worldNear.w;
+		worldFar /= worldFar.w;
+
+		Vec3 dir = glm::normalize(Vec3(worldFar - worldNear));
+
+		// intersect ray with Z=0 plane
+		float t = -worldNear.z / dir.z;
+		return Vec3(worldNear) + dir * t;
 	}
 
 	Vec2 getMousePosition()

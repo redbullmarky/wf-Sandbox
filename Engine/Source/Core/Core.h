@@ -1,9 +1,10 @@
 #pragma once
 #include "Gui.h"
 #include "Input.h"
+#include "Math/Math.h"
+#include "Scene/Component/Camera.h"
 #include "Timer.h"
 #include "Window.h"
-#include "Math/Math.h"
 
 #include <memory>
 
@@ -63,6 +64,7 @@ namespace wf
 	bool isMouseButtonReleased(int button);
 	bool isMouseButtonHeld(int button);
 
+	Vec3 getMouseWorldPosition(const component::Camera& camera);
 	Vec2 getMousePosition();
 	Vec2 getMouseWheel();
 	Vec2 getMouseDelta();

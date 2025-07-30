@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine.h"
 
+#include "Component/Player.h"
 #include "Component/Squishy.h"
 
 namespace Squishies
@@ -23,7 +24,6 @@ namespace Squishies
 		void applyJump(Component::Squishy& squishy);
 		void applyDuck(Component::Squishy& squishy);
 
-		void selectWeapon(int dir);
-		void deployWeapon();
+		void deployWeapon(wf::EntityID playerId, Component::Squishy& squishy, Component::Player& player, const wf::Vec3& target);
 	};
 }

@@ -68,6 +68,7 @@ namespace wf::system
 		// @todo render meshes with assigned material
 		entityManager->each<component::Geometry, component::Material, component::Transform>(
 			[&](const component::Geometry& geometry, const component::Material& material, const component::Transform& transform) {
+				if (!material.visible) return;
 				if (!geometry.mesh || !geometry.mesh->handle || !m_meshBuffers.contains(geometry.mesh->handle)) return;
 				if (!material.shader || !material.shader->handle) return;
 
@@ -153,7 +154,7 @@ namespace wf::system
 					buffers,
 					static_cast<int>(geometry.mesh->vertices.size()),
 					static_cast<int>(geometry.mesh->indices.size()),
-					geometry.mesh->wireframe
+					material.wireframe
 				);
 			});
 	}

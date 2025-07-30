@@ -2,6 +2,7 @@
 namespace wf
 {
 	class EntityManager;
+	class EventDispatcher;
 	class Scene;
 
 	/**
@@ -28,5 +29,6 @@ namespace wf
 	protected:
 		Scene* scene;
 		EntityManager* entityManager;
+		EventDispatcher* eventDispatcher;
 	};
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "Common.h"
+#include "Core/EventDispatcher.h"
 #include "EntityManager.h"
 #include "Geometry/Geometry.h"
 #include "Misc/Colour.h"
@@ -118,6 +119,11 @@ namespace wf
 		EntityManager* getEntityManager();
 
 		/**
+		 * @brief Return the event dispatcher attached to this scene
+		 */
+		EventDispatcher* getEventDispatcher();
+
+		/**
 		 * @brief Register and initialise a system
 		 */
 		template<typename T, typename... Args>
@@ -130,6 +136,7 @@ namespace wf
 
 	protected:
 		EntityManager entityManager;
+		EventDispatcher eventDispatcher;
 		SceneConfig config;
 		component::Camera* currentCamera{ nullptr };
 		component::Light* currentLight{ nullptr };

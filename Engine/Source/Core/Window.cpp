@@ -55,18 +55,21 @@ namespace wf
 		SDL_Quit();
 	}
 
-	int Window::getWidth() const
+	Vec2 Window::getSize() const
 	{
 		int w{}, h{};
 		SDL_GetWindowSize(m_window, &w, &h);
-		return w;
+		return { (float)w, (float)h };
+	}
+
+	int Window::getWidth() const
+	{
+		return getSize().x;
 	}
 
 	int Window::getHeight() const
 	{
-		int w{}, h{};
-		SDL_GetWindowSize(m_window, &w, &h);
-		return h;
+		return getSize().y;
 	}
 
 	float Window::getAspectRatio() const

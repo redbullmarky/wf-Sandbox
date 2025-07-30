@@ -142,4 +142,9 @@ namespace wf
 	{
 		return &entityManager;
 	}
+
+	EventDispatcher* Scene::getEventDispatcher()
+	{
+		return &eventDispatcher;
+	}
 }

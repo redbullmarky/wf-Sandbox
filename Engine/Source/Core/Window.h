@@ -14,6 +14,7 @@ namespace wf
 		bool open(const char* title, int width, int height, int flags);
 		void close();
 
+		Vec2 getSize() const;
 		int getWidth() const;
 		int getHeight() const;
 		float getAspectRatio() const;

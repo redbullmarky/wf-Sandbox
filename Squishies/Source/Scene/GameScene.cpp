@@ -5,6 +5,7 @@
 #include "Component/Squishy.h"
 #include "System/SquishySystem.h"
 #include "System/MovementSystem.h"
+#include "System/WeaponSystem.h"
 
 #include <imgui.h>
 #include <glm/glm.hpp>
@@ -17,6 +18,7 @@ namespace Squishies
 		addSystem<wf::system::CameraSystem>();
 		addSystem<SquishySystem>();
 		addSystem<MovementSystem>();
+		addSystem<WeaponSystem>();
 
 		return wf::Scene::init();
 	}
@@ -53,7 +55,7 @@ namespace Squishies
 		{
 			auto obj = createObject({ 0.f, -10.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Plane");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSimplePlane());
+			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSimplePlane(100.f));
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.map = grassTex;
 		}

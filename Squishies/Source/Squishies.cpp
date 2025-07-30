@@ -23,7 +23,6 @@ namespace Squishies
 
 		m_scene->setup();
 
-
 		return true;
 	}
 

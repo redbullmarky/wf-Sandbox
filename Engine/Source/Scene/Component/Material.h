@@ -44,6 +44,7 @@ namespace wf::component
 		bool depthTest{ true };									// depth test
 		wgl::DepthFunc depthFunc{ wgl::DepthFunc::LESS };					// depth test function
 
+		bool visible{ true };									// current visibility state
 		bool wireframe{ false };								// if we're drawing using wireframe mode
 
 		/**

@@ -16,7 +16,6 @@ namespace wf
 		bool isDynamic{ false };						// whether the mesh data is static or can be updated
 		bool needsUpdate{ true };						// if the mesh data is dirty and needs re-uploading
 		bool autoUpdate{ true };						// if we want to automatically update the data without having to set the needsUpdate flag
-		bool wireframe{ false };						// render as a wireframe
 
 		BoundingBox getBoundingBox() const
 		{

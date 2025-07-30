@@ -1,6 +1,7 @@
 #include "SquishySystem.h"
 
 #include "Component/Squishy.h"
+#include "Config.h"
 #include "Utils/Misc.h"
 
 #include <vector>
@@ -12,9 +13,6 @@ namespace Squishies
 		entityManager->onCreate<Component::Squishy>([&](wf::Entity entity) {
 			createSquishy(entity);
 			});
-
-		m_worldBounds.extend({ -10.f, -10.f, -10.f });
-		m_worldBounds.extend({ 10.f, 10.f, 10.f });
 
 		return true;
 	}
@@ -125,7 +123,7 @@ namespace Squishies
 				// apply gravity
 				for (auto& pt : squishy.points) {
 					if (pt.fixed) continue;
-					pt.force += wf::Vec3(0.f, m_gravity, 0.f) * pt.mass;
+					pt.force += wf::Vec3(0.f, Config::get().gravity, 0.f) * pt.mass;
 				}
 
 				// internal forces - springs, shape matching, etc.
@@ -214,7 +212,9 @@ namespace Squishies
 		entityManager->each<Component::Squishy>(
 			[&](Component::Squishy& squishy) {
 
-				if (!m_worldBounds.isValid) return;
+				auto worldBounds = Config::get().worldBounds;
+
+				if (!worldBounds.isValid) return;
 
 				auto& pms = squishy.points;
 
@@ -222,33 +222,33 @@ namespace Squishies
 
 				for (size_t i = 0; i < pms.size(); i++) {
 					// horizontals
-					if (pms[i].position.x < m_worldBounds.min.x) {
-						pms[i].position.x = m_worldBounds.min.x;
+					if (pms[i].position.x < worldBounds.min.x) {
+						pms[i].position.x = worldBounds.min.x;
 						pms[i].velocity.x = -pms[i].velocity.x * damping.x;
 					}
-					else if (pms[i].position.x > m_worldBounds.max.x) {
-						pms[i].position.x = m_worldBounds.max.x;
+					else if (pms[i].position.x > worldBounds.max.x) {
+						pms[i].position.x = worldBounds.max.x;
 						pms[i].velocity.x = -pms[i].velocity.x * damping.x;
 					}
 
-					if (pms[i].position.z < m_worldBounds.min.z) {
-						pms[i].position.z = m_worldBounds.min.z;
+					if (pms[i].position.z < worldBounds.min.z) {
+						pms[i].position.z = worldBounds.min.z;
 						pms[i].velocity.z = -pms[i].velocity.z * damping.x;
 					}
-					else if (pms[i].position.z > m_worldBounds.max.z) {
-						pms[i].position.z = m_worldBounds.max.z;
+					else if (pms[i].position.z > worldBounds.max.z) {
+						pms[i].position.z = worldBounds.max.z;
 						pms[i].velocity.z = -pms[i].velocity.z * damping.x;
 					}
 
 					// vertical
-					if (pms[i].position.y < m_worldBounds.min.y) {
-						pms[i].position.y = m_worldBounds.min.y;
+					if (pms[i].position.y < worldBounds.min.y) {
+						pms[i].position.y = worldBounds.min.y;
 						pms[i].velocity.y = -pms[i].velocity.y * damping.y;
 						pms[i].velocity.x *= damping.x;
 						pms[i].velocity.z *= damping.z;
 					}
-					else if (pms[i].position.y > m_worldBounds.max.y) {
-						pms[i].position.y = m_worldBounds.max.y;
+					else if (pms[i].position.y > worldBounds.max.y) {
+						pms[i].position.y = worldBounds.max.y;
 						pms[i].velocity.y = -pms[i].velocity.y * damping.y;
 						pms[i].velocity.x *= damping.x;
 						pms[i].velocity.z *= damping.z;
@@ -268,7 +268,7 @@ namespace Squishies
 
 				squishy.updateBoundingBox();
 				squishy.updateEdges();
-				squishy.updateBitfields(m_worldBounds, m_spatialGridSize);
+				squishy.updateBitfields(Config::get().worldBounds, Config::get().spatialGridSize);
 
 				// clear our point details ready for collision detection
 				for (auto& pt : squishy.points) {

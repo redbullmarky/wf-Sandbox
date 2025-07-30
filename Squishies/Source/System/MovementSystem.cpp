@@ -3,6 +3,7 @@
 
 #include "Component/Player.h"
 #include "Component/Squishy.h"
+#include "Event/DeployWeapon.h"
 
 namespace Squishies
 {
@@ -13,13 +14,26 @@ namespace Squishies
 
 	void MovementSystem::update(float dt)
 	{
-		entityManager->each<Component::Squishy, Component::Player>(
-			[&](Component::Squishy& squishy, Component::Player& player) {
+		// no need for camera updates or key controls if we're trying to free-cam around
+		if (wf::isKeyHeld(wf::KEY_SHIFT_LEFT)) return;
 
-				if (wf::isKeyPressed(wf::KEY_T)) {
-					wf::showCursor(!wf::isCursorVisible());
-					printf("Toggle cursor\n");
-				}
+		// track the player with the camera
+		entityManager->each<Component::Player, Component::Squishy>(
+			[&](const Component::Player& player, const Component::Squishy& squishy) {
+
+				float trackSpeed{ 3.f };
+
+				auto& camera = *scene->getCurrentCamera();
+				camera.target = glm::mix(camera.target, squishy.derivedPosition + wf::Vec3{ 0.f, 2.f, 0.f }, trackSpeed * dt);
+				camera.position = { camera.target.x, camera.target.y + .5f, camera.position.z };
+			});
+
+		// integrate grenades
+		entityManager->each<Component::Squishy, Component::Player>(
+			[&](wf::EntityID playerId, Component::Squishy& squishy, Component::Player& player) {
+
+				// we don't want to do stuff if we're working with the GUI
+				if (wf::isGuiFocussed()) return;
 
 				// move left/right
 				if (wf::isKeyHeld(wf::KEY_A)) {
@@ -39,13 +53,16 @@ namespace Squishies
 					applyJump(squishy);
 				}
 
-				// @todo aim & fire, with mouse
-				// 1. the mouse should provide the cursor
-				// 2. middle wheel to select weapon
-				// 3. click to fire
+				// scroll through weapons
 				auto wheel = wf::getMouseWheel();
-				if (wf::isMouseButtonPressed(wf::BUTTON_LEFT)) {
+				if (wheel.y != 0.f) {
+					player.scrollWeapon(wheel.y > 0.f ? -1 : 1);
+				}
 
+				// fire!
+				if (wf::isMouseButtonPressed(wf::BUTTON_LEFT)) {
+					const auto cam = *scene->getCurrentCamera();
+					deployWeapon(playerId, squishy, player, wf::getMouseWorldPosition(cam));
 				}
 			});
 	}
@@ -70,37 +87,19 @@ namespace Squishies
 			pt.force.y -= 500.f;
 		}
 	}
-}
 
-//if (isFixed || isKinematic) return;
-//		Vector2 mvec;
-//		float maxJumpVel = 15.f;
-//		float squish = false;
-//
-//		if ((dir.x < 0.f && derivedVelocity.x > -15.f) || (dir.x > 0.f && derivedVelocity.x < 15.f)) {
-//			mvec.x = dir.x;
-//		}
-//		if ((dir.y < 0.f && derivedVelocity.y > -15.f) || (dir.y > 0.f && derivedVelocity.y < 15.f)) {
-//			mvec.y = dir.y;
-//
-//			// temp hack for jump - set an immediate vel else it just kinda looks weird.
-//			if (mvec.y < 0.f && derivedVelocity.y > -maxJumpVel) {
-//				mvec.y = derivedVelocity.y - maxJumpVel;
-//			}
-//
-//			// temp hack for squish...
-//			if (mvec.y > 0.f) {
-//				mvec.y = 0.f;
-//				squish = true;
-//			}
-//		}
-//
-//		for (auto& p : points) {
-//			p->velocity += mvec;
-//
-//			// temp hack for squish...
-//			if (squish) {
-//				p->force.y += (5.f * shapeSpringK);
-//				p->velocity.x = Clamp(p->velocity.x, -3.f, 3.f); // sneaking..
-//			}
-//		}
+	void MovementSystem::deployWeapon(wf::EntityID playerId, Component::Squishy& squishy, Component::Player& player, const wf::Vec3& target)
+	{
+		wf::Debug::filledCircle(target, 10.f, wf::RED);
+
+		auto pos = squishy.derivedPosition;
+
+		auto e = event::DeployWeapon{ playerId, player.currentWeapon, squishy.derivedPosition, target, 20.f };
+		eventDispatcher->dispatch<event::DeployWeapon>(e);
+
+		// 1. get mouse position and translate to worldspace
+		// 2. calculate angle from player.
+		// 3. a short way from the player towards that direction, that's our start point.
+		// 4. spawn the grenade.
+	}
+}

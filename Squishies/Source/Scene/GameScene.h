@@ -1,6 +1,8 @@
 #pragma once
 #include "Engine.h"
 
+#include <memory>
+
 namespace Squishies
 {
 	class GameScene : public wf::Scene
@@ -14,5 +16,8 @@ namespace Squishies
 		virtual void teardown() override;
 		virtual void render(float dt) override;
 		virtual void renderGui(float dt) override;
+
+	private:
+		std::shared_ptr<wf::Mesh> m_grenade;
 	};
 }
