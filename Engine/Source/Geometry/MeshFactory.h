@@ -11,6 +11,7 @@ namespace wf
 	namespace mesh
 	{
 		std::shared_ptr<Mesh> createSimplePlane(float size = 50.f);
+		std::shared_ptr<Mesh> createCircle(float radius, int segments);
 
 		/**
 		 * @brief Generate a simple cube with 8 vertices

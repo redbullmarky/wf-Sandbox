@@ -18,6 +18,15 @@ namespace wf
 		bool autoUpdate{ true };						// if we want to automatically update the data without having to set the needsUpdate flag
 		bool wireframe{ false };						// render as a wireframe
 
+		BoundingBox getBoundingBox() const
+		{
+			BoundingBox b{};
+			for (auto& vert : vertices) {
+				b.extend(vert.position);
+			}
+			return b;
+		}
+
 		static std::shared_ptr<Mesh> create()
 		{
 			return std::shared_ptr<Mesh>(new Mesh());

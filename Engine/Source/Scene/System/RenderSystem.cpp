@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "CoreSystem.h"
+#include "RenderSystem.h"
 
 #include "Scene/Component/Camera.h"
 #include "Scene/Component/Geometry.h"

@@ -31,6 +31,40 @@ namespace wf
 		return Mat4{ matrix * rhs.matrix };
 	}
 
+	void BoundingBox::reset()
+	{
+		min = { FLT_MAX, FLT_MAX, FLT_MAX };
+		max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+		isValid = false;
+	}
+
+	void BoundingBox::extend(const BoundingBox& other)
+	{
+		extend(other.min);
+		extend(other.max);
+	}
+
+	void BoundingBox::extend(const Vec3& point)
+	{
+		if (point.x < min.x) min.x = point.x;
+		if (point.y < min.y) min.y = point.y;
+		if (point.z < min.z) min.z = point.z;
+		if (point.x > max.x) max.x = point.x;
+		if (point.y > max.y) max.y = point.y;
+		if (point.z > max.z) max.z = point.z;
+		isValid = min != max;
+	}
+
+	Vec3 BoundingBox::size() const
+	{
+		return max - min;
+	}
+
+	Vec3 BoundingBox::midpoint() const
+	{
+		return (min + max) * .5f;
+	}
+
 	Vec3 getSpringForce(Vec3 p1, Vec3 v1, Vec3 p2, Vec3 v2, float k, float damping, float rest)
 	{
 		Vec3 distanceV = p1 - p2;

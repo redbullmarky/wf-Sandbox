@@ -12,8 +12,12 @@
 #include "Geometry/MeshFactory.h"
 #include "Geometry/MeshUtils.h"
 #include "Geometry/Model.h"
+#include "Geometry/Terrain.h"
 
+#include "Math/Bezier.h"
 #include "Math/Math.h"
+#include "Math/PerlinNoise.h"
+#include "Math/SimplexNoise.h"
 
 #include "Misc/Colour.h"
 
@@ -32,4 +36,4 @@
 #include "Scene/Scene.h"
 #include "Scene/System.h"
 #include "Scene/System/CameraSystem.h"
-#include "Scene/System/CoreSystem.h"
+#include "Scene/System/RenderSystem.h"

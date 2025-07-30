@@ -25,5 +25,19 @@ namespace wf
 		Mat4 operator*(const Mat4& rhs) const;
 	};
 
+	struct BoundingBox
+	{
+		Vec3 min{ FLT_MAX, FLT_MAX, FLT_MAX };
+		Vec3 max{ -FLT_MAX, -FLT_MAX, -FLT_MAX };
+
+		bool isValid{ false };
+
+		void reset();
+		void extend(const BoundingBox& other);
+		void extend(const Vec3& point);
+		Vec3 size() const;
+		Vec3 midpoint() const;
+	};
+
 	Vec3 getSpringForce(Vec3 p1, Vec3 v1, Vec3 p2, Vec3 v2, float k, float damping, float rest);
 }

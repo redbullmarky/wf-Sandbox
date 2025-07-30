@@ -38,6 +38,42 @@ namespace wf::mesh
 		return mesh;
 	}
 
+	std::shared_ptr<Mesh> createCircle(float radius, int segments)
+	{
+		auto mesh = Mesh::create();
+
+		mesh->vertices.resize((size_t)segments + 1);
+
+		// center vertex
+		mesh->vertices[0].position = { 0.f, 0.f, 0.f };
+		mesh->vertices[0].normal = { 0.f, 0.f, 1.f };
+		mesh->vertices[0].colour = WHITE;
+		mesh->vertices[0].texcoord = { 0.5f, 0.5f };
+
+		for (size_t i = 0; i < segments; i++) {
+			float angle = (2.f * PI * i) / segments;
+			float x = radius * cos(angle);
+			float y = radius * sin(angle);
+
+			mesh->vertices[i + 1].position = { x, y, 0.f };
+			mesh->vertices[i + 1].normal = { 0.f, 0.f, 1.f };
+			mesh->vertices[i + 1].colour = { 1.f, 1.f, 1.f, 1.f };
+			mesh->vertices[i + 1].texcoord = { (cos(angle) * 0.5f) + 0.5f, (sin(angle) * 0.5f) + 0.5f };
+		}
+
+		// indices for triangle fan from center
+		mesh->indices.reserve((size_t)segments * 3);
+		for (unsigned int i = 0; i < (unsigned int)segments; i++) {
+			mesh->indices.push_back(0);
+			mesh->indices.push_back(i + 1);
+			mesh->indices.push_back(i + 1 == segments ? 1 : i + 2);
+		}
+
+		generateMeshTangents(mesh.get());
+
+		return mesh;
+	}
+
 	std::shared_ptr<Mesh> createCube(const Vec3& dimensions, const Colour& colour)
 	{
 		auto mesh = Mesh::create();
