@@ -53,6 +53,7 @@ namespace Squishies::Component
 			dir = p1 - p2; // @todo winding order
 			length = glm::length(dir);
 
+			// debug the edges
 			/*wf::Vec3 center = (p1 + p2) * 0.5f;
 			wf::Vec3 normal = glm::normalize(wf::Vec3{ -dir.y, dir.x, 0.f });
 			wf::Debug::line(center, center + normal * .2f, 2.f, wf::WHITE);*/
@@ -69,6 +70,9 @@ namespace Squishies::Component
 	 */
 	struct Squishy
 	{
+		float radius{};
+		size_t pointCount{};										// number of configured points we'll build
+
 		std::vector<PointMass> points;								// all of our point masses
 		std::vector<std::tuple<size_t, size_t, float>> joints;		// joints between the points to hold shape
 
@@ -84,7 +88,9 @@ namespace Squishies::Component
 		wf::Vec3 derivedPosition{};									// calculated position of the body as a whole
 		wf::Quat derivedRotation{};									// calcualted rotation of the body
 		wf::Vec3 derivedVelocity{};									// calculated velocity of the body
+
 		bool colliding{ false };									// whether we're colliding with another
+		wf::BoundingBox collisionBox{};								// bounding box containing all points currently colliding
 
 		Bitfields bitFields;										// simple space partitioning, for collisons
 		wf::BoundingBox boundingBox{};								// cached bounding box from the mesh
@@ -116,5 +122,7 @@ namespace Squishies::Component
 		 * @brief Update all of the edge data in prep for collision detection
 		 */
 		void updateEdges();
+
+		Squishy(float radius, size_t pointCount) : radius(radius), pointCount(pointCount) {}
 	};
 }

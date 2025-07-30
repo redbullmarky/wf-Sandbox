@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine.h"
 
+#include <memory>
 #include <vector>
 
 namespace Squishies
@@ -15,4 +16,18 @@ namespace Squishies
 		const wf::Vec3& derivedPosition,
 		const wf::Quat& derivedRotation
 	);
+
+	/**
+	 * @brief Generate a simple circle of points
+	 * @param radius
+	 * @param segments
+	 */
+	std::vector<wf::Vec3> createCircleShape(float radius, size_t segments);
+
+	/**
+	 * @brief Converts a previously generated list of circle points into a mesh with center point
+	 * @param edgePoints
+	 * @return
+	 */
+	std::shared_ptr<wf::Mesh> createCircleMeshFromPoints(const std::vector<wf::Vec3>& edgePoints);
 }

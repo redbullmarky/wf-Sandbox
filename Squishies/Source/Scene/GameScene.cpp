@@ -55,39 +55,34 @@ namespace Squishies
 			material.diffuse.map = grassTex;
 		}
 
-		int points = 9; // number of points on the squishies
+		int points = 15;		// number of points on the squishies
+		float radius = 1.f;	// size
 
 		{
 			auto obj = createObject({ -2.f, -5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 1");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, points));
-			geometry.mesh->isDynamic = true;
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::RED;
 			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::Squishy>();
+			obj.addComponent<Component::Squishy>(radius, points);
 		}
 
 		{
 			auto obj = createObject({ -1.2f, -3.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 2");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, points));
-			geometry.mesh->isDynamic = true;
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::BLUE;
 			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::Squishy>();
+			obj.addComponent<Component::Squishy>(radius, points);
 		}
 		/*
 		{
 			auto obj = createObject({ 6.f, 5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 3");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, 15));
-			geometry.mesh->isDynamic = true;
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::BLUE;
 			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::Squishy>();
+			obj.addComponent<Component::Squishy>(radius, points);
 		}*/
 
 		wf::Scene::setup();

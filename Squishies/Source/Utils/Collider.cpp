@@ -49,7 +49,7 @@ namespace Squishies
 		Collision infoSame;
 		bool hasCollisions = false;
 
-		for (size_t i = 1; i < bApmCount; i++) {
+		for (size_t i = 0; i < bApmCount; i++) {
 			wf::Vec2 pt = obj1.points[i].position;
 
 			// check if the point is even inside the other shape. a simple bb check, then a poly check if necessary.
@@ -57,8 +57,8 @@ namespace Squishies
 
 			if (!checkCollisionPoint(pt, obj2.points)) continue;
 
-			size_t prevPt = (i > 1) ? i - 1 : bApmCount - 1;
-			size_t nextPt = (i < bApmCount - 1) ? i + 1 : 1;
+			size_t prevPt = (i > 0) ? 0 : bApmCount - 1;
+			size_t nextPt = (i + 1) % bApmCount;
 
 			wf::Vec2 prev = obj1.points[prevPt].position;
 			wf::Vec2 next = obj1.points[nextPt].position;
@@ -86,13 +86,13 @@ namespace Squishies
 			size_t b1 = 0;
 			size_t b2 = 1;
 
-			for (size_t j = 1; j < bBpmCount; j++) {
+			for (size_t j = 0; j < bBpmCount; j++) {
 				wf::Vec2 hitPt;
 				wf::Vec2 norm;
 				float edgeD;
 
 				b1 = j;
-				b2 = (j < bBpmCount - 1) ? j + 1 : 1;
+				b2 = (j + 1) % bBpmCount;
 
 				EdgeCol ec = getClosestPointOnEdgeSquared(pt, obj2.edges[j]);
 				float dist = ec.dist;

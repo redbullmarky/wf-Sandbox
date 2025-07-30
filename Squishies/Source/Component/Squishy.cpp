@@ -7,15 +7,12 @@ namespace Squishies::Component
 {
 	void Squishy::updateDerivedData()
 	{
-		// skip the center
-		size_t pointCount = this->points.size() - 1;
-
 		// first figure out the center and velocity
-		const float invPCount = 1.f / pointCount;
+		const float invPCount = 1.f / this->points.size();
 		wf::Vec3 center{};
 		wf::Vec3 velocity{};
 
-		for (size_t i = 1; i < this->points.size(); i++) {
+		for (size_t i = 0; i < this->points.size(); i++) {
 			center += this->points[i].position;
 			velocity += this->points[i].velocity;
 		}
@@ -28,7 +25,7 @@ namespace Squishies::Component
 		// Project all positions to X/Y plane and calculate average angle offset
 		float angleSum = 0.f;
 
-		for (size_t i = 1; i < this->points.size(); i++) {
+		for (size_t i = 0; i < this->points.size(); i++) {
 			glm::vec2 base2 = glm::vec2(this->points[i].originalPosition);
 			glm::vec2 curr2 = glm::vec2(this->points[i].position - this->derivedPosition);
 
@@ -41,7 +38,7 @@ namespace Squishies::Component
 			angleSum += delta;
 		}
 
-		float avgAngle = angleSum / pointCount;
+		float avgAngle = angleSum / this->points.size();
 		this->derivedRotation = glm::angleAxis(avgAngle, glm::vec3(0, 0, 1));
 	}
 
@@ -51,7 +48,7 @@ namespace Squishies::Component
 
 		for (auto& v : this->points) {
 			boundingBox.extend(v.position);
-			boundingBox.extend(v.position + wf::Vec3{ 0.f, 0.f, .1f }); // @todomay revisit, but we're nudging a little bit for the z
+			boundingBox.extend(v.position + wf::Vec3{ 0.f, 0.f, .1f }); // @todo may revisit, but we're nudging a little bit for the z
 		}
 	}
 
@@ -100,11 +97,10 @@ namespace Squishies::Component
 			this->edges.resize(this->points.size());
 		}
 
-		// skip the first vertex as it's the center
-		for (size_t i = 1; i < this->points.size(); i++) {
-			size_t j = (i == this->points.size() - 1) ? 1 : i + 1;
+		for (size_t i = 0; i < this->points.size(); i++) {
+			size_t j = (i + 1) % this->points.size();
 
-			this->edges[i - 1].update(this->points[i].position, this->points[j].position);
+			this->edges[i].update(this->points[i].position, this->points[j].position);
 		}
 	}
 }

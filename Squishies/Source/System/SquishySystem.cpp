@@ -26,11 +26,13 @@ namespace Squishies
 
 				auto& verts = geometry.mesh->vertices;
 
+				verts[0].position = squishy.derivedPosition;
+
 				// update our actual mesh verts from our points
-				for (size_t i = 0; i < verts.size(); i++) {
-					if (verts[i].position != squishy.points[i].position) {
+				for (size_t i = 1; i < verts.size(); i++) {
+					if (verts[i].position != squishy.points[i - 1].position) {
 						geometry.mesh->needsUpdate = true;
-						verts[i].position = squishy.points[i].position;
+						verts[i].position = squishy.points[i - 1].position;
 					}
 				}
 			});
@@ -50,89 +52,60 @@ namespace Squishies
 	//		1. foreach point, keep an original, update the global shape and reset transforms
 	//		2. point the mesh
 	//		3. build the joints
-	//
-	// @todo still some bits outstanding
 	void SquishySystem::createSquishy(wf::Entity entity)
 	{
+		auto& softbody = entity.getComponent<Component::Squishy>();
+
+		// create the dynamic geometry
+		auto points = createCircleShape(softbody.radius, softbody.pointCount);
+		auto& geometry = entity.addComponent<wf::component::Geometry>(createCircleMeshFromPoints(points));
+		geometry.mesh->isDynamic = true;
+
 		// set up the pointmasses for all of the vertices.
 		// we can probably use the indices too for joints, though might be a little sloppy
-		auto& softbody = entity.getComponent<Component::Squishy>();
-		auto& mesh = entity.getComponent<wf::component::Geometry>().mesh;
 		auto& transform = entity.getComponent<wf::component::Transform>();
+		auto& mesh = geometry.mesh;
 
-		softbody.points.resize(mesh->vertices.size());
+		softbody.points.resize(points.size());
 
 		// apply the transform then reset it. @todo rot/scale
 		softbody.derivedPosition = transform.position;
-		softbody.derivedRotation = glm::quat(1.f, 0.f, 0.f, 0.f);
+		softbody.derivedRotation = glm::quat(glm::radians(transform.rotation));
 		transform.position = {};
 		transform.rotation = {};
 		transform.scale = { 1.f, 1.f, 1.f };
 
 		// gather up the original points and the derived global shape
-		for (size_t i = 0; i < mesh->vertices.size(); i++) {
-			softbody.points[i].originalPosition = mesh->vertices[i].position;
+		for (size_t i = 0; i < points.size(); i++) {
+			// keep a copy of the original point
+			softbody.points[i].originalPosition = points[i];
 
+			// get our point position in worldspace
 			auto newPos = softbody.points[i].originalPosition + softbody.derivedPosition;
+
+			// store it in position and globalPosition
 			softbody.points[i].position = newPos;
 			softbody.points[i].globalPosition = newPos;
 		}
 
 		// next build out the joints
-		// firstly we'll just use the triangles (indices) of the mesh.
-		std::unordered_set<uint64_t> edgeSet;
-
-		auto hashEdge = [](size_t a, size_t b) {
-			if (a > b) std::swap(a, b);
-			return (uint64_t(a) << 32) | b;
-			};
-
-		for (size_t i = 0; i < mesh->indices.size(); i += 3) {
-			size_t i0 = mesh->indices[i + 0];
-			size_t i1 = mesh->indices[i + 1];
-			size_t i2 = mesh->indices[i + 2];
-
-			std::array<std::pair<size_t, size_t>, 3> edges = {
-				std::pair{i0, i1}, std::pair{i1, i2}, std::pair{i2, i0}
-			};
-
-			for (auto& [a, b] : edges) {
-				uint64_t key = hashEdge(a, b);
-				if (edgeSet.insert(key).second) {
-					auto& pa = mesh->vertices[a].position;
-					auto& pb = mesh->vertices[b].position;
-					float dist = glm::distance(pa, pb);
-					softbody.joints.emplace_back(a, b, dist);
-					printf("%zu %zu %.2f\n", a, b, dist);
-				}
-			}
+		// first the basic edges
+		for (size_t i = 0; i < points.size(); i++) {
+			size_t j = (i + 1) % points.size();
+			float dist = glm::distance(softbody.points[i].position, softbody.points[j].position);
+			softbody.joints.emplace_back(i, j, dist);
 		}
 
-		// next we'll add some extra support around the edges (i.e. skip vertex 0, the center point)
-		size_t ringStart = 1;
-		size_t ringCount = mesh->vertices.size() - 1;
-
-		for (size_t i = 0; i < ringCount; ++i)
-		{
-			size_t a = ringStart + i;
-			size_t b = ringStart + ((i + 2) % ringCount); // skip one vertex, wrap around
-
-			uint64_t key = hashEdge(a, b);
-			if (edgeSet.insert(key).second)
-			{
-				auto& pa = mesh->vertices[a].position;
-				auto& pb = mesh->vertices[b].position;
-				float dist = glm::distance(pa, pb);
-				softbody.joints.emplace_back(a, b, dist);
-			}
+		// extra support
+		for (size_t i = 0; i < points.size(); i++) {
+			size_t j = (i + 2) % points.size();
+			float dist = glm::distance(softbody.points[i].position, softbody.points[j].position);
+			softbody.joints.emplace_back(i, j, dist);
 		}
 
 		softbody.updateDerivedData();
 		softbody.updateEdges();
 		softbody.updateBoundingBox();
-
-
-		// @todo maybe we need to keep tabs on the inner points. if there are points where basically 
 	}
 
 	// 1. PREP: foreach body
@@ -153,7 +126,6 @@ namespace Squishies
 				// apply gravity
 				for (auto& pt : squishy.points) {
 					if (pt.fixed) continue;
-
 					pt.force += wf::Vec3(0.f, m_gravity, 0.f) * pt.mass;
 				}
 
@@ -309,8 +281,6 @@ namespace Squishies
 	// 5. COLLISIONS: for each body and each other body
 	//		- check collision and add to list
 	//		- process all collisions when we've checked the lot
-	//
-	// @todo collision response
 	void SquishySystem::handleCollisions()
 	{
 		auto view = entityManager->find<Component::Squishy>();
@@ -341,19 +311,21 @@ namespace Squishies
 	//			2. expand the collision box if the point is inside of another (gathered during collision check)
 	//		3. determine if the body is grounded
 	//
-	// @todo, collision box, grounded checks
+	// @todo grounded checks
 	void SquishySystem::postUpdates()
 	{
 		entityManager->each<Component::Squishy>(
 			[&](Component::Squishy& squishy) {
 
-				// @todo reset collision box
+				squishy.collisionBox.reset();
 
-				// dampen velocities
+				// dampen velocities and expand our collision box with all points in collision, if any
 				for (auto& pt : squishy.points) {
 					pt.velocity *= .999f;
 
-					// @todo expand collision box
+					if (pt.insideAnother) {
+						squishy.collisionBox.extend(pt.position);
+					}
 				}
 
 				// @todo grounded check
