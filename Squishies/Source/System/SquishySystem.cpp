@@ -19,21 +19,6 @@ namespace Squishies
 		return true;
 	}
 
-	void SquishySystem::setup()
-	{
-		entityManager->each<Component::Squishy, const wf::component::Geometry>(
-			[&](Component::Squishy& squishy, const wf::component::Geometry& geometry) {
-				auto obj = scene->createObject({ 0.f, 0.f, .1f });
-				obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(.3f, 15));
-				auto& material = obj.addComponent<wf::component::Material>();
-				material.diffuse.colour = { 1.f, 0.f, 0.f, .5f };
-				material.blendMode = wf::wgl::BlendMode::ALPHA;
-				material.wireframe = true;
-
-				squishy.debugEntity = obj.handle;
-			});
-	}
-
 	void SquishySystem::update(float dt)
 	{
 		entityManager->each<Component::Squishy, wf::component::Geometry>(
@@ -41,17 +26,13 @@ namespace Squishies
 
 				auto& verts = geometry.mesh->vertices;
 
+				// update our actual mesh verts from our points
 				for (size_t i = 0; i < verts.size(); i++) {
 					if (verts[i].position != squishy.points[i].position) {
 						geometry.mesh->needsUpdate = true;
 						verts[i].position = squishy.points[i].position;
 					}
 				}
-
-				// align the debugging shape to the derived position
-				auto debugEnt = entityManager->get(squishy.debugEntity);
-				auto& transform = debugEnt.getComponent<wf::component::Transform>();
-				transform.position = squishy.derivedPosition + wf::Vec3{ 0.f, 0.f, .1f };
 			});
 	}
 
@@ -156,6 +137,8 @@ namespace Squishies
 	//		1. update shape meta for shape matching
 	//		2. accumulate external forces - gravity, etc
 	//		3. accumulate internal forces - spring joints, etc
+	//
+	// @todo check shape meta stuff for 3D
 	void SquishySystem::prepareAndAccumulateForces()
 	{
 		entityManager->each<Component::Squishy>(
@@ -252,8 +235,7 @@ namespace Squishies
 	//		constrain (primitive bounce) using these dampings:
 	//			float dampingX = 0.9f;
 	//			float dampingY = 0.8f;
-	//
-	// @todo Z outstanding
+	//			float dampingZ = 0.9f;
 	void SquishySystem::hardConstraints()
 	{
 		entityManager->each<Component::Squishy>(
@@ -263,29 +245,40 @@ namespace Squishies
 
 				auto& pms = squishy.points;
 
-				// @todo this is only in the X/Y dims for now
-				float dampingX = 0.9f;
-				float dampingY = 0.8f;
+				wf::Vec3 damping = { .9f, .8f, .9f };
 
 				for (size_t i = 0; i < pms.size(); i++) {
+					// horizontals
 					if (pms[i].position.x < m_worldBounds.min.x) {
 						pms[i].position.x = m_worldBounds.min.x;
-						pms[i].velocity.x = -pms[i].velocity.x * dampingX;
+						pms[i].velocity.x = -pms[i].velocity.x * damping.x;
 					}
 					else if (pms[i].position.x > m_worldBounds.max.x) {
 						pms[i].position.x = m_worldBounds.max.x;
-						pms[i].velocity.x = -pms[i].velocity.x * dampingX;
+						pms[i].velocity.x = -pms[i].velocity.x * damping.x;
 					}
 
+					if (pms[i].position.z < m_worldBounds.min.z) {
+						pms[i].position.z = m_worldBounds.min.z;
+						pms[i].velocity.z = -pms[i].velocity.z * damping.x;
+					}
+					else if (pms[i].position.z > m_worldBounds.max.z) {
+						pms[i].position.z = m_worldBounds.max.z;
+						pms[i].velocity.z = -pms[i].velocity.z * damping.x;
+					}
+
+					// vertical
 					if (pms[i].position.y < m_worldBounds.min.y) {
 						pms[i].position.y = m_worldBounds.min.y;
-						pms[i].velocity.y = -pms[i].velocity.y * dampingY;
-						pms[i].velocity.x *= dampingX;
+						pms[i].velocity.y = -pms[i].velocity.y * damping.y;
+						pms[i].velocity.x *= damping.x;
+						pms[i].velocity.z *= damping.z;
 					}
 					else if (pms[i].position.y > m_worldBounds.max.y) {
 						pms[i].position.y = m_worldBounds.max.y;
-						pms[i].velocity.y = -pms[i].velocity.y * dampingY;
-						pms[i].velocity.x *= dampingX;
+						pms[i].velocity.y = -pms[i].velocity.y * damping.y;
+						pms[i].velocity.x *= damping.x;
+						pms[i].velocity.z *= damping.z;
 					}
 				}
 			});
@@ -295,28 +288,39 @@ namespace Squishies
 	//		1. update bounding box
 	//		2. update edge data
 	//		3. update bitmask (where in the world on the "grid" for collisions)
-	//
-	// @todo edges, bitmasks
 	void SquishySystem::metaUpdates()
 	{
 		entityManager->each<Component::Squishy>(
 			[&](Component::Squishy& squishy) {
 
 				squishy.updateBoundingBox();
+				squishy.updateEdges();
+				squishy.updateBitfields(m_worldBounds, m_spatialGridSize);
 
-				// edge data
-
-				// bitmask
+				// clear our point details ready for collision detection
+				for (auto& pt : squishy.points) {
+					pt.insideAnother = false;
+				}
 			});
 	}
 
 	// 5. COLLISIONS: for each body and each other body
 	//		check collision and add to list
-	//
-	// @todo
 	void SquishySystem::collisionDetection()
 	{
+		auto view = entityManager->find<Component::Squishy>();
+		m_collider.reset();
 
+		view.each(
+			[&](wf::EntityID id, Component::Squishy& squishy) {
+				view.each(
+					[&](wf::EntityID id2, Component::Squishy& squishy2) {
+
+						if (id == id2) return;
+
+						squishy.colliding = m_collider.check(squishy, squishy2);
+					});
+			});
 	}
 
 	// 6. COLLISON RESPONSE: for each collision

@@ -65,6 +65,26 @@ namespace wf
 		return (min + max) * .5f;
 	}
 
+	bool BoundingBox::intersects(const BoundingBox& other) const
+	{
+		if (!isValid) return false;
+		bool overlapX = ((min.x <= other.max.x) && (max.x >= other.min.x));
+		bool overlapY = ((min.y <= other.max.y) && (max.y >= other.min.y));
+		bool overlapZ = ((min.z <= other.max.z) && (max.z >= other.min.z));
+		return (overlapX && overlapY && overlapZ);
+	}
+
+	bool BoundingBox::contains(const wf::Vec3& point) const
+	{
+		if (!isValid) return false;
+		return point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y && point.z >= min.z && point.z <= max.z;
+	}
+
+	bool BoundingBox::contains(const BoundingBox& other) const
+	{
+		return contains(other.min) && contains(other.max);
+	}
+
 	Vec2 getSpringForce(Vec2 p1, Vec2 v1, Vec2 p2, Vec2 v2, float k, float damping, float rest)
 	{
 		auto ret = getSpringForce(

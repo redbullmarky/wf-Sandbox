@@ -46,6 +46,7 @@ namespace Squishies::Component
 
 		for (auto& v : this->points) {
 			boundingBox.extend(v.position);
+			boundingBox.extend(v.position + wf::Vec3{ 0.f, 0.f, .1f }); // @todomay revisit, but we're nudging a little bit for the z
 		}
 	}
 
@@ -54,6 +55,50 @@ namespace Squishies::Component
 		for (auto& pt : this->points) {
 			pt.globalPosition = pt.originalPosition + this->derivedPosition;
 			// @todo apply rotation
+		}
+	}
+
+	void Squishy::updateBitfields(const wf::BoundingBox& worldBounds, float gridCellSize)
+	{
+		wf::Vec3 gridStep = worldBounds.size() / gridCellSize;
+
+		int minX = (int)floor((boundingBox.min.x - worldBounds.min.x) / gridStep.x);
+		int maxX = (int)floor((boundingBox.max.x - worldBounds.min.x) / gridStep.x);
+		int minY = (int)floor((boundingBox.min.y - worldBounds.min.y) / gridStep.y);
+		int maxY = (int)floor((boundingBox.max.y - worldBounds.min.y) / gridStep.y);
+		int minZ = (int)floor((boundingBox.min.z - worldBounds.min.z) / gridStep.z);
+		int maxZ = (int)floor((boundingBox.max.z - worldBounds.min.z) / gridStep.z);
+
+		minX = glm::clamp(minX, 0, static_cast<int>(gridCellSize));
+		minY = glm::clamp(minY, 0, static_cast<int>(gridCellSize));
+		minZ = glm::clamp(minZ, 0, static_cast<int>(gridCellSize));
+		maxX = glm::clamp(maxX, 0, static_cast<int>(gridCellSize));
+		maxY = glm::clamp(maxY, 0, static_cast<int>(gridCellSize));
+		maxZ = glm::clamp(maxZ, 0, static_cast<int>(gridCellSize));
+
+		this->bitFields.clear();
+
+		for (int i = minX; i <= maxX; i++) {
+			this->bitFields.x.setOn(i);
+		}
+		for (int i = minY; i <= maxY; i++) {
+			this->bitFields.y.setOn(i);
+		}
+		for (int i = minZ; i <= maxZ; i++) {
+			this->bitFields.z.setOn(i);
+		}
+	}
+
+	void Squishy::updateEdges()
+	{
+		if (this->edges.size() != this->points.size()) {
+			this->edges.resize(this->points.size());
+		}
+
+		for (size_t i = 0; i < this->points.size(); i++) {
+			size_t j = (i + 1) % this->points.size();
+
+			this->edges[i].update(this->points[i].position, this->points[j].position);
 		}
 	}
 }

@@ -38,6 +38,9 @@ namespace wf
 		void extend(const Vec3& point);
 		Vec3 size() const;
 		Vec3 midpoint() const;
+		bool intersects(const BoundingBox& other) const;	// box overlaps with another?
+		bool contains(const wf::Vec3& point) const;			// box has a point inside?
+		bool contains(const BoundingBox& other) const;		// bounding box encloses another entirely?
 	};
 
 	Vec2 getSpringForce(Vec2 p1, Vec2 v1, Vec2 p2, Vec2 v2, float k, float damping, float rest);

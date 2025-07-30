@@ -1,6 +1,8 @@
 #pragma once
 #include "Engine.h"
 
+#include "Utils/Collider.h"
+
 namespace Squishies
 {
 	class SquishySystem : public wf::ISystem
@@ -9,7 +11,6 @@ namespace Squishies
 		using wf::ISystem::ISystem;
 
 		virtual bool init() override;
-		virtual void setup() override;
 		virtual void update(float dt) override;
 		virtual void fixedUpdate(float dt) override;
 
@@ -24,8 +25,11 @@ namespace Squishies
 		void postUpdates();
 
 	private:
+		Collider m_collider;
+
 		// @todo we'll likely shift these out of here but it's fine for now
 		float m_gravity = -9.81f;
 		wf::BoundingBox m_worldBounds{};
+		float m_spatialGridSize{ 32.f };
 	};
 }

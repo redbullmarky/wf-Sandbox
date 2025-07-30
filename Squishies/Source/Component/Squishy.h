@@ -1,5 +1,9 @@
 #pragma once
 #include "Engine.h"
+#include "Utils/Bitfield.h"
+
+#include <bitset>
+#include <vector>
 
 // @todo we need to play with the values a bit. on the old squishies game, we had:
 //
@@ -25,6 +29,33 @@ namespace Squishies::Component
 		wf::Vec3 lastPosition{};									// keeping tabs on last position for stability
 		wf::Vec3 originalPosition{};								// the original vertex position for shape matching
 		wf::Vec3 globalPosition{};									// after transforming the original using derived vals
+
+		bool insideAnother{ false };								// collision detection picked up that this point is inside another object
+	};
+
+	struct Edge
+	{
+		wf::Vec3 dir{};
+		float length{};
+		wf::Vec3 p1{};
+		wf::Vec3 p2{};
+
+		Edge() = default;
+		Edge(wf::Vec3 p1, wf::Vec3 p2)
+		{
+			update(p1, p2);
+		}
+
+		void update(wf::Vec3 newP1, wf::Vec3 newP2)
+		{
+			p1 = newP1;
+			p2 = newP2;
+			dir = p2 - p1;
+			length = glm::length(dir);
+		}
+
+		bool operator==(const Edge& rhs) const { return p1 == rhs.p1 && p2 == rhs.p2 && dir == rhs.dir; }
+		bool operator!=(const Edge& rhs) const { return p1 != rhs.p1 || p2 != rhs.p2 || dir != rhs.dir; }
 	};
 
 	/**
@@ -49,9 +80,11 @@ namespace Squishies::Component
 		wf::Vec3 derivedPosition{};									// calculated position of the body as a whole
 		wf::Quat derivedRotation{};									// calcualted rotation of the body
 		wf::Vec3 derivedVelocity{};									// calculated velocity of the body
-		wf::BoundingBox boundingBox{};								// cached bounding box from the mesh
+		bool colliding{ false };									// whether we're colliding with another
 
-		wf::EntityID debugEntity;									// shadow entity for debugging
+		Bitfields bitFields;										// simple space partitioning, for collisons
+		wf::BoundingBox boundingBox{};								// cached bounding box from the mesh
+		std::vector<Edge> edges;									// edge data
 
 		/**
 		 * @brief Updates the percieved position, rotation and velocity based on how the points have moved
@@ -67,5 +100,17 @@ namespace Squishies::Component
 		 * @brief Update our global (world position) derived shape
 		 */
 		void updateGlobalShape();
+
+		/**
+		 * @brief Update bitmask based on our position for collision filtering
+		 * @param worldBounds Main world dimensions we're working in
+		 * @param gridCellSize How big each grid cell is
+		 */
+		void updateBitfields(const wf::BoundingBox& worldBounds, float gridCellSize);
+
+		/**
+		 * @brief Update all of the edge data in prep for collision detection
+		 */
+		void updateEdges();
 	};
 }

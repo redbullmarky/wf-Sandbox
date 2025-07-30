@@ -3,8 +3,10 @@
 
 #include "Component/Squishy.h"
 #include "System/SquishySystem.h"
+#include "Utils/Debug.h"
 
 #include <imgui.h>
+#include <glm/glm.hpp>
 
 namespace Squishies
 {
@@ -34,6 +36,9 @@ namespace Squishies
 			50.f
 		);
 
+		// prepare the debugger to track the camera
+		Debug::instance().setCamera(getCurrentCamera());
+
 		auto light = createLight(
 			wf::Vec3{ 20.f, 20.f, 20.f },
 			wf::Vec3{ 0.f, 0.f, 0.f }
@@ -52,28 +57,27 @@ namespace Squishies
 		}
 
 		{
-			auto obj = createObject({ -2.f, 5.f, 0.f });
+			auto obj = createObject({ -2.f, 3.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 1");
 			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, 15));
 			geometry.mesh->isDynamic = true;
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::RED;
-			material.diffuse.colour.a = .7f;
 			material.specular.intensity = 1.5f;
 			obj.addComponent<Component::Squishy>();
 		}
 
-		/*{
-			auto obj = createObject({ 2.f, 5.f, 0.f });
+		{
+			auto obj = createObject({ -1.f, 5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 2");
 			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, 15));
 			geometry.mesh->isDynamic = true;
 			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.colour = wf::RED;
+			material.diffuse.colour = wf::BLUE;
 			material.specular.intensity = 1.5f;
 			obj.addComponent<Component::Squishy>();
 		}
-
+		/*
 		{
 			auto obj = createObject({ 6.f, 5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 3");
@@ -96,6 +100,18 @@ namespace Squishies
 	void GameScene::render(float dt)
 	{
 		wf::Scene::render(dt);
+	}
+
+	static ImVec2 getScreenPos(const wf::Vec3& pos, const wf::component::Camera& camera)
+	{
+		glm::vec4 clipSpace = camera.getViewProjectionMatrix().matrix * glm::vec4(pos, 1.0f);
+		if (clipSpace.w <= 0.0f) return{}; // behind camera
+
+		glm::vec3 ndc = glm::vec3(clipSpace) / clipSpace.w; // -1 to +1
+		glm::vec2 screenPos{};
+		screenPos.x = (ndc.x * 0.5f + 0.5f) * wf::getWindow().getWidth();
+		screenPos.y = (1.0f - (ndc.y * 0.5f + 0.5f)) * wf::getWindow().getHeight();
+		return { screenPos.x, screenPos.y };
 	}
 
 	void GameScene::renderGui(float dt)
@@ -155,12 +171,15 @@ namespace Squishies
 						ImGui::SliderFloat("JointD", &squishy.jointDamping, 1.f, 150.f);
 
 						ImGui::Text("Derived pos: %.2f %.2f %.2f", squishy.derivedPosition.x, squishy.derivedPosition.y, squishy.derivedPosition.z);
+						Debug::filledCircle(squishy.derivedPosition, 5.f, wf::YELLOW);
+						Debug::rect(squishy.boundingBox, 2.f, wf::WHITE);
 
 						float lowesty = 10000.f;
 						for (auto& pt : squishy.points) {
 							if (pt.position.y < lowesty) {
 								lowesty = pt.position.y;
 							}
+							Debug::filledCircle(pt.position, 5.f, pt.insideAnother ? wf::RED : wf::YELLOW);
 						}
 						ImGui::Text("Lowest Y: %.2f", lowesty);
 					}
