@@ -66,6 +66,12 @@ namespace Squishies
 		postUpdates();
 	}
 
+	// 0. BUILD
+	//		1. foreach point, keep an original, update the global shape and reset transforms
+	//		2. point the mesh
+	//		3. build the joints
+	//
+	// @todo still some bits outstanding
 	void SquishySystem::createSquishy(wf::Entity entity)
 	{
 		// set up the pointmasses for all of the vertices.
@@ -146,13 +152,12 @@ namespace Squishies
 		// @todo maybe we need to keep tabs on the inner points. if there are points where basically 
 	}
 
+	// 1. PREP: foreach body
+	//		1. update shape meta for shape matching
+	//		2. accumulate external forces - gravity, etc
+	//		3. accumulate internal forces - spring joints, etc
 	void SquishySystem::prepareAndAccumulateForces()
 	{
-		// 1. PREP: foreach body
-		//		1. update shape meta for shape matching
-		//		2. accumulate external forces - gravity, etc
-		//		3. accumulate internal forces - spring joints, etc
-
 		entityManager->each<Component::Squishy>(
 			[&](Component::Squishy& squishy) {
 
@@ -220,14 +225,13 @@ namespace Squishies
 			});
 	}
 
+	// 2. INTEGRATE: foreach point on each body
+	//		1. velocity += (force / mass) * dt;
+	//		2. lastPosition = position;
+	//		3. position += velocity * dt;
+	//		4. force = { 0.f };
 	void SquishySystem::integrate(float dt)
 	{
-		// 2. INTEGRATE: foreach point on each body
-		//		1. velocity += (force / mass) * dt;
-		//		2. lastPosition = position;
-		//		3. position += velocity * dt;
-		//		4. force = { 0.f };
-
 		entityManager->each<Component::Squishy>(
 			[&](Component::Squishy& squishy) {
 
@@ -244,13 +248,14 @@ namespace Squishies
 			});
 	}
 
+	// 3. HARD CONSTRAINTS: foreach point on each body
+	//		constrain (primitive bounce) using these dampings:
+	//			float dampingX = 0.9f;
+	//			float dampingY = 0.8f;
+	//
+	// @todo Z outstanding
 	void SquishySystem::hardConstraints()
 	{
-		// 3. HARD CONSTRAINTS: foreach point on each body
-		//		constrain (primitive bounce) using these dampings:
-		//			float dampingX = 0.9f;
-		//			float dampingY = 0.8f;
-
 		entityManager->each<Component::Squishy>(
 			[&](Component::Squishy& squishy) {
 
@@ -286,13 +291,14 @@ namespace Squishies
 			});
 	}
 
+	// 4. META UPDATES: foreach body
+	//		1. update bounding box
+	//		2. update edge data
+	//		3. update bitmask (where in the world on the "grid" for collisions)
+	//
+	// @todo edges, bitmasks
 	void SquishySystem::metaUpdates()
 	{
-		// 4. META UPDATES: foreach body
-		//		1. update bounding box
-		//		2. update edge data
-		//		3. update bitmask (where in the world on the "grid" for collisions)
-
 		entityManager->each<Component::Squishy>(
 			[&](Component::Squishy& squishy) {
 
@@ -300,34 +306,38 @@ namespace Squishies
 
 				// edge data
 
-
 				// bitmask
 			});
 	}
 
+	// 5. COLLISIONS: for each body and each other body
+	//		check collision and add to list
+	//
+	// @todo
 	void SquishySystem::collisionDetection()
 	{
-		// 5. COLLISIONS: for each body and each other body
-		//		check collision and add to list
 
 	}
 
+	// 6. COLLISON RESPONSE: for each collision
+	//		resolve the collision
+	//
+	// @todo
 	void SquishySystem::collisionResponse()
 	{
-		// 6. COLLISON RESPONSE: for each collision
-		//		resolve the collision
 
 	}
 
+	// 7. POST-UPDATES: foreach body
+	//		1. reset collision box
+	//		2. foreach point
+	//			1. damp velocity by 0.999f
+	//			2. expand the collision box if the point is inside of another (gathered during collision check)
+	//		3. determine if the body is grounded
+	//
+	// @todo, collision box, grounded checks
 	void SquishySystem::postUpdates()
 	{
-		// 7. POST-UPDATES: foreach body
-		//		1. reset collision box
-		//		2. foreach point
-		//			1. damp velocity by 0.999f
-		//			2. expand the collision box if the point is inside of another (gathered during collision check)
-		//		3. determine if the body is grounded
-
 		entityManager->each<Component::Squishy>(
 			[&](Component::Squishy& squishy) {
 

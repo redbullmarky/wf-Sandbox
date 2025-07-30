@@ -54,7 +54,7 @@ namespace Squishies
 		{
 			auto obj = createObject({ -2.f, 5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 1");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, 5));
+			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCircle(1.f, 15));
 			geometry.mesh->isDynamic = true;
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::RED;
@@ -145,6 +145,15 @@ namespace Squishies
 
 					if (ent.hasComponent<Component::Squishy>()) {
 						auto& squishy = ent.getComponent<Component::Squishy>();
+
+						ImGui::Checkbox("Shape matching", &squishy.shapeMatching);
+						if (squishy.shapeMatching) {
+							ImGui::SliderFloat("ShapeK", &squishy.shapeMatchK, 1.f, 5000.f);
+							ImGui::SliderFloat("ShapeD", &squishy.shapeMatchDamping, 1.f, 150.f);
+						}
+						ImGui::SliderFloat("JointK", &squishy.jointK, 1.f, 5000.f);
+						ImGui::SliderFloat("JointD", &squishy.jointDamping, 1.f, 150.f);
+
 						ImGui::Text("Derived pos: %.2f %.2f %.2f", squishy.derivedPosition.x, squishy.derivedPosition.y, squishy.derivedPosition.z);
 
 						float lowesty = 10000.f;
