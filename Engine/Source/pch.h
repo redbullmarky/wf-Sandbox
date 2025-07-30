@@ -9,6 +9,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <sstream>
 #include <stack>
 #include <stdexcept>
 #include <stdlib.h>

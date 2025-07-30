@@ -1,8 +1,23 @@
 #pragma once
 #include "Math/Math.h"
 
+#include <sstream>
+
 namespace wf
 {
+	struct ColourDenorm
+	{
+		unsigned char r{ 255 };
+		unsigned char g{ 255 };
+		unsigned char b{ 255 };
+		unsigned char a{ 255 };
+
+		Colour normalised() const
+		{
+			return Colour{ r * 255, g * 255, b * 255, a * 255 };
+		}
+	};
+
 	struct Colour
 	{
 		float r{ 1.f };
@@ -10,30 +25,116 @@ namespace wf
 		float b{ 1.f };
 		float a{ 1.f };
 
+		/**
+		 * @brief Convert to a Vec3 (RGB)
+		 */
 		Vec3 toVec3() const
 		{
 			return Vec3{ r, g, b };
 		}
 
+		/**
+		 * @brief Convert to a Vec4 (RGA)
+		 */
 		Vec4 toVec4() const
 		{
-			return Vec4{ r, g,b,a };
+			return Vec4{ r, g, b, a };
 		}
 
+		/**
+		 * @brief Convert from a Vec3
+		 */
 		static Colour from(const Vec3& from)
 		{
 			return Colour{ from.x, from.y, from.z, 1.f };
 		}
 
+		/**
+		 * @brief Convert from a Vec4
+		 */
 		static Colour from(const Vec4& from)
 		{
 			return Colour{ from.x, from.y, from.z, from.w };
+		}
+
+		/**
+		 * @brief Convert from denormalised colour
+		 */
+		static Colour from(const ColourDenorm& from)
+		{
+			return from.normalised();
+		}
+
+		ColourDenorm denormalised() const
+		{
+			return ColourDenorm{
+				static_cast<unsigned char>(r * 255),
+				static_cast<unsigned char>(g * 255),
+				static_cast<unsigned char>(b * 255),
+				static_cast<unsigned char>(a * 255)
+			};
+		}
+
+		/**
+		 * @brief Convert to a hex string
+		 */
+		std::string toHex() const
+		{
+			std::stringstream ss;
+			auto denorm = denormalised();
+
+			ss << "#"
+				<< std::setw(2) << std::setfill('0') << std::hex << denorm.r
+				<< std::setw(2) << std::setfill('0') << std::hex << denorm.g
+				<< std::setw(2) << std::setfill('0') << std::hex << denorm.b
+				<< std::setw(2) << std::setfill('0') << std::hex << denorm.a;
+			return ss.str();
+		}
+
+		/**
+		 * @brief Get the luminance of this colour
+		 *
+		 * Luminance formula based on WCAG 2.0
+		 */
+		float luminance() const
+		{
+
+			Colour lum(*this);
+
+			lum.r = (lum.r <= 0.03928f) ? lum.r / 12.92f : pow((lum.r + .055f) / 1.055f, 2.4f);
+			lum.g = (lum.g <= 0.03928f) ? lum.g / 12.92f : pow((lum.g + .055f) / 1.055f, 2.4f);
+			lum.b = (lum.b <= 0.03928f) ? lum.b / 12.92f : pow((lum.b + .055f) / 1.055f, 2.4f);
+
+			return 0.2126f * lum.r + 0.7152f * lum.g + 0.0722f * lum.b;
+		}
+
+		/**
+		 * @brief Get contrast ratio with another col
+		 */
+		float contrastRatio(const Colour& otherCol) const
+		{
+			float luminance1 = luminance();
+			float luminance2 = otherCol.luminance();
+
+			float light = std::max(luminance1, luminance2) + 0.05f;
+			float dark = std::min(luminance1, luminance2) + 0.05f;
+
+			return light / dark;
+		}
+
+		/**
+		 * @brief Determine if the contrast with another colour exceeds a threshold
+		 */
+		bool isContrastSufficient(const Colour& otherCol, float threshold = 4.5f) const
+		{
+			return contrastRatio(otherCol) >= threshold;
 		}
 
 		constexpr Colour() = default;
 		constexpr Colour(float r, float g, float b) : Colour(r, g, b, 1.f) {}
 		constexpr Colour(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
 	};
+
 
 	constexpr wf::Colour BLANK{ 0.f, 0.f, 0.f, 0.f };
 	constexpr wf::Colour BLACK{ 0.f, 0.f, 0.f, 1.f };

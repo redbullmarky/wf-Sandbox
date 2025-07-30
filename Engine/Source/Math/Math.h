@@ -6,6 +6,7 @@
 constexpr float RAD2DEG = 180.f / 3.14159265358979323846f; // ~ 57.2957795131
 constexpr float DEG2RAD = 3.14159265358979323846f / 180.f; // ~ 0.0174532925
 constexpr float PI = 3.14159265359f;
+constexpr float EPSILON = 0.000001f;
 
 namespace wf
 {
