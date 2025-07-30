@@ -53,9 +53,9 @@ namespace Squishies::Component
 			dir = p1 - p2; // @todo winding order
 			length = glm::length(dir);
 
-			wf::Vec3 center = (p1 + p2) * 0.5f;
+			/*wf::Vec3 center = (p1 + p2) * 0.5f;
 			wf::Vec3 normal = glm::normalize(wf::Vec3{ -dir.y, dir.x, 0.f });
-			wf::Debug::line(center, center + normal * .2f, 2.f, wf::WHITE);
+			wf::Debug::line(center, center + normal * .2f, 2.f, wf::WHITE);*/
 		}
 
 		bool operator==(const Edge& rhs) const { return p1 == rhs.p1 && p2 == rhs.p2 && dir == rhs.dir; }
