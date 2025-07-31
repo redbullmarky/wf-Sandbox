@@ -93,8 +93,6 @@ namespace Squishies
 
 	void MovementSystem::deployWeapon(wf::EntityID playerId, Component::SoftBody& squishy, Component::Inventory& inventory, const wf::Vec3& target)
 	{
-		wf::Debug::filledCircle(target, 10.f, wf::RED);
-
 		auto pos = squishy.derivedPosition;
 		auto e = event::DeployWeapon{ playerId, inventory.selectedIndex, squishy.derivedPosition, target, 20.f };
 
