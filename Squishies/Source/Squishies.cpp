@@ -15,6 +15,7 @@ namespace Squishies
 		}
 
 		wf::initGui();
+		//wf::setFixedTimestep(0.005f);
 
 		m_scene = std::make_shared<GameScene>();
 		if (!m_scene->init()) {
@@ -28,13 +29,14 @@ namespace Squishies
 
 	void Squishies::run()
 	{
+		// @todo bake this into the core
 		auto cursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR);
 
 		while (!wf::shouldClose()) {
 			SDL_SetCursor(cursor);
 
 			while (wf::isFixedUpdateReady()) {
-				m_scene->fixedUpdate(wf::getFixedTime());
+				m_scene->fixedUpdate(wf::getFixedTimestep());
 			}
 
 			m_scene->update(wf::getDeltaTime());

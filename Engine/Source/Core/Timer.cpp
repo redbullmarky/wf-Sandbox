@@ -18,7 +18,7 @@ namespace wf
 
 		// so that the fixed update runs at least once on the first frame
 		if (m_frameCount == 1) {
-			m_fixedAccumulator = m_fixedTimeStep;
+			m_fixedAccumulator = m_fixedTimestep;
 		}
 
 		refreshFps();
@@ -30,8 +30,8 @@ namespace wf
 
 	bool Timer::isFixedUpdateReady()
 	{
-		bool ret = m_fixedAccumulator >= m_fixedTimeStep;
-		if (ret) m_fixedAccumulator -= m_fixedTimeStep;
+		bool ret = m_fixedAccumulator >= m_fixedTimestep;
+		if (ret) m_fixedAccumulator -= m_fixedTimestep;
 		return ret;
 	}
 
@@ -40,9 +40,14 @@ namespace wf
 		return m_deltaTime;
 	}
 
-	float Timer::getFixedTime() const
+	float Timer::getFixedTimestep() const
 	{
-		return m_fixedTimeStep;
+		return m_fixedTimestep;
+	}
+
+	void Timer::setFixedTimestep(float timestep)
+	{
+		m_fixedTimestep = timestep;
 	}
 
 	float Timer::getFps() const

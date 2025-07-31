@@ -160,9 +160,6 @@ namespace Squishies
 			auto& pointB1 = info.obj2->points[info.obj2PointA];
 			auto& pointB2 = info.obj2->points[info.obj2PointB];
 
-			wf::Debug::line(pointA.position, pointA.position + wf::Vec3(info.normal, 0.f) * 20.f, 2.f, info.obj1->colour);
-
-
 			// fixme doing this also for kinematics, but this might be better to use derivedVelocity...if we calc it for kinematic objects.
 			wf::Vec2 bVel = ((pointB1.fixed ? wf::Vec2{} : wf::Vec2(pointB1.velocity)) + (pointB2.fixed ? wf::Vec2{} : pointB2.velocity)) * .5f;
 			wf::Vec2 relVel = wf::Vec2(pointA.velocity) - bVel;
@@ -190,14 +187,18 @@ namespace Squishies
 			float Bmove = 0.f;
 
 			if (pointA.fixed) {
+				assert(false);
 				Bmove = penetration + 0.001f;
 			}
 			else if (std::isinf(b2MassSum)) {
+				assert(false);
 				Amove = penetration + 0.001f;
 			}
 			else {
 				Amove = (penetration * (b2MassSum / massSum));
 				Bmove = (penetration * (pointA.mass / massSum));
+
+				//printf("Amove = %.2f * %.2f / %.2f  = %.2f   -  b1m: %.2f b2m: %.2f\n", penetration, b2MassSum, massSum, Amove, pointB1.mass, pointB2.mass);
 			}
 
 			float pointB1move = Bmove * b1inf;
@@ -216,15 +217,20 @@ namespace Squishies
 
 			if (!pointA.fixed) {
 				pointA.position += wf::Vec3(info.normal * Amove, 0.f);
+				wf::Debug::line(pointA.position, pointA.position + wf::Vec3(info.normal, 0.f) * Amove, 2.f, info.obj1->colour);
 			}
 
 			if (!pointB1.fixed) {
 				pointB1.position -= wf::Vec3(info.normal * pointB1move, 0.f);
+				wf::Debug::line(pointB1.position, pointB1.position + wf::Vec3(info.normal, 0.f) * pointB1move, 2.f, info.obj1->colour);
 			}
 
 			if (!pointB2.fixed) {
 				pointB2.position -= wf::Vec3(info.normal * pointB2move, 0.f);
+				wf::Debug::line(pointB2.position, pointB2.position + wf::Vec3(info.normal, 0.f) * pointB2move, 2.f, info.obj1->colour);
 			}
+
+			//printf("Pen: %.2f     Amove: %.2f     B1move: %.2f      B2move: %.2f      Elast: %.2f    Fric: %.2f\n", penetration, Amove, pointB1move, pointB2move, m_elasticity, m_friction);
 
 			wf::Vec2 tangent = perp(info.normal);
 			float fNumerator = glm::dot(relVel, tangent) * m_friction;

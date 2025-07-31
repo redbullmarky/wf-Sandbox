@@ -78,6 +78,9 @@ namespace Squishies::Component
 		float shapeMatchK{ 150.f };									// spring strength and damping for shape matching
 		float shapeMatchDamping{ 5.f };
 
+		wf::Vec3 originalPosition{};								// original position, for resets
+		wf::Quat originalRotation{};								// original rotation, for resets
+
 		wf::Vec3 derivedPosition{};									// calculated position of the body as a whole
 		wf::Quat derivedRotation{};									// calcualted rotation of the body
 		wf::Vec3 derivedVelocity{};									// calculated velocity of the body

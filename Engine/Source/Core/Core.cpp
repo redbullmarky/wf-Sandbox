@@ -95,9 +95,14 @@ namespace wf
 		return g_gameState.timer.getDeltaTime();
 	}
 
-	float getFixedTime()
+	float getFixedTimestep()
 	{
-		return g_gameState.timer.getFixedTime();
+		return g_gameState.timer.getFixedTimestep();
+	}
+
+	void setFixedTimestep(float timestep)
+	{
+		g_gameState.timer.setFixedTimestep(timestep);
 	}
 
 	float getFps()

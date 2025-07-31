@@ -51,7 +51,8 @@ namespace wf
 
 	bool isFixedUpdateReady();
 	float getDeltaTime();
-	float getFixedTime();
+	float getFixedTimestep();
+	void setFixedTimestep(float timestep = 1.f / 60.f);
 	float getFps();
 	void createTimer(float duration, TimerCallback callback, bool autoRenew = false, int renewCount = -1);
 	void pauseTimers(bool pause = true);

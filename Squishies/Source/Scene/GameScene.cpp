@@ -64,7 +64,7 @@ namespace Squishies
 			material.diffuse.map = grassTex;
 		}*/
 
-		int points = 25;		// number of points on the squishies
+		int points = 15;		// number of points on the squishies
 		float radius = 1.f;		// size
 
 		auto squishy = SquishyFactory::createCircle(radius, points, 3);
@@ -79,17 +79,17 @@ namespace Squishies
 			obj.addComponent<Component::Player>();
 		}
 
-		{
+		/*{
 			auto obj = createObject({ -1.2f, -3.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 2");
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::BLUE;
 			material.specular.intensity = 1.5f;
 			obj.addComponent<Component::SoftBody>(squishy).colour = wf::BLUE;
-		}
+		}*/
 
 		{
-			auto obj = createObject({ 6.f, 5.f, 0.f });
+			auto obj = createObject({ 5.f, 5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 3");
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::YELLOW;
@@ -139,6 +139,14 @@ namespace Squishies
 
 		ImGui::Begin("Squishies");
 		{
+			ImGui::Checkbox("Debug", &m_debug);
+
+			if (ImGui::Button("Reset")) {
+				resetSquishies();
+			}
+
+			ImGui::Separator();
+
 			ImGui::Text("ImGui FPS: %.2f", ImGui::GetIO().Framerate);
 			ImGui::Text("Gui focussed: %s", wf::isGuiFocussed() ? "Yes" : "No");
 			ImGui::Text("Cursor visible: %s", wf::isCursorVisible() ? "Yes" : "No");
@@ -201,7 +209,24 @@ namespace Squishies
 		}
 		ImGui::End();
 
-		// any debug points we have, render now..
-		wf::Debug::render();
+		if (m_debug) {
+			// any debug points we have, render now..
+			wf::Debug::render();
+		}
+	}
+
+	void GameScene::resetSquishies()
+	{
+		getEntityManager()->each<wf::component::Transform, Component::SoftBody>(
+			[&](wf::EntityID id, wf::component::Transform& transform, Component::SoftBody& softbody) {
+				for (size_t i = 0; i < softbody.points.size(); i++) {
+					softbody.points[i].position = wf::Vec3(softbody.shape.poly.points[i], 0.f) + softbody.originalPosition;
+					softbody.points[i].velocity = softbody.points[i].force = {};
+				}
+
+				softbody.updateDerivedData();
+				softbody.updateEdges();
+				softbody.updateBoundingBox();
+			});
 	}
 }

@@ -55,7 +55,8 @@ namespace wf
 
 		bool isFixedUpdateReady();
 		float getDeltaTime() const;
-		float getFixedTime() const;
+		float getFixedTimestep() const;
+		void setFixedTimestep(float timestep);
 		float getFps() const;
 
 		/**
@@ -79,7 +80,7 @@ namespace wf
 
 	private:
 		// config
-		float m_fixedTimeStep{ 1.f / 60.f };
+		float m_fixedTimestep{ 1.f / 60.f };
 
 		// state
 		float m_deltaTime{ 0.f };

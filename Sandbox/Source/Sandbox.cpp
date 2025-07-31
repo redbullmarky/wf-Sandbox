@@ -27,7 +27,7 @@ namespace Sandbox
 	{
 		while (!wf::shouldClose()) {
 			while (wf::isFixedUpdateReady()) {
-				m_scene->fixedUpdate(wf::getFixedTime());
+				m_scene->fixedUpdate(wf::getFixedTimestep());
 			}
 			m_scene->update(wf::getDeltaTime());
 

@@ -40,9 +40,11 @@ namespace Squishies
 		prepareAndAccumulateForces();
 		integrate(dt);
 		hardConstraints();
-		metaUpdates();
-		handleCollisions();
-		postUpdates();
+		for (int i = 0; i < 10; i++) {
+			metaUpdates();
+			handleCollisions();
+			postUpdates();
+		}
 	}
 
 	// 0. BUILD
@@ -66,8 +68,8 @@ namespace Squishies
 		softbody.points.resize(points.size());
 
 		// apply the transform then reset it. @todo rot/scale
-		softbody.derivedPosition = transform.position;
-		softbody.derivedRotation = glm::quat(glm::radians(transform.rotation));
+		softbody.derivedPosition = softbody.originalPosition = transform.position;
+		softbody.derivedRotation = softbody.originalRotation = glm::quat(glm::radians(transform.rotation));
 		transform.position = {};
 		transform.rotation = {};
 		transform.scale = { 1.f, 1.f, 1.f };
@@ -318,7 +320,7 @@ namespace Squishies
 						squishy.collisionBox.extend(pt.position);
 					}
 
-					wf::Debug::filledCircle(pt.position, 5.f, pt.insideAnother ? wf::RED : wf::YELLOW);
+					//wf::Debug::filledCircle(pt.position, 5.f, pt.insideAnother ? wf::RED : wf::YELLOW);
 				}
 
 				// @todo grounded check
