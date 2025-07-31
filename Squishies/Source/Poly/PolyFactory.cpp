@@ -7,7 +7,7 @@ namespace Squishies
 {
 	Poly PolyFactory::createRect(float width, float height, int extraPointsX, int extraPointsY)
 	{
-		Poly poly{};
+		Poly poly;
 
 		int stepsX = extraPointsX + 1;
 		int stepsY = extraPointsY + 1;

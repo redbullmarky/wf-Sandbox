@@ -63,10 +63,6 @@ namespace Squishies
 
 	Squishy SquishyFactory::createGear(float radius, int teeth, float toothDepth)
 	{
-		Squishy s(PolyFactory::createGear(radius, teeth, toothDepth));
-
-		// @todo joints
-
-		return s;
+		return PolyFactory::createGear(radius, teeth, toothDepth);
 	}
 }
