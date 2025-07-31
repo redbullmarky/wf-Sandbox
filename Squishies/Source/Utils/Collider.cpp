@@ -160,8 +160,12 @@ namespace Squishies
 			auto& pointB1 = info.obj2->points[info.obj2PointA];
 			auto& pointB2 = info.obj2->points[info.obj2PointB];
 
+			bool pointAFixed = pointA.fixed || pointA.mass == 0.f || info.obj1->fixed;
+			bool pointB1Fixed = pointB1.fixed || pointB1.mass == 0.f || info.obj2->fixed;
+			bool pointB2Fixed = pointB2.fixed || pointB2.mass == 0.f || info.obj2->fixed;
+
 			// fixme doing this also for kinematics, but this might be better to use derivedVelocity...if we calc it for kinematic objects.
-			wf::Vec2 bVel = ((pointB1.fixed ? wf::Vec2{} : wf::Vec2(pointB1.velocity)) + (pointB2.fixed ? wf::Vec2{} : pointB2.velocity)) * .5f;
+			wf::Vec2 bVel = ((pointB1Fixed ? wf::Vec2{} : wf::Vec2(pointB1.velocity)) + (pointB2Fixed ? wf::Vec2{} : pointB2.velocity)) * .5f;
 			wf::Vec2 relVel = wf::Vec2(pointA.velocity) - bVel;
 			float relDot = glm::dot(relVel, info.normal);
 
@@ -180,31 +184,27 @@ namespace Squishies
 			float b1inf = 1.f - info.edgeD;
 			float b2inf = info.edgeD;
 
-			float b2MassSum = (pointB1.fixed || pointB2.fixed) ? std::numeric_limits<float>::infinity() : (pointB1.mass + pointB2.mass);
+			float b2MassSum = (pointB1Fixed || pointB2Fixed) ? std::numeric_limits<float>::infinity() : (pointB1.mass + pointB2.mass);
 			float massSum = pointA.mass + b2MassSum;
 
 			float Amove = 0.f;
 			float Bmove = 0.f;
 
-			if (pointA.fixed) {
-				assert(false);
+			if (pointAFixed) {
 				Bmove = penetration + 0.001f;
 			}
 			else if (std::isinf(b2MassSum)) {
-				assert(false);
 				Amove = penetration + 0.001f;
 			}
 			else {
 				Amove = (penetration * (b2MassSum / massSum));
 				Bmove = (penetration * (pointA.mass / massSum));
-
-				//printf("Amove = %.2f * %.2f / %.2f  = %.2f   -  b1m: %.2f b2m: %.2f\n", penetration, b2MassSum, massSum, Amove, pointB1.mass, pointB2.mass);
 			}
 
 			float pointB1move = Bmove * b1inf;
 			float pointB2move = Bmove * b2inf;
 
-			float AinvMass = pointA.fixed ? 0.f : 1.f / pointA.mass;
+			float AinvMass = pointAFixed ? 0.f : 1.f / pointA.mass;
 			float BinvMass = std::isinf(b2MassSum) ? 0.f : 1.f / b2MassSum;
 
 			float jDenom = AinvMass + BinvMass;
@@ -215,37 +215,32 @@ namespace Squishies
 
 			float j = jNumerator / jDenom;
 
-			if (!pointA.fixed) {
+			if (!pointAFixed) {
 				pointA.position += wf::Vec3(info.normal * Amove, 0.f);
-				wf::Debug::line(pointA.position, pointA.position + wf::Vec3(info.normal, 0.f) * Amove, 2.f, info.obj1->colour);
 			}
 
-			if (!pointB1.fixed) {
+			if (!pointB1Fixed) {
 				pointB1.position -= wf::Vec3(info.normal * pointB1move, 0.f);
-				wf::Debug::line(pointB1.position, pointB1.position + wf::Vec3(info.normal, 0.f) * pointB1move, 2.f, info.obj1->colour);
 			}
 
-			if (!pointB2.fixed) {
+			if (!pointB2Fixed) {
 				pointB2.position -= wf::Vec3(info.normal * pointB2move, 0.f);
-				wf::Debug::line(pointB2.position, pointB2.position + wf::Vec3(info.normal, 0.f) * pointB2move, 2.f, info.obj1->colour);
 			}
-
-			//printf("Pen: %.2f     Amove: %.2f     B1move: %.2f      B2move: %.2f      Elast: %.2f    Fric: %.2f\n", penetration, Amove, pointB1move, pointB2move, m_elasticity, m_friction);
 
 			wf::Vec2 tangent = perp(info.normal);
 			float fNumerator = glm::dot(relVel, tangent) * m_friction;
 			float f = fNumerator / jDenom;
 
 			if (relDot < 0.0001f) {
-				if (!pointA.fixed) {
+				if (!pointAFixed) {
 					pointA.velocity += wf::Vec3((info.normal * (j / pointA.mass)) - (tangent * (f / pointA.mass)), 0.f);
 				}
 
-				if (!pointB1.fixed) {
+				if (!pointB1Fixed) {
 					pointB1.velocity -= wf::Vec3((info.normal * (j / b2MassSum) * b1inf) - (tangent * (f / b2MassSum) * b1inf), 0.f);
 				}
 
-				if (!pointB2.fixed) {
+				if (!pointB2Fixed) {
 					pointB2.velocity -= wf::Vec3((info.normal * (j / b2MassSum) * b2inf) - (tangent * (f / b2MassSum) * b2inf), 0.f);
 				}
 			}

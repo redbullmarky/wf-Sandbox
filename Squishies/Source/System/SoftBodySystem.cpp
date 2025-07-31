@@ -1,4 +1,4 @@
-#include "SquishySystem.h"
+#include "SoftBodySystem.h"
 
 #include "Component/SoftBody.h"
 #include "Config.h"
@@ -7,7 +7,7 @@
 
 namespace Squishies
 {
-	bool SquishySystem::init()
+	bool SoftBodySystem::init()
 	{
 		entityManager->onCreate<Component::SoftBody>([&](wf::Entity entity) {
 			createSquishy(entity);
@@ -16,42 +16,42 @@ namespace Squishies
 		return true;
 	}
 
-	void SquishySystem::update(float dt)
+	void SoftBodySystem::update(float dt)
 	{
 		entityManager->each<Component::SoftBody, wf::component::Geometry>(
-			[&](Component::SoftBody& squishy, wf::component::Geometry& geometry) {
+			[&](Component::SoftBody& softbody, wf::component::Geometry& geometry) {
 
 				auto& verts = geometry.mesh->vertices;
 
-				verts[0].position = squishy.derivedPosition;
+				verts[0].position = softbody.derivedPosition;
 
 				// update our actual mesh verts from our points
 				for (size_t i = 1; i < verts.size(); i++) {
-					if (verts[i].position != squishy.points[i - 1].position) {
+					if (verts[i].position != softbody.points[i - 1].position) {
 						geometry.mesh->needsUpdate = true;
-						verts[i].position = squishy.points[i - 1].position;
+						verts[i].position = softbody.points[i - 1].position;
+
 					}
+					//wf::Debug::filledCircle(verts[i].position, 4.f, wf::WHITE);
 				}
 			});
 	}
 
-	void SquishySystem::fixedUpdate(float dt)
+	void SoftBodySystem::fixedUpdate(float dt)
 	{
 		prepareAndAccumulateForces();
 		integrate(dt);
 		hardConstraints();
-		for (int i = 0; i < 10; i++) {
-			metaUpdates();
-			handleCollisions();
-			postUpdates();
-		}
+		metaUpdates();
+		handleCollisions();
+		postUpdates();
 	}
 
 	// 0. BUILD
 	//		1. foreach point, keep an original, update the global shape and reset transforms
 	//		2. point the mesh
 	//		3. build the joints
-	void SquishySystem::createSquishy(wf::Entity entity)
+	void SoftBodySystem::createSquishy(wf::Entity entity)
 	{
 		auto& softbody = entity.getComponent<Component::SoftBody>();
 
@@ -85,9 +85,7 @@ namespace Squishies
 			softbody.points[i].globalPosition = newPos;
 		}
 
-		softbody.updateDerivedData();
-		softbody.updateEdges();
-		softbody.updateBoundingBox();
+		softbody.updateAll();
 	}
 
 	// 1. PREP: foreach body
@@ -96,71 +94,71 @@ namespace Squishies
 	//		3. accumulate internal forces - spring joints, etc
 	//
 	// @todo check shape meta stuff for 3D
-	void SquishySystem::prepareAndAccumulateForces()
+	void SoftBodySystem::prepareAndAccumulateForces()
 	{
 		entityManager->each<Component::SoftBody>(
-			[&](Component::SoftBody& squishy) {
+			[&](Component::SoftBody& softbody) {
 
-				if (squishy.fixed) return;
+				if (softbody.fixed) return;
 
 				// update details about perceived position/rotation/velocity of the overall body
-				squishy.updateDerivedData();
-				squishy.updateGlobalShape();
+				softbody.updateDerivedData();
+				softbody.updateGlobalShape();
 
 				// apply gravity
-				for (auto& pt : squishy.points) {
+				for (auto& pt : softbody.points) {
 					if (pt.fixed) continue;
 					pt.force += wf::Vec3(0.f, Config::get().gravity, 0.f) * pt.mass;
 				}
 
 				// internal forces - springs, shape matching, etc.
 				// first the joints
-				for (auto& [p1, p2, rest] : squishy.shape.getJoints()) {
-					if (squishy.points[p1].fixed && squishy.points[p2].fixed) {
+				for (auto& [p1, p2, rest] : softbody.shape.getJoints()) {
+					if (softbody.points[p1].fixed && softbody.points[p2].fixed) {
 						continue;
 					}
 					wf::Vec3 force = wf::getSpringForce(
-						squishy.points[p1].position,
-						squishy.points[p1].velocity,
-						squishy.points[p2].position,
-						squishy.points[p2].velocity,
-						squishy.jointK,
-						squishy.jointDamping,
+						softbody.points[p1].position,
+						softbody.points[p1].velocity,
+						softbody.points[p2].position,
+						softbody.points[p2].velocity,
+						softbody.jointK,
+						softbody.jointDamping,
 						rest
 					);
 
-					if (!squishy.points[p1].fixed) squishy.points[p1].force += force;
-					if (!squishy.points[p2].fixed) squishy.points[p2].force -= force;
+					if (!softbody.points[p1].fixed) softbody.points[p1].force += force;
+					if (!softbody.points[p2].fixed) softbody.points[p2].force -= force;
 				}
 
-				if (squishy.shapeMatching) {
-					for (size_t i = 0; i < squishy.points.size(); i++) {
+				if (softbody.shapeMatching) {
+					for (size_t i = 0; i < softbody.points.size(); i++) {
 						wf::Vec3 shapeMatchForce{};
 
-						if (!squishy.kinematic) {
+						if (!softbody.kinematic) {
 							shapeMatchForce = wf::getSpringForce(
-								squishy.points[i].position,
-								squishy.points[i].velocity,
-								squishy.points[i].globalPosition,
-								squishy.points[i].velocity,
-								squishy.shapeMatchK,
-								squishy.shapeMatchDamping,
+								softbody.points[i].position,
+								softbody.points[i].velocity,
+								softbody.points[i].globalPosition,
+								softbody.points[i].velocity,
+								softbody.shapeMatchK,
+								softbody.shapeMatchDamping,
 								0.f
 							);
 						}
 						else {
 							shapeMatchForce = wf::getSpringForce(
-								squishy.points[i].position,
-								squishy.points[i].velocity,
-								squishy.points[i].globalPosition,
+								softbody.points[i].position,
+								softbody.points[i].velocity,
+								softbody.points[i].globalPosition,
 								wf::Vec3{},
-								squishy.shapeMatchK,
-								squishy.shapeMatchDamping,
+								softbody.shapeMatchK,
+								softbody.shapeMatchDamping,
 								0.f
 							);
 						}
 
-						squishy.points[i].force += shapeMatchForce;
+						softbody.points[i].force += shapeMatchForce;
 					}
 				}
 			});
@@ -171,22 +169,22 @@ namespace Squishies
 	//		2. lastPosition = position;
 	//		3. position += velocity * dt;
 	//		4. force = { 0.f };
-	void SquishySystem::integrate(float dt)
+	void SoftBodySystem::integrate(float dt)
 	{
 		entityManager->each<Component::SoftBody>(
-			[&](Component::SoftBody& squishy) {
+			[&](Component::SoftBody& softbody) {
 
-				if (squishy.fixed) return;
+				if (softbody.fixed) return;
 
-				for (size_t i = 0; i < squishy.points.size(); i++) {
+				for (size_t i = 0; i < softbody.points.size(); i++) {
 					// avoid pointless division by doing pointless code.
-					auto fm = squishy.points[i].mass > 1.f ? (squishy.points[i].force / squishy.points[i].mass) : squishy.points[i].force;
-					squishy.points[i].velocity += fm * dt;
+					auto fm = softbody.points[i].mass > 1.f ? (softbody.points[i].force / softbody.points[i].mass) : softbody.points[i].force;
+					softbody.points[i].velocity += fm * dt;
 
-					squishy.points[i].lastPosition = squishy.points[i].position;
-					squishy.points[i].position += squishy.points[i].velocity * dt;
+					softbody.points[i].lastPosition = softbody.points[i].position;
+					softbody.points[i].position += softbody.points[i].velocity * dt;
 
-					squishy.points[i].force = {};
+					softbody.points[i].force = {};
 				}
 			});
 	}
@@ -196,18 +194,18 @@ namespace Squishies
 	//			float dampingX = 0.9f;
 	//			float dampingY = 0.8f;
 	//			float dampingZ = 0.9f;
-	void SquishySystem::hardConstraints()
+	void SoftBodySystem::hardConstraints()
 	{
 		entityManager->each<Component::SoftBody>(
-			[&](Component::SoftBody& squishy) {
+			[&](Component::SoftBody& softbody) {
 
-				if (squishy.fixed) return;
+				if (softbody.fixed) return;
 
 				auto worldBounds = Config::get().worldBounds;
 
 				if (!worldBounds.isValid) return;
 
-				auto& pms = squishy.points;
+				auto& pms = softbody.points;
 
 				wf::Vec3 damping = { .9f, .8f, .9f };
 
@@ -252,19 +250,17 @@ namespace Squishies
 	//		1. update bounding box
 	//		2. update edge data
 	//		3. update bitmask (where in the world on the "grid" for collisions)
-	void SquishySystem::metaUpdates()
+	void SoftBodySystem::metaUpdates()
 	{
 		entityManager->each<Component::SoftBody>(
-			[&](Component::SoftBody& squishy) {
+			[&](Component::SoftBody& softbody) {
 
-				if (squishy.fixed) return;
+				if (softbody.fixed) return;
 
-				squishy.updateBoundingBox();
-				squishy.updateEdges();
-				squishy.updateBitfields(Config::get().worldBounds, Config::get().spatialGridSize);
+				softbody.updateAll();
 
 				// clear our point details ready for collision detection
-				for (auto& pt : squishy.points) {
+				for (auto& pt : softbody.points) {
 					pt.insideAnother = false;
 				}
 			});
@@ -273,7 +269,7 @@ namespace Squishies
 	// 5. COLLISIONS: for each body and each other body
 	//		- check collision and add to list
 	//		- process all collisions when we've checked the lot
-	void SquishySystem::handleCollisions()
+	void SoftBodySystem::handleCollisions()
 	{
 		auto view = entityManager->find<Component::SoftBody>();
 
@@ -282,13 +278,13 @@ namespace Squishies
 
 		// loop the objects and see what's colliding
 		view.each(
-			[&](wf::EntityID id, Component::SoftBody& squishy) {
+			[&](wf::EntityID id, Component::SoftBody& softbody) {
 				view.each(
-					[&](wf::EntityID id2, Component::SoftBody& squishy2) {
+					[&](wf::EntityID id2, Component::SoftBody& softbody2) {
 
-						if (id == id2 || squishy.fixed && squishy2.fixed) return;
+						if (id == id2 || softbody.fixed && softbody2.fixed) return;
 
-						squishy.colliding = m_collider.check(squishy, squishy2);
+						softbody.colliding = m_collider.check(softbody, softbody2);
 					});
 			});
 
@@ -304,21 +300,21 @@ namespace Squishies
 	//		3. determine if the body is grounded
 	//
 	// @todo grounded checks
-	void SquishySystem::postUpdates()
+	void SoftBodySystem::postUpdates()
 	{
 		entityManager->each<Component::SoftBody>(
-			[&](Component::SoftBody& squishy) {
+			[&](Component::SoftBody& softbody) {
 
-				if (squishy.fixed) return;
+				if (softbody.fixed) return;
 
-				squishy.collisionBox.reset();
+				softbody.collisionBox.reset();
 
 				// dampen velocities and expand our collision box with all points in collision, if any
-				for (auto& pt : squishy.points) {
+				for (auto& pt : softbody.points) {
 					pt.velocity *= .999f;
 
 					if (pt.insideAnother) {
-						squishy.collisionBox.extend(pt.position);
+						softbody.collisionBox.extend(pt.position);
 					}
 
 					//wf::Debug::filledCircle(pt.position, 5.f, pt.insideAnother ? wf::RED : wf::YELLOW);

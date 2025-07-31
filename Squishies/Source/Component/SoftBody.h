@@ -49,8 +49,10 @@ namespace Squishies::Component
 		{
 			p1 = newP1;
 			p2 = newP2;
-			dir = p1 - p2; // @todo winding order
-			length = glm::length(dir);
+
+			wf::Vec3 e = p1 - p2; // @todo winding order
+			length = glm::length(e);
+			dir = glm::normalize(e);
 		}
 
 		bool operator==(const Edge& rhs) const { return p1 == rhs.p1 && p2 == rhs.p2 && dir == rhs.dir; }
@@ -93,6 +95,11 @@ namespace Squishies::Component
 		std::vector<Edge> edges;									// edge data
 
 		/**
+		 * @brief Update all metadata in one go
+		 */
+		void updateAll();
+
+		/**
 		 * @brief Updates the percieved position, rotation and velocity based on how the points have moved
 		 */
 		void updateDerivedData();
@@ -109,10 +116,8 @@ namespace Squishies::Component
 
 		/**
 		 * @brief Update bitmask based on our position for collision filtering
-		 * @param worldBounds Main world dimensions we're working in
-		 * @param gridCellSize How big each grid cell is
 		 */
-		void updateBitfields(const wf::BoundingBox& worldBounds, float gridCellSize);
+		void updateBitfields();
 
 		/**
 		 * @brief Update all of the edge data in prep for collision detection

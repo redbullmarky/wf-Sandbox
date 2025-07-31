@@ -88,6 +88,8 @@ namespace Squishies
 			points.emplace_back(x, y);
 		}
 
+		std::reverse(points.begin(), points.end());
+
 		return Poly(points);
 	}
 }

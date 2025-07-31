@@ -7,7 +7,7 @@
 #include "Component/UserControl.h"
 #include "Poly/PolyFactory.h"
 #include "Poly/SquishyFactory.h"
-#include "System/SquishySystem.h"
+#include "System/SoftBodySystem.h"
 #include "System/MovementSystem.h"
 #include "System/WeaponSystem.h"
 
@@ -20,7 +20,7 @@ namespace Squishies
 	{
 		addSystem<wf::system::RenderSystem>();
 		addSystem<wf::system::CameraSystem>();
-		addSystem<SquishySystem>();
+		addSystem<SoftBodySystem>();
 		addSystem<MovementSystem>();
 		addSystem<WeaponSystem>();
 
@@ -61,16 +61,41 @@ namespace Squishies
 		createSquishy("Squishy 1", { -2.f, -5.f, 0.f }, wf::RED)
 			.addComponent<Component::UserControl>();
 		createSquishy("Squishy 2", { -1.2f, -3.f, 0.f }, wf::BLUE);
-		createSquishy("Squishy 3", { 5.f, 5.f, 0.f }, wf::YELLOW);
+		//createSquishy("Squishy 3", { 5.f, 5.f, 0.f }, wf::YELLOW);
 
 		// create a temporary floor
-		auto obj = createObject({ 0, -15.f, 0.f });
-		obj.addComponent<wf::component::NameTag>("Beam");
-		auto& material = obj.addComponent<wf::component::Material>();
-		material.diffuse.map = woodTex;
-		material.normal.map = woodNorm;
-		auto& beam = obj.addComponent<Component::SoftBody>(SquishyFactory::createRect(100.f, 10.f));
-		beam.setFixed();
+		{
+			auto obj = createObject({ 0.f, -15.f, 0.f });
+			obj.addComponent<wf::component::NameTag>("Beam");
+			auto& material = obj.addComponent<wf::component::Material>();
+			material.diffuse.map = woodTex;
+			material.normal.map = woodNorm;
+			auto& beam = obj.addComponent<Component::SoftBody>(SquishyFactory::createRect(100.f, 10.f));
+			beam.setFixed();
+		}
+
+		// and a platform
+		{
+			auto platformSquishy = SquishyFactory::createRect(10.f, 2.f);
+			platformSquishy.poly.rotate(-30.f);
+
+			auto obj = createObject({ -5.f, -5.f, 0.f });
+			obj.addComponent<wf::component::NameTag>("Platform");
+			auto& material = obj.addComponent<wf::component::Material>();
+			material.diffuse.map = woodTex;
+			material.normal.map = woodNorm;
+			obj.addComponent<Component::SoftBody>(platformSquishy).setFixed();
+		}
+
+		{
+			Squishy proto = SquishyFactory::createGear(1.5, 10, .3f);
+			proto.colour = wf::DARKGREY;
+			auto obj = createObject({ 5.f, 5.f, 0.f });
+			obj.addComponent<wf::component::NameTag>("Gear");
+			auto& material = obj.addComponent<wf::component::Material>();
+			material.specular.intensity = 1.5f;
+			obj.addComponent<Component::SoftBody>(proto).setFixed();
+		}
 
 		wf::Scene::setup();
 	}
@@ -195,7 +220,7 @@ namespace Squishies
 	// simple prefab helper
 	wf::Entity GameScene::createSquishy(const std::string& name, const wf::Vec3 pos, const wf::Colour& colour)
 	{
-		int points = 15;		// number of points on the squishies
+		int points = 20;		// number of points on the squishies
 		float radius = 1.f;		// size
 		int strength = 3;		// how much support with joints etc.
 

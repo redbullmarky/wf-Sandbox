@@ -7,7 +7,7 @@
 namespace Squishies
 {
 	/**
-	 * @brief Handle capturing and applying movement to the Squishies from the user.
+	 * @brief Handle capturing and applying movement to the Squishies from whatever source
 	 *
 	 * For now it's about getting things fleshed out but as much will apply to AI, we'll probably move things around later.
 	 */

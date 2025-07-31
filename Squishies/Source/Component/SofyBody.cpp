@@ -1,10 +1,20 @@
 #include "SoftBody.h"
 #include "Engine.h"
 
+#include "Config.h"
+
 #include <glm/glm.hpp>
 
 namespace Squishies::Component
 {
+	void SoftBody::updateAll()
+	{
+		updateDerivedData();
+		updateEdges();
+		updateBoundingBox();
+		updateBitfields();
+	}
+
 	void SoftBody::updateDerivedData()
 	{
 		// first figure out the center and velocity
@@ -60,8 +70,11 @@ namespace Squishies::Component
 		}
 	}
 
-	void SoftBody::updateBitfields(const wf::BoundingBox& worldBounds, float gridCellSize)
+	void SoftBody::updateBitfields()
 	{
+		auto worldBounds = Config::get().worldBounds;
+		auto gridCellSize = Config::get().spatialGridSize;
+
 		wf::Vec3 gridStep = worldBounds.size() / gridCellSize;
 
 		int minX = (int)floor((boundingBox.min.x - worldBounds.min.x) / gridStep.x);

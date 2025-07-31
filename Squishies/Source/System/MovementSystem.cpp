@@ -31,7 +31,6 @@ namespace Squishies
 				camera.position = { camera.target.x, camera.target.y + .5f, camera.position.z };
 			});
 
-		// integrate grenades
 		entityManager->each<Component::SoftBody, Component::Inventory, Component::UserControl>(
 			[&](wf::EntityID playerId, Component::SoftBody& squishy, Component::Inventory& inventory) {
 

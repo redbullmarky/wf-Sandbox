@@ -9,30 +9,10 @@ namespace Squishies
 {
 	Squishy SquishyFactory::createRect(float width, float height)
 	{
-		Squishy s(PolyFactory::createRect(width, height));
+		int extraX = static_cast<int>(floor(width - 1));
+		int extraY = static_cast<int>(floor(height - 1));
 
-		//// support
-		//int widthSupport = static_cast<int>(ceil(width / height));
-		//int heightSupport = static_cast<int>(ceil(height / width));
-
-		//float widthSeg = width / widthSupport;
-		//float heightSeg = height / heightSupport;
-
-		//size_t vertcount = (widthSupport * 2) + ((heightSupport - 1) * 2);
-
-		//std::vector<Vector2> verts(vertcount);
-
-		//// todo: vertical supports
-		//int c = 0;
-		//for (int x = 0; x < widthSupport; x++) {
-		//	verts[vertcount - x - 1] = { 0.f + (x * widthSeg), 0.f };
-		//	verts[x] = { 0.f + (x * widthSeg), height };
-		//	c += 2;
-		//}
-
-		//return { verts };
-
-		return s;
+		return PolyFactory::createRect(width, height, extraX, extraY);
 	}
 
 	Squishy SquishyFactory::createSquare(float size)

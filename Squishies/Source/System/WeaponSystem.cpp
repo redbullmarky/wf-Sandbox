@@ -5,6 +5,8 @@
 #include "Config.h"
 #include "Event/DeployWeapon.h"
 #include "Event/ExplodeGrenade.h"
+#include "Event/Explosion.h"
+
 #include "Event/SplitSquishyEvent.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -20,8 +22,8 @@ namespace Squishies
 		eventDispatcher->on<event::DeployWeapon>([&](event::DeployWeapon& e) {
 			spawnGrenade(e);
 			});
-		eventDispatcher->on<event::ExplodeGrenade>([&](event::ExplodeGrenade& e) {
-			explodeGrenade(e);
+		eventDispatcher->on<event::Explosion>([&](event::Explosion& e) {
+			explode(e);
 			});
 		return true;
 	}
@@ -101,42 +103,45 @@ namespace Squishies
 			auto& nade = ent.getComponent<Component::Grenade>();
 			auto& pos = ent.getComponent<wf::component::Transform>();
 
-			auto e = event::ExplodeGrenade{ ent.handle, nade.playerId, pos.position };
-			eventDispatcher->dispatch<event::ExplodeGrenade>(e);
+			// trigger the explosion and remove the grenade
+			auto e = event::Explosion(pos.position, nade.blastRadius, 1.f);
+			eventDispatcher->dispatch<event::Explosion>(e);
+			entityManager->destroy(ent.handle);
 
 			});
 	}
 
-	void WeaponSystem::explodeGrenade(event::ExplodeGrenade& detail)
+	void WeaponSystem::explode(event::Explosion& detail)
 	{
 		entityManager->each<Component::SoftBody>(
 			[&](wf::EntityID playerId, Component::SoftBody& softbody) {
 
-				// fetch the nade
-				auto nadeEnt = entityManager->get(detail.id);
-				auto& nade = nadeEnt.getComponent<Component::Grenade>();
-
 				// 1. see if the blast radius reaches our bounding box
 				auto dir = glm::normalize(softbody.derivedPosition - detail.position); // direction from nade to player
-				auto edgePt = detail.position + dir * nade.blastRadius; // point on edge of the blast radius
+				auto edgePt = detail.position + dir * detail.radius; // point on edge of the blast radius
 
 				if (!softbody.boundingBox.contains(edgePt)) return; // quick exit if we're nowhere near
 
 				// 2. check the points
-				int blastPoints{};
+				std::vector<std::pair<unsigned int, float>> hitPoints;
 
-				for (auto& pt : softbody.points) {
-					if (glm::length2(pt.position - detail.position) <= nade.blastRadius * nade.blastRadius) {
-						blastPoints++;
+				for (unsigned int i = 0; i < softbody.points.size(); i++) {
+					float distSq = glm::length2(softbody.points[i].position - detail.position);
+
+					if (distSq <= detail.radius * detail.radius) {
+						hitPoints.push_back({ i, distSq });
 					}
 				}
 
-				if (!blastPoints) return;
+				// 3. if we have points, dispatch the event
+				if (hitPoints.size()) {
+					event::SplitSquishy e(playerId, hitPoints, detail.position, detail.power);
+					eventDispatcher->dispatch<event::SplitSquishy>(e);
 
-				entityManager->destroy(playerId);
+					// @todo do something more devestating than a printf log. plus it'd be the listener that does this stuff not here.
+					printf("GOTCHA!\n");
+					entityManager->destroy(playerId);
+				}
 			});
-
-		//printf("BOOM! at %.2f %.2f\n", detail.position.x, detail.position.y);
-		entityManager->destroy(detail.id);
 	}
 }
