@@ -114,7 +114,7 @@ namespace Squishies::Component
 		this->fixed = fixed;
 	}
 
-	SoftBody::SoftBody(const Squishy& squishy) : shape(squishy)
+	SoftBody::SoftBody(const Squishy& squishy) : shape(squishy), colour(squishy.colour)
 	{
 	}
 }

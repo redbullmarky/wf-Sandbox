@@ -59,6 +59,7 @@ namespace Squishies
 		auto& points = softbody.shape.getPoints();
 		auto& geometry = entity.addComponent<wf::component::Geometry>(softbody.shape.createMesh());
 		geometry.mesh->isDynamic = true;
+		entity.getComponent<wf::component::Material>().diffuse.colour = softbody.colour;
 
 		// set up the pointmasses for all of the vertices.
 		// we can probably use the indices too for joints, though might be a little sloppy

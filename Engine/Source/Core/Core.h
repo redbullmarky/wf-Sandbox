@@ -77,6 +77,5 @@ namespace wf
 }
 
 namespace {
-	static void tick();
 	static void pollEvents();
 }

@@ -18,8 +18,9 @@ namespace Squishies
 
 	struct Squishy
 	{
-		Poly poly;						// the shape
-		std::vector<Joint> joints;		// joints between the points
+		Poly poly;									// the shape
+		std::vector<Joint> joints;					// joints between the points
+		wf::Colour colour;							// default colour
 
 		Squishy() = default;
 		Squishy(const Poly& poly) : poly(poly) {}

@@ -1,8 +1,10 @@
 #include "GameScene.h"
 #include "Engine.h"
 
-#include "Component/Player.h"
+#include "Component/Character.h"
+#include "Component/Inventory.h"
 #include "Component/SoftBody.h"
+#include "Component/UserControl.h"
 #include "Poly/PolyFactory.h"
 #include "Poly/SquishyFactory.h"
 #include "System/SquishySystem.h"
@@ -52,84 +54,25 @@ namespace Squishies
 		light->lightCam.orthoWidth = 40.f;
 
 		// textures
-		auto grassTex = wf::loadTexture("resources/images/grass12.png");
 		auto woodTex = wf::loadTexture("resources/images/wood_planks_12_color_1k.png");
 		auto woodNorm = wf::loadTexture("resources/images/wood_planks_12_normal_gl_1k.png");
 
-		/*{
-			auto obj = createObject({ 0.f, -10.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Plane");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSimplePlane(100.f));
-			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.map = grassTex;
-		}*/
+		// squishies
+		createSquishy("Squishy 1", { -2.f, -5.f, 0.f }, wf::RED)
+			.addComponent<Component::UserControl>();
+		createSquishy("Squishy 2", { -1.2f, -3.f, 0.f }, wf::BLUE);
+		createSquishy("Squishy 3", { 5.f, 5.f, 0.f }, wf::YELLOW);
 
-		int points = 15;		// number of points on the squishies
-		float radius = 1.f;		// size
-
-		auto squishy = SquishyFactory::createCircle(radius, points, 3);
-
-		{
-			auto obj = createObject({ -2.f, -5.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Squishy 1");
-			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.colour = wf::RED;
-			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::SoftBody>(squishy).colour = wf::RED;
-			obj.addComponent<Component::Player>();
-		}
-
-		/*{
-			auto obj = createObject({ -1.2f, -3.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Squishy 2");
-			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.colour = wf::BLUE;
-			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::SoftBody>(squishy).colour = wf::BLUE;
-		}*/
-
-		{
-			auto obj = createObject({ 5.f, 5.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Squishy 3");
-			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.colour = wf::YELLOW;
-			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::SoftBody>(squishy).colour = wf::YELLOW;
-		}
-
-		{
-			auto obj = createObject({ 0, -15.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Beam");
-			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.map = woodTex;
-			material.normal.map = woodNorm;
-			auto& beam = obj.addComponent<Component::SoftBody>(SquishyFactory::createRect(100.f, 10.f));
-			beam.setFixed();
-		}
+		// create a temporary floor
+		auto obj = createObject({ 0, -15.f, 0.f });
+		obj.addComponent<wf::component::NameTag>("Beam");
+		auto& material = obj.addComponent<wf::component::Material>();
+		material.diffuse.map = woodTex;
+		material.normal.map = woodNorm;
+		auto& beam = obj.addComponent<Component::SoftBody>(SquishyFactory::createRect(100.f, 10.f));
+		beam.setFixed();
 
 		wf::Scene::setup();
-	}
-
-	void GameScene::teardown()
-	{
-		wf::Scene::teardown();
-	}
-
-	void GameScene::render(float dt)
-	{
-		wf::Scene::render(dt);
-	}
-
-	static ImVec2 getScreenPos(const wf::Vec3& pos, const wf::component::Camera& camera)
-	{
-		glm::vec4 clipSpace = camera.getViewProjectionMatrix().matrix * glm::vec4(pos, 1.0f);
-		if (clipSpace.w <= 0.0f) return{}; // behind camera
-
-		glm::vec3 ndc = glm::vec3(clipSpace) / clipSpace.w; // -1 to +1
-		glm::vec2 screenPos{};
-		screenPos.x = (ndc.x * 0.5f + 0.5f) * wf::getWindow().getWidth();
-		screenPos.y = (1.0f - (ndc.y * 0.5f + 0.5f)) * wf::getWindow().getHeight();
-		return { screenPos.x, screenPos.y };
 	}
 
 	void GameScene::renderGui(float dt)
@@ -172,40 +115,59 @@ namespace Squishies
 			}
 			ImGui::PopID();
 
-			getEntityManager()->each<wf::component::Transform, wf::component::Material, wf::component::NameTag>(
-				[&](wf::EntityID id, wf::component::Transform& transform, wf::component::Material& material, const wf::component::NameTag& nametag) {
-					auto ent = getEntityManager()->get(id);
-
+			// INVENTORIES
+			getEntityManager()->each<wf::component::NameTag, Component::Inventory>(
+				[&](wf::EntityID id, const wf::component::NameTag& nametag, Component::Inventory& inventory) {
 					ImGui::PushID(static_cast<int>(id));
 					ImGui::SeparatorText(nametag.name.c_str());
 
-					ImGui::DragFloat3("Pos", &transform.position.x);
-					ImGui::DragFloat3("Rot", &transform.rotation.x);
-
-					ImGui::SliderFloat("Norm. strength", &material.normal.strength, -3.f, 3.f);
-
-					ImGui::SliderFloat("Spec. intesity", &material.specular.intensity, 0.f, 2.f);
-					ImGui::SliderFloat("Spec. shine", &material.specular.shininess, 0.f, 128.f);
-
-					if (ent.hasComponent<Component::SoftBody>()) {
-						auto& squishy = ent.getComponent<Component::SoftBody>();
-
-						ImGui::Checkbox("Shape matching", &squishy.shapeMatching);
-						if (squishy.shapeMatching) {
-							ImGui::SliderFloat("ShapeK", &squishy.shapeMatchK, 1.f, 5000.f);
-							ImGui::SliderFloat("ShapeD", &squishy.shapeMatchDamping, 1.f, 150.f);
-						}
-						ImGui::SliderFloat("JointK", &squishy.jointK, 1.f, 5000.f);
-						ImGui::SliderFloat("JointD", &squishy.jointDamping, 1.f, 150.f);
-
-						ImGui::Text("Derived pos: %.2f %.2f %.2f", squishy.derivedPosition.x, squishy.derivedPosition.y, squishy.derivedPosition.z);
-
-						// wf::Debug::filledCircle(squishy.derivedPosition, 5.f, wf::YELLOW); // derived position
-						// wf::Debug::rect(squishy.boundingBox, 2.f, wf::WHITE); // bounding box
+					for (auto& item : inventory.items) {
+						ImGui::SliderInt(Component::InventoryItem::getWeaponName(item.type).c_str(), &item.count, 0, 100);
 					}
+
+					auto sel = Component::InventoryItem::getWeaponName(inventory.items[inventory.selectedIndex].type);
+					ImGui::Text("Selected: %s (%d)", sel.c_str(), (int)inventory.items[inventory.selectedIndex].type);
 
 					ImGui::PopID();
 				});
+
+			if (ImGui::CollapsingHeader("Obj explorere")) {
+				getEntityManager()->each<wf::component::Transform, wf::component::Material, wf::component::NameTag>(
+					[&](wf::EntityID id, wf::component::Transform& transform, wf::component::Material& material, const wf::component::NameTag& nametag) {
+
+						auto ent = getEntityManager()->get(id);
+
+						ImGui::PushID(static_cast<int>(id));
+						ImGui::SeparatorText(nametag.name.c_str());
+
+						ImGui::DragFloat3("Pos", &transform.position.x);
+						ImGui::DragFloat3("Rot", &transform.rotation.x);
+
+						ImGui::SliderFloat("Norm. strength", &material.normal.strength, -3.f, 3.f);
+
+						ImGui::SliderFloat("Spec. intesity", &material.specular.intensity, 0.f, 2.f);
+						ImGui::SliderFloat("Spec. shine", &material.specular.shininess, 0.f, 128.f);
+
+						if (ent.hasComponent<Component::SoftBody>()) {
+							auto& squishy = ent.getComponent<Component::SoftBody>();
+
+							ImGui::Checkbox("Shape matching", &squishy.shapeMatching);
+							if (squishy.shapeMatching) {
+								ImGui::SliderFloat("ShapeK", &squishy.shapeMatchK, 1.f, 5000.f);
+								ImGui::SliderFloat("ShapeD", &squishy.shapeMatchDamping, 1.f, 150.f);
+							}
+							ImGui::SliderFloat("JointK", &squishy.jointK, 1.f, 5000.f);
+							ImGui::SliderFloat("JointD", &squishy.jointDamping, 1.f, 150.f);
+
+							ImGui::Text("Derived pos: %.2f %.2f %.2f", squishy.derivedPosition.x, squishy.derivedPosition.y, squishy.derivedPosition.z);
+
+							// wf::Debug::filledCircle(squishy.derivedPosition, 5.f, wf::YELLOW); // derived position
+							// wf::Debug::rect(squishy.boundingBox, 2.f, wf::WHITE); // bounding box
+						}
+
+						ImGui::PopID();
+					});
+			}
 		}
 		ImGui::End();
 
@@ -228,5 +190,45 @@ namespace Squishies
 				softbody.updateEdges();
 				softbody.updateBoundingBox();
 			});
+	}
+
+	// simple prefab helper
+	wf::Entity GameScene::createSquishy(const std::string& name, const wf::Vec3 pos, const wf::Colour& colour)
+	{
+		int points = 15;		// number of points on the squishies
+		float radius = 1.f;		// size
+		int strength = 3;		// how much support with joints etc.
+
+		static Squishy proto = SquishyFactory::createCircle(radius, points, strength);
+
+		auto obj = createObject(pos);
+		obj.addComponent<wf::component::NameTag>(name);
+		obj.addComponent<Component::Character>();
+		auto& material = obj.addComponent<wf::component::Material>();
+		material.specular.intensity = 1.5f;
+
+		Squishy pCopy = proto;
+		pCopy.colour = colour;
+
+		obj.addComponent<Component::SoftBody>(pCopy);
+
+		resetInventory(obj);
+
+		return obj;
+	}
+
+	void GameScene::resetInventory(wf::Entity entity)
+	{
+		if (!entity.hasComponent<Component::Inventory>()) {
+			entity.addComponent<Component::Inventory>();
+		}
+
+		auto& inv = entity.getComponent<Component::Inventory>();
+		inv.items.clear();
+		inv.selectedIndex = 0;
+
+		inv.items.push_back({ Component::WeaponType::NADE, 5 });
+		inv.items.push_back({ Component::WeaponType::MINE, 5 });
+		inv.items.push_back({ Component::WeaponType::BALLOON, 5 });
 	}
 }

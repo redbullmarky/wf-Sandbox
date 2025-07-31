@@ -1,9 +1,15 @@
 #include "WeaponSystem.h"
 
 #include "Component/Grenade.h"
+#include "Component/SoftBody.h"
 #include "Config.h"
 #include "Event/DeployWeapon.h"
 #include "Event/ExplodeGrenade.h"
+#include "Event/SplitSquishyEvent.h"
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/glm.hpp>
+#include <glm/gtx/norm.hpp>
 
 namespace Squishies
 {
@@ -69,6 +75,11 @@ namespace Squishies
 
 				// reset forces
 				grenade.force = {};
+
+				auto p1 = wf::Debug::screenPos(wf::Vec3(transform.position.x, 0, 0));
+				auto p2 = wf::Debug::screenPos(wf::Vec3(transform.position.x + grenade.blastRadius, 0, 0));
+				auto dist = glm::length(p1 - p2);
+				wf::Debug::circle(transform.position, dist, wf::RED);
 			});
 	}
 
@@ -82,7 +93,7 @@ namespace Squishies
 
 		auto& nade = ent.addComponent<Component::Grenade>();
 		nade.playerId = detail.playerId;
-		nade.timer = 3.f;
+		nade.timer = 2.f;
 		nade.velocity = glm::normalize(detail.target - detail.position) * detail.power;
 
 		wf::createTimer(nade.timer, [ent, this](wf::CustomTimer& timer) mutable {
@@ -98,8 +109,34 @@ namespace Squishies
 
 	void WeaponSystem::explodeGrenade(event::ExplodeGrenade& detail)
 	{
-		// @todo
-		printf("BOOM!\n");
+		entityManager->each<Component::SoftBody>(
+			[&](wf::EntityID playerId, Component::SoftBody& softbody) {
+
+				// fetch the nade
+				auto nadeEnt = entityManager->get(detail.id);
+				auto& nade = nadeEnt.getComponent<Component::Grenade>();
+
+				// 1. see if the blast radius reaches our bounding box
+				auto dir = glm::normalize(softbody.derivedPosition - detail.position); // direction from nade to player
+				auto edgePt = detail.position + dir * nade.blastRadius; // point on edge of the blast radius
+
+				if (!softbody.boundingBox.contains(edgePt)) return; // quick exit if we're nowhere near
+
+				// 2. check the points
+				int blastPoints{};
+
+				for (auto& pt : softbody.points) {
+					if (glm::length2(pt.position - detail.position) <= nade.blastRadius * nade.blastRadius) {
+						blastPoints++;
+					}
+				}
+
+				if (!blastPoints) return;
+
+				entityManager->destroy(playerId);
+			});
+
+		//printf("BOOM! at %.2f %.2f\n", detail.position.x, detail.position.y);
 		entityManager->destroy(detail.id);
 	}
 }

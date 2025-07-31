@@ -126,6 +126,12 @@ namespace wf
 			rect(box.min, box.max, thickness, colour);
 		}
 
+		static Vec2 screenPos(const Vec3& pos)
+		{
+			auto screenPos = instance().getScreenPos(pos);
+			return Vec2{ screenPos.x, screenPos.y };
+		}
+
 		void setCamera(component::Camera* camera)
 		{
 			m_camera = camera;

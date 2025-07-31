@@ -1,8 +1,11 @@
 #include "MovementSystem.h"
 #include "Engine.h"
 
-#include "Component/Player.h"
+#include "Component/Character.h"
+#include "Component/Inventory.h"
 #include "Component/SoftBody.h"
+#include "Component/UserControl.h"
+
 #include "Event/DeployWeapon.h"
 
 namespace Squishies
@@ -18,8 +21,8 @@ namespace Squishies
 		if (wf::isKeyHeld(wf::KEY_SHIFT_LEFT)) return;
 
 		// track the player with the camera
-		entityManager->each<Component::Player, Component::SoftBody>(
-			[&](const Component::Player& player, const Component::SoftBody& squishy) {
+		entityManager->each<Component::UserControl, Component::SoftBody>(
+			[&](const Component::SoftBody& squishy) {
 
 				float trackSpeed{ 3.f };
 
@@ -29,8 +32,8 @@ namespace Squishies
 			});
 
 		// integrate grenades
-		entityManager->each<Component::SoftBody, Component::Player>(
-			[&](wf::EntityID playerId, Component::SoftBody& squishy, Component::Player& player) {
+		entityManager->each<Component::SoftBody, Component::Inventory, Component::UserControl>(
+			[&](wf::EntityID playerId, Component::SoftBody& squishy, Component::Inventory& inventory) {
 
 				// we don't want to do stuff if we're working with the GUI
 				if (wf::isGuiFocussed()) return;
@@ -56,13 +59,13 @@ namespace Squishies
 				// scroll through weapons
 				auto wheel = wf::getMouseWheel();
 				if (wheel.y != 0.f) {
-					player.scrollWeapon(wheel.y > 0.f ? -1 : 1);
+					inventory.scrollWeapon(wheel.y > 0.f ? -1 : 1);
 				}
 
 				// fire!
 				if (wf::isMouseButtonPressed(wf::BUTTON_LEFT)) {
 					const auto cam = *scene->getCurrentCamera();
-					deployWeapon(playerId, squishy, player, wf::getMouseWorldPosition(cam));
+					deployWeapon(playerId, squishy, inventory, wf::getMouseWorldPosition(cam));
 				}
 			});
 	}
@@ -88,18 +91,13 @@ namespace Squishies
 		}
 	}
 
-	void MovementSystem::deployWeapon(wf::EntityID playerId, Component::SoftBody& squishy, Component::Player& player, const wf::Vec3& target)
+	void MovementSystem::deployWeapon(wf::EntityID playerId, Component::SoftBody& squishy, Component::Inventory& inventory, const wf::Vec3& target)
 	{
 		wf::Debug::filledCircle(target, 10.f, wf::RED);
 
 		auto pos = squishy.derivedPosition;
+		auto e = event::DeployWeapon{ playerId, inventory.selectedIndex, squishy.derivedPosition, target, 20.f };
 
-		auto e = event::DeployWeapon{ playerId, player.currentWeapon, squishy.derivedPosition, target, 20.f };
 		eventDispatcher->dispatch<event::DeployWeapon>(e);
-
-		// 1. get mouse position and translate to worldspace
-		// 2. calculate angle from player.
-		// 3. a short way from the player towards that direction, that's our start point.
-		// 4. spawn the grenade.
 	}
 }
