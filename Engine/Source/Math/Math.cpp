@@ -108,7 +108,7 @@ namespace wf
 		return transform;
 	}
 
-	Vec3 Transform::getPosition(const Vec3& point)
+	Vec3 Transform::getWorldPosition(const Vec3& point) const
 	{
 		auto m = getTransformMatrix().matrix;
 		glm::vec4 world = m * glm::vec4(point, 1.f);
@@ -130,17 +130,17 @@ namespace wf
 		return Vec3(getTransformMatrix().matrix[0]); // column 0
 	}
 
-	Transform Transform::t(const Vec3 position)
+	Transform Transform::t(const Vec3& position)
 	{
 		return Transform(position);
 	}
 
-	Transform Transform::r(const Vec3 rotation)
+	Transform Transform::r(const Vec3& rotation)
 	{
 		return Transform(Vec3{}, rotation);
 	}
 
-	Transform Transform::s(const Vec3 scale)
+	Transform Transform::s(const Vec3& scale)
 	{
 		return Transform(Vec3{}, Vec3{}, scale);
 	}
@@ -150,13 +150,13 @@ namespace wf
 		return s(Vec3{ scale, scale, scale });
 	}
 
-	Vec2 getSpringForce(Vec2 p1, Vec2 v1, Vec2 p2, Vec2 v2, float k, float damping, float rest)
+	Vec2 getSpringForce(const Vec2& p1, const Vec2& v1, const Vec2& p2, const Vec2& v2, float k, float damping, float rest)
 	{
 		auto ret = getSpringForce(
 			Vec3{ p1.x, p1.y, 0.f },
 			Vec3{ v1.x, v1.y, 0.f },
 			Vec3{ p2.x, p2.y, 0.f },
-			Vec3{ p2.x, p2.y, 0.f },
+			Vec3{ v2.x, v2.y, 0.f },
 			k,
 			damping,
 			rest
@@ -164,7 +164,7 @@ namespace wf
 		return { ret.x, ret.y };
 	}
 
-	Vec3 getSpringForce(Vec3 p1, Vec3 v1, Vec3 p2, Vec3 v2, float k, float damping, float rest)
+	Vec3 getSpringForce(const Vec3& p1, const Vec3& v1, const Vec3& p2, const Vec3& v2, float k, float damping, float rest)
 	{
 		Vec3 distanceV = p1 - p2;
 		float dist = glm::length(distanceV);

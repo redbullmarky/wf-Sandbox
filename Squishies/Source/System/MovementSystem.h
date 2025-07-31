@@ -2,7 +2,7 @@
 #include "Engine.h"
 
 #include "Component/Player.h"
-#include "Component/Squishy.h"
+#include "Component/SoftBody.h"
 
 namespace Squishies
 {
@@ -20,10 +20,10 @@ namespace Squishies
 		virtual void update(float dt) override;
 
 	private:
-		void applyMovement(Component::Squishy& squishy, float movement);
-		void applyJump(Component::Squishy& squishy);
-		void applyDuck(Component::Squishy& squishy);
+		void applyMovement(Component::SoftBody& squishy, float movement);
+		void applyJump(Component::SoftBody& squishy);
+		void applyDuck(Component::SoftBody& squishy);
 
-		void deployWeapon(wf::EntityID playerId, Component::Squishy& squishy, Component::Player& player, const wf::Vec3& target);
+		void deployWeapon(wf::EntityID playerId, Component::SoftBody& squishy, Component::Player& player, const wf::Vec3& target);
 	};
 }

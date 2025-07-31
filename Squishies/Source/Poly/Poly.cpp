@@ -2,38 +2,55 @@
 
 namespace Squishies
 {
-	Poly::Poly(std::vector<wf::Vec2> points, wf::Vec2 origin)
+	Poly::Poly(std::vector<wf::Vec2> points) : points(points)
 	{
 	}
 
 	wf::Vec2 Poly::getCenter() const
 	{
-		return wf::Vec2();
+		wf::Vec2 center{};
+		const float invPC = 1.f / points.size();
+
+		for (auto& pt : points) {
+			center += pt;
+		}
+
+		center *= invPC;
+
+		return center;
 	}
 
 	Poly& Poly::transform(const wf::Transform& transform)
 	{
+		for (auto& p : points) {
+			auto tp = transform.getWorldPosition(wf::Vec3(p, 0.f));
+			p = { tp.x, tp.y };
+		}
 		return *this;
+	}
+
+	Poly Poly::getTransformed(const wf::Transform& transform) const
+	{
+		Poly ret(*this);
+		ret.transform(transform);
+		return ret;
 	}
 
 	Poly& Poly::translate(const wf::Vec2& offset)
 	{
-		wf::Transform trans(wf::Vec3(repos));
-
+		transform(wf::Transform::t(wf::Vec3(offset, 0.f)));
 		return *this;
 	}
 
 	Poly& Poly::rotate(float angleDegrees)
 	{
-		wf::Transform trans(wf::Vec3(offset));
-
-		// TODO: insert return statement here
+		transform(wf::Transform::r(wf::Vec3(0.f, 0.f, angleDegrees))); // 2d rotation is essentialy around the Z axis.
 		return *this;
 	}
 
 	Poly& Poly::scale(float scale)
 	{
-		// TODO: insert return statement here
+		transform(wf::Transform::s(scale));
 		return *this;
 	}
 }

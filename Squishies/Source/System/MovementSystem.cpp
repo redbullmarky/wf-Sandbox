@@ -2,7 +2,7 @@
 #include "Engine.h"
 
 #include "Component/Player.h"
-#include "Component/Squishy.h"
+#include "Component/SoftBody.h"
 #include "Event/DeployWeapon.h"
 
 namespace Squishies
@@ -18,8 +18,8 @@ namespace Squishies
 		if (wf::isKeyHeld(wf::KEY_SHIFT_LEFT)) return;
 
 		// track the player with the camera
-		entityManager->each<Component::Player, Component::Squishy>(
-			[&](const Component::Player& player, const Component::Squishy& squishy) {
+		entityManager->each<Component::Player, Component::SoftBody>(
+			[&](const Component::Player& player, const Component::SoftBody& squishy) {
 
 				float trackSpeed{ 3.f };
 
@@ -29,8 +29,8 @@ namespace Squishies
 			});
 
 		// integrate grenades
-		entityManager->each<Component::Squishy, Component::Player>(
-			[&](wf::EntityID playerId, Component::Squishy& squishy, Component::Player& player) {
+		entityManager->each<Component::SoftBody, Component::Player>(
+			[&](wf::EntityID playerId, Component::SoftBody& squishy, Component::Player& player) {
 
 				// we don't want to do stuff if we're working with the GUI
 				if (wf::isGuiFocussed()) return;
@@ -67,28 +67,28 @@ namespace Squishies
 			});
 	}
 
-	void MovementSystem::applyMovement(Component::Squishy& squishy, float movement)
+	void MovementSystem::applyMovement(Component::SoftBody& squishy, float movement)
 	{
 		for (auto& pt : squishy.points) {
 			pt.force.x += movement * 10.f;
 		}
 	}
 
-	void MovementSystem::applyJump(Component::Squishy& squishy)
+	void MovementSystem::applyJump(Component::SoftBody& squishy)
 	{
 		for (auto& pt : squishy.points) {
 			pt.force.y += 500.f;
 		}
 	}
 
-	void MovementSystem::applyDuck(Component::Squishy& squishy)
+	void MovementSystem::applyDuck(Component::SoftBody& squishy)
 	{
 		for (auto& pt : squishy.points) {
 			pt.force.y -= 500.f;
 		}
 	}
 
-	void MovementSystem::deployWeapon(wf::EntityID playerId, Component::Squishy& squishy, Component::Player& player, const wf::Vec3& target)
+	void MovementSystem::deployWeapon(wf::EntityID playerId, Component::SoftBody& squishy, Component::Player& player, const wf::Vec3& target)
 	{
 		wf::Debug::filledCircle(target, 10.f, wf::RED);
 

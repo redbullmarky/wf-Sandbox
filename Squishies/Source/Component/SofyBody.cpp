@@ -1,11 +1,11 @@
-#include "Squishy.h"
+#include "SoftBody.h"
 #include "Engine.h"
 
 #include <glm/glm.hpp>
 
 namespace Squishies::Component
 {
-	void Squishy::updateDerivedData()
+	void SoftBody::updateDerivedData()
 	{
 		// first figure out the center and velocity
 		const float invPCount = 1.f / this->points.size();
@@ -26,7 +26,7 @@ namespace Squishies::Component
 		float angleSum = 0.f;
 
 		for (size_t i = 0; i < this->points.size(); i++) {
-			glm::vec2 base2 = glm::vec2(this->points[i].originalPosition);
+			glm::vec2 base2 = glm::vec2(this->shape.getPoint(i));
 			glm::vec2 curr2 = glm::vec2(this->points[i].position - this->derivedPosition);
 
 			float baseAngle = atan2(base2.y, base2.x);
@@ -42,7 +42,7 @@ namespace Squishies::Component
 		this->derivedRotation = glm::angleAxis(avgAngle, glm::vec3(0, 0, 1));
 	}
 
-	void Squishy::updateBoundingBox()
+	void SoftBody::updateBoundingBox()
 	{
 		boundingBox.reset();
 
@@ -52,15 +52,15 @@ namespace Squishies::Component
 		}
 	}
 
-	void Squishy::updateGlobalShape()
+	void SoftBody::updateGlobalShape()
 	{
-		for (auto& pt : this->points) {
-			pt.globalPosition = pt.originalPosition + this->derivedPosition;
+		for (size_t i = 0; i < this->points.size(); i++) {
+			this->points[i].globalPosition = wf::Vec3(this->shape.getPoint(i), 0.f) + this->derivedPosition;
 			// @todo apply rotation
 		}
 	}
 
-	void Squishy::updateBitfields(const wf::BoundingBox& worldBounds, float gridCellSize)
+	void SoftBody::updateBitfields(const wf::BoundingBox& worldBounds, float gridCellSize)
 	{
 		wf::Vec3 gridStep = worldBounds.size() / gridCellSize;
 
@@ -91,7 +91,7 @@ namespace Squishies::Component
 		}
 	}
 
-	void Squishy::updateEdges()
+	void SoftBody::updateEdges()
 	{
 		if (this->edges.size() != this->points.size()) {
 			this->edges.resize(this->points.size());
@@ -102,5 +102,14 @@ namespace Squishies::Component
 
 			this->edges[i].update(this->points[i].position, this->points[j].position);
 		}
+	}
+
+	void SoftBody::setFixed(bool fixed)
+	{
+		this->fixed = fixed;
+	}
+
+	SoftBody::SoftBody(const Squishy& squishy) : shape(squishy)
+	{
 	}
 }

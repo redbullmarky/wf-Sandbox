@@ -34,7 +34,7 @@ namespace wf::component
 
 		struct Shadow											// shadow map (internals, @todo temporary to get it working)
 		{
-			wgl::RenderTargetHandle* map;						// shadow map
+			wgl::RenderTargetHandle* map{ nullptr };				// shadow map
 			bool shadowPass{ false };								// if we're creating the shadows (true) or using them.
 		} shadow;
 

@@ -1,42 +1,27 @@
-#include "Misc.h"
+#include "Squishy.h"
 
 namespace Squishies
 {
-	std::vector<wf::Vec3> transformPoints(
-		const std::vector<wf::Vec3>& originalPoints,
-		const wf::Vec3& derivedPosition,
-		const wf::Quat& derivedRotation
-	) {
-		std::vector<wf::Vec3> transformed;
-		transformed.reserve(originalPoints.size());
-
-		for (const auto& p : originalPoints)
-			transformed.push_back(derivedPosition + derivedRotation * p);
-
-		return transformed;
-	}
-
-	std::vector<wf::Vec3> createCircleShape(float radius, size_t segments)
+	const std::vector<wf::Vec2> Squishy::getPoints() const
 	{
-		std::vector<wf::Vec3> points;
-		points.resize(segments);
-
-		for (size_t i = 0; i < segments; i++) {
-			float angle = (2.f * PI * i) / segments;
-			float x = radius * cos(angle);
-			float y = radius * sin(angle);
-
-			points[i] = { x, y, 0.f };
-		}
-
-		return points;
+		return poly.points;
 	}
 
-	std::shared_ptr<wf::Mesh> createCircleMeshFromPoints(const std::vector<wf::Vec3>& edgePoints)
+	const std::vector<Joint> Squishy::getJoints() const
+	{
+		return joints;
+	}
+
+	const wf::Vec2 Squishy::getPoint(size_t index) const
+	{
+		return poly.points[index];
+	}
+
+	std::shared_ptr<wf::Mesh> Squishy::createMesh()
 	{
 		auto mesh = wf::Mesh::create();
 
-		size_t segments = edgePoints.size();
+		size_t segments = poly.points.size();
 		mesh->vertices.resize(segments + 1); // +1 for center
 
 		// center vertex
@@ -47,12 +32,12 @@ namespace Squishies
 
 		// compute max extent for texcoord normalisation
 		float maxRadius = 0.f;
-		for (const auto& p : edgePoints)
+		for (const auto& p : poly.points)
 			maxRadius = std::max(maxRadius, glm::length(glm::vec2(p)));
 
 		for (size_t i = 0; i < segments; i++) {
-			const auto& pos = edgePoints[i];
-			mesh->vertices[i + 1].position = pos;
+			const auto& pos = poly.points[i];
+			mesh->vertices[i + 1].position = wf::Vec3{ pos, 0.f };
 			mesh->vertices[i + 1].normal = { 0.f, 0.f, 1.f };
 			mesh->vertices[i + 1].colour = wf::WHITE;
 
@@ -72,16 +57,6 @@ namespace Squishies
 		mesh->indices.push_back(0);
 		mesh->indices.push_back((unsigned int)segments);
 		mesh->indices.push_back(1);
-
-		int c = 0;
-		for (auto& i : mesh->indices) {
-			printf("%u\n", i);
-			c++;
-			if (c == 3) {
-				printf("---\n");
-				c = 0;
-			}
-		}
 
 		wf::mesh::generateMeshTangents(mesh.get());
 		return mesh;

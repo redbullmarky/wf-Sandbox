@@ -2,7 +2,9 @@
 #include "Engine.h"
 
 #include "Component/Player.h"
-#include "Component/Squishy.h"
+#include "Component/SoftBody.h"
+#include "Poly/PolyFactory.h"
+#include "Poly/SquishyFactory.h"
 #include "System/SquishySystem.h"
 #include "System/MovementSystem.h"
 #include "System/WeaponSystem.h"
@@ -51,17 +53,21 @@ namespace Squishies
 
 		// textures
 		auto grassTex = wf::loadTexture("resources/images/grass12.png");
+		auto woodTex = wf::loadTexture("resources/images/wood_planks_12_color_1k.png");
+		auto woodNorm = wf::loadTexture("resources/images/wood_planks_12_normal_gl_1k.png");
 
-		{
+		/*{
 			auto obj = createObject({ 0.f, -10.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Plane");
 			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSimplePlane(100.f));
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.map = grassTex;
-		}
+		}*/
 
 		int points = 15;		// number of points on the squishies
-		float radius = 1.f;	// size
+		float radius = 1.f;		// size
+
+		auto squishy = SquishyFactory::createCircle(radius, points);
 
 		{
 			auto obj = createObject({ -2.f, -5.f, 0.f });
@@ -69,7 +75,7 @@ namespace Squishies
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::RED;
 			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::Squishy>(radius, points);
+			obj.addComponent<Component::SoftBody>(squishy);
 			obj.addComponent<Component::Player>();
 		}
 
@@ -79,17 +85,27 @@ namespace Squishies
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::BLUE;
 			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::Squishy>(radius, points);
+			obj.addComponent<Component::SoftBody>(squishy);
 		}
-		/*
+
 		{
 			auto obj = createObject({ 6.f, 5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Squishy 3");
 			auto& material = obj.addComponent<wf::component::Material>();
-			material.diffuse.colour = wf::BLUE;
+			material.diffuse.colour = wf::YELLOW;
 			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::Squishy>(radius, points);
-		}*/
+			obj.addComponent<Component::SoftBody>(squishy);
+		}
+
+		{
+			auto obj = createObject({ 0, -15.f, 0.f });
+			obj.addComponent<wf::component::NameTag>("Beam");
+			auto& material = obj.addComponent<wf::component::Material>();
+			material.diffuse.map = woodTex;
+			material.normal.map = woodNorm;
+			auto& beam = obj.addComponent<Component::SoftBody>(SquishyFactory::createRect(100.f, 10.f));
+			beam.setFixed();
+		}
 
 		wf::Scene::setup();
 	}
@@ -163,8 +179,8 @@ namespace Squishies
 					ImGui::SliderFloat("Spec. intesity", &material.specular.intensity, 0.f, 2.f);
 					ImGui::SliderFloat("Spec. shine", &material.specular.shininess, 0.f, 128.f);
 
-					if (ent.hasComponent<Component::Squishy>()) {
-						auto& squishy = ent.getComponent<Component::Squishy>();
+					if (ent.hasComponent<Component::SoftBody>()) {
+						auto& squishy = ent.getComponent<Component::SoftBody>();
 
 						ImGui::Checkbox("Shape matching", &squishy.shapeMatching);
 						if (squishy.shapeMatching) {

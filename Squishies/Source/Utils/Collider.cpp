@@ -20,7 +20,7 @@ namespace Squishies
 
 	// @todo initial checks around whether the objects are the same, or both fixed, or not collidable, etc - things we'll want configured later in our
 	//		bodies.
-	bool Collider::check(Component::Squishy& obj1, Component::Squishy& obj2)
+	bool Collider::check(Component::SoftBody& obj1, Component::SoftBody& obj2)
 	{
 		// bitmask check..
 		if (!obj1.bitFields.same(obj2.bitFields)) {

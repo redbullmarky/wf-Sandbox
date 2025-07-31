@@ -43,8 +43,8 @@ namespace wf
 		bool contains(const BoundingBox& other) const;		// bounding box encloses another entirely?
 	};
 
-	Vec2 getSpringForce(Vec2 p1, Vec2 v1, Vec2 p2, Vec2 v2, float k, float damping, float rest);
-	Vec3 getSpringForce(Vec3 p1, Vec3 v1, Vec3 p2, Vec3 v2, float k, float damping, float rest);
+	Vec2 getSpringForce(const Vec2& p1, const Vec2& v1, const Vec2& p2, const Vec2& v2, float k, float damping, float rest);
+	Vec3 getSpringForce(const Vec3& p1, const Vec3& v1, const Vec3& p2, const Vec3& v2, float k, float damping, float rest);
 
 	/**
 	 * @brief Transform utility.
@@ -69,7 +69,7 @@ namespace wf
 		/**
 		 * @brief Get the world position of a point
 		 */
-		Vec3 getPosition(const Vec3& point);
+		Vec3 getWorldPosition(const Vec3& point) const;
 
 		/**
 		 * @brief Get vector represeting "up"
@@ -89,17 +89,17 @@ namespace wf
 		/**
 		 * @brief Construct transform with starting translation
 		 */
-		static Transform t(const Vec3 position);
+		static Transform t(const Vec3& position);
 
 		/**
 		 * @brief Construct transform with starting rotation
 		 */
-		static Transform r(const Vec3 rotation);
+		static Transform r(const Vec3& rotation);
 
 		/**
 		 * @brief Construct transform with starting scale
 		 */
-		static Transform s(const Vec3 scale);
+		static Transform s(const Vec3& scale);
 		static Transform s(float scale);
 	};
 }

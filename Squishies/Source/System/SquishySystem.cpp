@@ -1,8 +1,7 @@
 #include "SquishySystem.h"
 
-#include "Component/Squishy.h"
+#include "Component/SoftBody.h"
 #include "Config.h"
-#include "Utils/Misc.h"
 
 #include <vector>
 
@@ -10,7 +9,7 @@ namespace Squishies
 {
 	bool SquishySystem::init()
 	{
-		entityManager->onCreate<Component::Squishy>([&](wf::Entity entity) {
+		entityManager->onCreate<Component::SoftBody>([&](wf::Entity entity) {
 			createSquishy(entity);
 			});
 
@@ -19,8 +18,8 @@ namespace Squishies
 
 	void SquishySystem::update(float dt)
 	{
-		entityManager->each<Component::Squishy, wf::component::Geometry>(
-			[&](Component::Squishy& squishy, wf::component::Geometry& geometry) {
+		entityManager->each<Component::SoftBody, wf::component::Geometry>(
+			[&](Component::SoftBody& squishy, wf::component::Geometry& geometry) {
 
 				auto& verts = geometry.mesh->vertices;
 
@@ -52,11 +51,11 @@ namespace Squishies
 	//		3. build the joints
 	void SquishySystem::createSquishy(wf::Entity entity)
 	{
-		auto& softbody = entity.getComponent<Component::Squishy>();
+		auto& softbody = entity.getComponent<Component::SoftBody>();
 
 		// create the dynamic geometry
-		auto points = createCircleShape(softbody.radius, softbody.pointCount);
-		auto& geometry = entity.addComponent<wf::component::Geometry>(createCircleMeshFromPoints(points));
+		auto& points = softbody.shape.getPoints();
+		auto& geometry = entity.addComponent<wf::component::Geometry>(softbody.shape.createMesh());
 		geometry.mesh->isDynamic = true;
 
 		// set up the pointmasses for all of the vertices.
@@ -75,29 +74,12 @@ namespace Squishies
 
 		// gather up the original points and the derived global shape
 		for (size_t i = 0; i < points.size(); i++) {
-			// keep a copy of the original point
-			softbody.points[i].originalPosition = points[i];
-
 			// get our point position in worldspace
-			auto newPos = softbody.points[i].originalPosition + softbody.derivedPosition;
+			auto newPos = wf::Vec3(softbody.shape.getPoint(i), 0.f) + softbody.derivedPosition;
 
 			// store it in position and globalPosition
 			softbody.points[i].position = newPos;
 			softbody.points[i].globalPosition = newPos;
-		}
-
-		// next build out the joints
-		int strength = 3;
-
-		for (size_t i = 0; i < points.size(); i++) {
-			if (strength <= 0) break;
-
-			for (size_t step = 1; step <= strength; step++) {
-				if (step >= points.size()) break; // don't loop entire shape
-				size_t j = (i + step) % points.size();
-				float dist = glm::distance(softbody.points[i].position, softbody.points[j].position);
-				softbody.joints.emplace_back(i, j, dist);
-			}
 		}
 
 		softbody.updateDerivedData();
@@ -113,8 +95,10 @@ namespace Squishies
 	// @todo check shape meta stuff for 3D
 	void SquishySystem::prepareAndAccumulateForces()
 	{
-		entityManager->each<Component::Squishy>(
-			[&](Component::Squishy& squishy) {
+		entityManager->each<Component::SoftBody>(
+			[&](Component::SoftBody& squishy) {
+
+				if (squishy.fixed) return;
 
 				// update details about perceived position/rotation/velocity of the overall body
 				squishy.updateDerivedData();
@@ -128,7 +112,7 @@ namespace Squishies
 
 				// internal forces - springs, shape matching, etc.
 				// first the joints
-				for (auto& [p1, p2, rest] : squishy.joints) {
+				for (auto& [p1, p2, rest] : squishy.shape.getJoints()) {
 					if (squishy.points[p1].fixed && squishy.points[p2].fixed) {
 						continue;
 					}
@@ -186,8 +170,10 @@ namespace Squishies
 	//		4. force = { 0.f };
 	void SquishySystem::integrate(float dt)
 	{
-		entityManager->each<Component::Squishy>(
-			[&](Component::Squishy& squishy) {
+		entityManager->each<Component::SoftBody>(
+			[&](Component::SoftBody& squishy) {
+
+				if (squishy.fixed) return;
 
 				for (size_t i = 0; i < squishy.points.size(); i++) {
 					// avoid pointless division by doing pointless code.
@@ -209,8 +195,10 @@ namespace Squishies
 	//			float dampingZ = 0.9f;
 	void SquishySystem::hardConstraints()
 	{
-		entityManager->each<Component::Squishy>(
-			[&](Component::Squishy& squishy) {
+		entityManager->each<Component::SoftBody>(
+			[&](Component::SoftBody& squishy) {
+
+				if (squishy.fixed) return;
 
 				auto worldBounds = Config::get().worldBounds;
 
@@ -263,8 +251,10 @@ namespace Squishies
 	//		3. update bitmask (where in the world on the "grid" for collisions)
 	void SquishySystem::metaUpdates()
 	{
-		entityManager->each<Component::Squishy>(
-			[&](Component::Squishy& squishy) {
+		entityManager->each<Component::SoftBody>(
+			[&](Component::SoftBody& squishy) {
+
+				if (squishy.fixed) return;
 
 				squishy.updateBoundingBox();
 				squishy.updateEdges();
@@ -282,18 +272,18 @@ namespace Squishies
 	//		- process all collisions when we've checked the lot
 	void SquishySystem::handleCollisions()
 	{
-		auto view = entityManager->find<Component::Squishy>();
+		auto view = entityManager->find<Component::SoftBody>();
 
 		// make sure we're starting fresh
 		m_collider.reset();
 
 		// loop the objects and see what's colliding
 		view.each(
-			[&](wf::EntityID id, Component::Squishy& squishy) {
+			[&](wf::EntityID id, Component::SoftBody& squishy) {
 				view.each(
-					[&](wf::EntityID id2, Component::Squishy& squishy2) {
+					[&](wf::EntityID id2, Component::SoftBody& squishy2) {
 
-						if (id == id2) return;
+						if (id == id2 || squishy.fixed && squishy2.fixed) return;
 
 						squishy.colliding = m_collider.check(squishy, squishy2);
 					});
@@ -313,8 +303,10 @@ namespace Squishies
 	// @todo grounded checks
 	void SquishySystem::postUpdates()
 	{
-		entityManager->each<Component::Squishy>(
-			[&](Component::Squishy& squishy) {
+		entityManager->each<Component::SoftBody>(
+			[&](Component::SoftBody& squishy) {
+
+				if (squishy.fixed) return;
 
 				squishy.collisionBox.reset();
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine.h"
-#include "Component/Squishy.h"
+#include "Component/SoftBody.h"
 
 #include <vector>
 
@@ -21,10 +21,10 @@ namespace Squishies
 
 	struct Collision
 	{
-		Component::Squishy* obj1{ nullptr };
+		Component::SoftBody* obj1{ nullptr };
 		size_t obj1Point{};
 
-		Component::Squishy* obj2{ nullptr };
+		Component::SoftBody* obj2{ nullptr };
 		size_t obj2PointA{};
 		size_t obj2PointB{};
 
@@ -67,7 +67,7 @@ namespace Squishies
 		 * @param obj2
 		 * @return
 		 */
-		bool check(Component::Squishy& obj1, Component::Squishy& obj2);
+		bool check(Component::SoftBody& obj1, Component::SoftBody& obj2);
 
 		/**
 		 * @brief Process all of the collisions we detected

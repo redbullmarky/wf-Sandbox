@@ -1,9 +1,9 @@
 #pragma once
 #include "Engine.h"
+#include "Poly/Squishy.h"
 #include "Utils/Bitfield.h"
 
 #include <bitset>
-#include <vector>
 
 // @todo we need to play with the values a bit. on the old squishies game, we had:
 //
@@ -27,7 +27,6 @@ namespace Squishies::Component
 		bool fixed{ false };										// fixed point; cannot move
 
 		wf::Vec3 lastPosition{};									// keeping tabs on last position for stability
-		wf::Vec3 originalPosition{};								// the original vertex position for shape matching
 		wf::Vec3 globalPosition{};									// after transforming the original using derived vals
 
 		bool insideAnother{ false };								// collision detection picked up that this point is inside another object
@@ -68,14 +67,12 @@ namespace Squishies::Component
 	 *
 	 * Whilst everything is stored implying 3D, generally we're working in 2D but leaving the door open...
 	 */
-	struct Squishy
+	struct SoftBody
 	{
-		float radius{};
-		size_t pointCount{};										// number of configured points we'll build
-
+		Squishy shape;												// shape used to create the softbody along with joint data
 		std::vector<PointMass> points;								// all of our point masses
-		std::vector<std::tuple<size_t, size_t, float>> joints;		// joints between the points to hold shape
 
+		bool fixed{ false };										// if the body is entirely static.
 		bool kinematic{ false };
 		bool shapeMatching{ true };									// whether shape matching is enabled
 
@@ -123,6 +120,18 @@ namespace Squishies::Component
 		 */
 		void updateEdges();
 
-		Squishy(float radius, size_t pointCount) : radius(radius), pointCount(pointCount) {}
+		/**
+		 * @brief Set the body as immovable
+		 * @param fixed
+		 */
+		void setFixed(bool fixed = true);
+
+		/**
+		 * @brief Create softbody from a squishy instance
+		 */
+		SoftBody(const Squishy& squishy);
+
+	private:
+		SoftBody() = default;
 	};
 }
