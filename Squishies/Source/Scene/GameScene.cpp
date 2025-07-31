@@ -64,7 +64,7 @@ namespace Squishies
 			material.diffuse.map = grassTex;
 		}*/
 
-		int points = 15;		// number of points on the squishies
+		int points = 25;		// number of points on the squishies
 		float radius = 1.f;		// size
 
 		auto squishy = SquishyFactory::createCircle(radius, points);
