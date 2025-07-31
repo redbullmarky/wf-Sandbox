@@ -1,8 +1,7 @@
 #include "pch.h"
 
 #include "Geometry/Mesh.h"
-#include "Math/PerlinNoise.h"
-#include "Math/SimplexNoise.h"
+#include "Math/Noise.h"
 #include "MeshUtils.h"
 #include "Terrain.h"
 

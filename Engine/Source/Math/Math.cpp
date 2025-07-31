@@ -74,7 +74,7 @@ namespace wf
 		return (overlapX && overlapY && overlapZ);
 	}
 
-	bool BoundingBox::contains(const wf::Vec3& point) const
+	bool BoundingBox::contains(const Vec3& point) const
 	{
 		if (!isValid) return false;
 		return point.x >= min.x && point.x <= max.x && point.y >= min.y && point.y <= max.y && point.z >= min.z && point.z <= max.z;
@@ -83,6 +83,71 @@ namespace wf
 	bool BoundingBox::contains(const BoundingBox& other) const
 	{
 		return contains(other.min) && contains(other.max);
+	}
+
+	Transform::Transform(const Vec3& position)
+		: position(position), rotation(Vec3{}) {
+	}
+
+	Transform::Transform(const Vec3& position, const Vec3& rotation, const Vec3& scale)
+		: position(position), rotation(rotation), scale(scale) {
+	}
+
+	Mat4 Transform::getTransformMatrix() const
+	{
+		auto transform = Mat4(1.f);
+
+		transform.translate(position);
+
+		transform.rotate(rotation.y * DEG2RAD, Vec3(0, 1, 0));
+		transform.rotate(rotation.x * DEG2RAD, Vec3(1, 0, 0));
+		transform.rotate(rotation.z * DEG2RAD, Vec3(0, 0, 1));
+
+		transform.scale(scale);
+
+		return transform;
+	}
+
+	Vec3 Transform::getPosition(const Vec3& point)
+	{
+		auto m = getTransformMatrix().matrix;
+		glm::vec4 world = m * glm::vec4(point, 1.f);
+		return Vec3(world);
+	}
+
+	Vec3 Transform::up() const
+	{
+		return Vec3(getTransformMatrix().matrix[1]); // column 1
+	}
+
+	Vec3 Transform::forward() const
+	{
+		return -Vec3(getTransformMatrix().matrix[2]); // column 2, NEGATED for -Z forward
+	}
+
+	Vec3 Transform::right() const
+	{
+		return Vec3(getTransformMatrix().matrix[0]); // column 0
+	}
+
+	Transform Transform::t(const Vec3 position)
+	{
+		return Transform(position);
+	}
+
+	Transform Transform::r(const Vec3 rotation)
+	{
+		return Transform(Vec3{}, rotation);
+	}
+
+	Transform Transform::s(const Vec3 scale)
+	{
+		return Transform(Vec3{}, Vec3{}, scale);
+	}
+
+	Transform Transform::s(float scale)
+	{
+		return s(Vec3{ scale, scale, scale });
 	}
 
 	Vec2 getSpringForce(Vec2 p1, Vec2 v1, Vec2 p2, Vec2 v2, float k, float damping, float rest)

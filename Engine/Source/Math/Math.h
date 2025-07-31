@@ -39,10 +39,67 @@ namespace wf
 		Vec3 size() const;
 		Vec3 midpoint() const;
 		bool intersects(const BoundingBox& other) const;	// box overlaps with another?
-		bool contains(const wf::Vec3& point) const;			// box has a point inside?
+		bool contains(const Vec3& point) const;			// box has a point inside?
 		bool contains(const BoundingBox& other) const;		// bounding box encloses another entirely?
 	};
 
 	Vec2 getSpringForce(Vec2 p1, Vec2 v1, Vec2 p2, Vec2 v2, float k, float damping, float rest);
 	Vec3 getSpringForce(Vec3 p1, Vec3 v1, Vec3 p2, Vec3 v2, float k, float damping, float rest);
+
+	/**
+	 * @brief Transform utility.
+	 *
+	 * Began as just a component but has other generic uses outside of the ECS stuff
+	 * @todo Methods for up/right/forward/getPosition largely untested, added due to simple copypaste port from previous (flawed) system
+	 */
+	struct Transform
+	{
+		Vec3 position{};
+		Vec3 rotation{};
+		Vec3 scale{ 1.f, 1.f, 1.f };
+
+		Transform(const Vec3& position);
+		Transform(const Vec3& position, const Vec3& rotation, const Vec3& scale = { 1.f, 1.f, 1.f });
+
+		/**
+		 * @brief Return the full transform matrix
+		 */
+		Mat4 getTransformMatrix() const;
+
+		/**
+		 * @brief Get the world position of a point
+		 */
+		Vec3 getPosition(const Vec3& point);
+
+		/**
+		 * @brief Get vector represeting "up"
+		 */
+		Vec3 up() const;
+
+		/**
+		 * @brief Get vector represeting "foward" (note: -Z forward)
+		 */
+		Vec3 forward() const;
+
+		/**
+		 * @brief Get vector represeting "right"
+		 */
+		Vec3 right() const;
+
+		/**
+		 * @brief Construct transform with starting translation
+		 */
+		static Transform t(const Vec3 position);
+
+		/**
+		 * @brief Construct transform with starting rotation
+		 */
+		static Transform r(const Vec3 rotation);
+
+		/**
+		 * @brief Construct transform with starting scale
+		 */
+		static Transform s(const Vec3 scale);
+		static Transform s(float scale);
+	};
 }

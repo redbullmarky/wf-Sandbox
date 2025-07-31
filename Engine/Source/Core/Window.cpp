@@ -64,12 +64,12 @@ namespace wf
 
 	int Window::getWidth() const
 	{
-		return getSize().x;
+		return (int)getSize().x;
 	}
 
 	int Window::getHeight() const
 	{
-		return getSize().y;
+		return (int)getSize().y;
 	}
 
 	float Window::getAspectRatio() const

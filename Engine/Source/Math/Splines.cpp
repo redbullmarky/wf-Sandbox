@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "Math/Bezier.h"
 #include "Math/Math.h"
+#include "Math/Splines.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>

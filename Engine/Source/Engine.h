@@ -14,10 +14,9 @@
 #include "Geometry/Model.h"
 #include "Geometry/Terrain.h"
 
-#include "Math/Bezier.h"
 #include "Math/Math.h"
-#include "Math/PerlinNoise.h"
-#include "Math/SimplexNoise.h"
+#include "Math/Noise.h"
+#include "Math/Splines.h"
 
 #include "Misc/Colour.h"
 #include "Misc/Debug.h"
