@@ -3,7 +3,7 @@
 
 namespace wf
 {
-	void Timer::tick()
+	void Timer::tick(bool tickCustomTimers)
 	{
 		static bool ticked{ false };
 
@@ -22,6 +22,10 @@ namespace wf
 		}
 
 		refreshFps();
+
+		if (tickCustomTimers) {
+			updateCustomTimers();
+		}
 	}
 
 	bool Timer::isFixedUpdateReady()
@@ -46,6 +50,23 @@ namespace wf
 		return m_fps;
 	}
 
+	void Timer::createTimer(float duration, TimerCallback callback, bool autoRenew, int renewCount)
+	{
+		CustomTimer t(duration, callback, autoRenew, renewCount);
+		m_pendingTimers.push_back(t);
+	}
+
+	void Timer::pauseTimers(bool pause)
+	{
+		m_timersPaused = pause;
+	}
+
+	void Timer::clearTimers()
+	{
+		m_timers.clear();
+		m_pendingTimers.clear();
+	}
+
 	void Timer::refreshFps()
 	{
 		static constexpr int sampleCount = 100;
@@ -64,5 +85,47 @@ namespace wf
 		float avgDelta = total / filled;
 
 		m_fps = avgDelta > 0.f ? 1.f / avgDelta : 0.f;
+	}
+
+	void Timer::updateCustomTimers()
+	{
+		if (!m_timersPaused && m_timers.size()) {
+			for (size_t i = 0; i < m_timers.size(); i++) {
+				auto& timer = m_timers[i];
+				if (timer.running) {
+					timer.remaining -= m_deltaTime;
+					if (timer.remaining <= 0.f) {
+						timer.expired = true;
+
+						if (timer.autoRenew) {
+							if (timer.renewCount == -1 || timer.remainingRenewals > 0) {
+								timer.remaining += timer.duration;
+								timer.expired = false;
+								timer.renewals++;
+
+								if (timer.renewCount > 0) {
+									timer.remainingRenewals--;
+								}
+							}
+						}
+
+						if (timer.expired) {
+							timer.running = false;
+						}
+
+						timer.expiryCallback(timer);
+					}
+				}
+			}
+
+			std::erase_if(m_timers, [](const CustomTimer& timer) {
+				return timer.expired;
+				});
+		}
+
+		if (!m_pendingTimers.empty()) {
+			m_timers.insert(m_timers.end(), m_pendingTimers.begin(), m_pendingTimers.end());
+			m_pendingTimers.clear();
+		}
 	}
 }

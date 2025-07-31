@@ -3,6 +3,7 @@
 #include "Component/Grenade.h"
 #include "Config.h"
 #include "Event/DeployWeapon.h"
+#include "Event/ExplodeGrenade.h"
 
 namespace Squishies
 {
@@ -12,6 +13,9 @@ namespace Squishies
 
 		eventDispatcher->on<event::DeployWeapon>([&](event::DeployWeapon& e) {
 			spawnGrenade(e);
+			});
+		eventDispatcher->on<event::ExplodeGrenade>([&](event::ExplodeGrenade& e) {
+			explodeGrenade(e);
 			});
 		return true;
 	}
@@ -71,12 +75,31 @@ namespace Squishies
 	void WeaponSystem::spawnGrenade(event::DeployWeapon& detail)
 	{
 		auto ent = scene->createObject(detail.position);
+
 		ent.addComponent<wf::component::Geometry>(m_grenade);
 		auto& material = ent.addComponent<wf::component::Material>();
 		material.diffuse.colour = wf::DARKGREY;
 
 		auto& nade = ent.addComponent<Component::Grenade>();
-		nade.timer = 5.f;
+		nade.playerId = detail.playerId;
+		nade.timer = 3.f;
 		nade.velocity = glm::normalize(detail.target - detail.position) * detail.power;
+
+		wf::createTimer(nade.timer, [ent, this](wf::CustomTimer& timer) mutable {
+
+			auto& nade = ent.getComponent<Component::Grenade>();
+			auto& pos = ent.getComponent<wf::component::Transform>();
+
+			auto e = event::ExplodeGrenade{ ent.handle, nade.playerId, pos.position };
+			eventDispatcher->dispatch<event::ExplodeGrenade>(e);
+
+			});
+	}
+
+	void WeaponSystem::explodeGrenade(event::ExplodeGrenade& detail)
+	{
+		// @todo
+		printf("BOOM!\n");
+		entityManager->destroy(detail.id);
 	}
 }

@@ -317,6 +317,8 @@ namespace Squishies
 					if (pt.insideAnother) {
 						squishy.collisionBox.extend(pt.position);
 					}
+
+					wf::Debug::filledCircle(pt.position, 5.f, pt.insideAnother ? wf::RED : wf::YELLOW);
 				}
 
 				// @todo grounded check

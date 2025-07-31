@@ -101,6 +101,11 @@ namespace Squishies::Component
 			size_t j = (i + 1) % this->points.size();
 
 			this->edges[i].update(this->points[i].position, this->points[j].position);
+
+			// debug the edges
+			/*wf::Vec3 center = (this->edges[i].p1 + this->edges[i].p2) * 0.5f;
+			wf::Vec3 normal = glm::normalize(wf::Vec3{ -this->edges[i].dir.y, this->edges[i].dir.x, 0.f });
+			wf::Debug::line(center, center + normal * .2f, 2.f, wf::WHITE);*/
 		}
 	}
 

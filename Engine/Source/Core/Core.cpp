@@ -28,7 +28,7 @@ namespace wf
 
 	bool shouldClose()
 	{
-		if (!g_gameState.shouldClose) {
+		if (!g_gameState.shouldClose && !g_gameState.paused) {
 			g_gameState.timer.tick();
 			pollEvents();
 		}
@@ -103,6 +103,21 @@ namespace wf
 	float getFps()
 	{
 		return g_gameState.timer.getFps();
+	}
+
+	void createTimer(float duration, TimerCallback callback, bool autoRenew, int renewCount)
+	{
+		g_gameState.timer.createTimer(duration, callback, autoRenew, renewCount);
+	}
+
+	void pauseTimers(bool pause)
+	{
+		g_gameState.timer.pauseTimers(pause);
+	}
+
+	void clearTimers()
+	{
+		g_gameState.timer.clearTimers();
 	}
 
 	bool isKeyPressed(KeyCode key)

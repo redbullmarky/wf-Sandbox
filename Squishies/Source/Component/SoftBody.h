@@ -51,11 +51,6 @@ namespace Squishies::Component
 			p2 = newP2;
 			dir = p1 - p2; // @todo winding order
 			length = glm::length(dir);
-
-			// debug the edges
-			/*wf::Vec3 center = (p1 + p2) * 0.5f;
-			wf::Vec3 normal = glm::normalize(wf::Vec3{ -dir.y, dir.x, 0.f });
-			wf::Debug::line(center, center + normal * .2f, 2.f, wf::WHITE);*/
 		}
 
 		bool operator==(const Edge& rhs) const { return p1 == rhs.p1 && p2 == rhs.p2 && dir == rhs.dir; }
@@ -71,6 +66,7 @@ namespace Squishies::Component
 	{
 		Squishy shape;												// shape used to create the softbody along with joint data
 		std::vector<PointMass> points;								// all of our point masses
+		wf::Colour colour{ wf::WHITE };								// general colour; not used at the mo for anything more than debugging. @todo
 
 		bool fixed{ false };										// if the body is entirely static.
 		bool kinematic{ false };

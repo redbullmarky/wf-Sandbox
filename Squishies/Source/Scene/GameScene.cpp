@@ -67,7 +67,7 @@ namespace Squishies
 		int points = 25;		// number of points on the squishies
 		float radius = 1.f;		// size
 
-		auto squishy = SquishyFactory::createCircle(radius, points);
+		auto squishy = SquishyFactory::createCircle(radius, points, 3);
 
 		{
 			auto obj = createObject({ -2.f, -5.f, 0.f });
@@ -75,7 +75,7 @@ namespace Squishies
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::RED;
 			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::SoftBody>(squishy);
+			obj.addComponent<Component::SoftBody>(squishy).colour = wf::RED;
 			obj.addComponent<Component::Player>();
 		}
 
@@ -85,7 +85,7 @@ namespace Squishies
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::BLUE;
 			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::SoftBody>(squishy);
+			obj.addComponent<Component::SoftBody>(squishy).colour = wf::BLUE;
 		}
 
 		{
@@ -94,7 +94,7 @@ namespace Squishies
 			auto& material = obj.addComponent<wf::component::Material>();
 			material.diffuse.colour = wf::YELLOW;
 			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::SoftBody>(squishy);
+			obj.addComponent<Component::SoftBody>(squishy).colour = wf::YELLOW;
 		}
 
 		{

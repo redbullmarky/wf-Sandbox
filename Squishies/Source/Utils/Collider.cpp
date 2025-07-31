@@ -1,4 +1,5 @@
 #include "Collider.h"
+#include "Engine.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -158,6 +159,9 @@ namespace Squishies
 			auto& pointA = info.obj1->points[info.obj1Point];
 			auto& pointB1 = info.obj2->points[info.obj2PointA];
 			auto& pointB2 = info.obj2->points[info.obj2PointB];
+
+			wf::Debug::line(pointA.position, pointA.position + wf::Vec3(info.normal, 0.f) * 20.f, 2.f, info.obj1->colour);
+
 
 			// fixme doing this also for kinematics, but this might be better to use derivedVelocity...if we calc it for kinematic objects.
 			wf::Vec2 bVel = ((pointB1.fixed ? wf::Vec2{} : wf::Vec2(pointB1.velocity)) + (pointB2.fixed ? wf::Vec2{} : pointB2.velocity)) * .5f;

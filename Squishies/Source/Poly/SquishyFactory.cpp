@@ -40,21 +40,20 @@ namespace Squishies
 		return createRect(size, size);
 	}
 
-	Squishy SquishyFactory::createCircle(float radius, int segments)
+	Squishy SquishyFactory::createCircle(float radius, int segments, int strength)
 	{
 		Squishy s(PolyFactory::createCircle(radius, segments));
 
-		// next build out the joints
-		int strength = 3;
+		if (strength > 0) {
 
-		for (size_t i = 0; i < s.poly.points.size(); i++) {
-			if (strength <= 0) break;
-
-			for (size_t step = 1; step <= strength; step++) {
-				if (step >= s.poly.points.size()) break; // don't loop entire shape
-				size_t j = (i + step) % s.poly.points.size();
-				float dist = glm::distance(s.poly.points[i], s.poly.points[j]);
-				s.joints.emplace_back(i, j, dist);
+			// build out the joints base on strenght setting
+			for (size_t i = 0; i < s.poly.points.size(); i++) {
+				for (size_t step = 1; step <= strength; step++) {
+					if (step >= s.poly.points.size()) break; // don't loop entire shape
+					size_t j = (i + step) % s.poly.points.size();
+					float dist = glm::distance(s.poly.points[i], s.poly.points[j]);
+					s.joints.emplace_back(i, j, dist);
+				}
 			}
 		}
 

@@ -72,6 +72,12 @@ namespace wf
 			}
 		}
 
+		void destroy()
+		{
+			registry.destroy(handle);
+			handle = entt::null;
+		}
+
 		entt::registry& registry;
 		EntityID handle;
 		std::string name{};

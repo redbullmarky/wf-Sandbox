@@ -13,7 +13,7 @@ namespace Squishies
 
 		static Squishy createSquare(float size);
 
-		static Squishy createCircle(float radius, int segments);
+		static Squishy createCircle(float radius, int segments, int strength = 2);
 
 		static Squishy createGear(float radius, int teeth, float toothDepth);
 

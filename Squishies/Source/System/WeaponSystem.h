@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine.h"
 #include "Event/DeployWeapon.h"
+#include "Event/ExplodeGrenade.h"
 
 namespace Squishies
 {
@@ -14,6 +15,7 @@ namespace Squishies
 
 	private:
 		void spawnGrenade(event::DeployWeapon& detail);
+		void explodeGrenade(event::ExplodeGrenade& detail);
 
 	private:
 		// grenade model, for when we need it
