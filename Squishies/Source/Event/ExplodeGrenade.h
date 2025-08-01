@@ -5,12 +5,12 @@ namespace Squishies::event
 {
 	struct ExplodeGrenade
 	{
-		wf::EntityID id;
-		wf::EntityID playerId;
+		wf::Entity id;
+		wf::Entity player;
 		wf::Vec3 position;
 
-		ExplodeGrenade(wf::EntityID id, wf::EntityID playerId, const wf::Vec3& position)
-			: id(id), playerId(playerId), position(position) {
+		ExplodeGrenade(wf::Entity id, wf::Entity player, const wf::Vec3& position)
+			: id(id), player(player), position(position) {
 		}
 	};
 }

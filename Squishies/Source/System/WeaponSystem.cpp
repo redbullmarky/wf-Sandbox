@@ -52,8 +52,7 @@ namespace Squishies
 		auto ent = scene->createObject(detail.position);
 		auto& material = ent.addComponent<wf::component::Material>();
 		auto& body = ent.addComponent<Component::SoftBody>(*m_grenadeProto.get());
-		auto& nade = ent.addComponent<Component::Grenade>();
-		nade.playerId = detail.playerId;
+		auto& nade = ent.addComponent<Component::Grenade>(detail.player);
 
 		// collider
 		ent.addComponent<Component::Collider>(CollisionGroup::PROJECTILE, CollisionGroup::ALL & ~(CollisionGroup::CHARACTER));
@@ -105,27 +104,20 @@ namespace Squishies
 				if (outside) return;
 
 				// 2. check the points
-				std::vector<std::pair<unsigned int, float>> hitPoints;
+				std::vector<std::pair<unsigned int, float>> hitpoints;
 
 				for (unsigned int i = 0; i < softbody.points.size(); i++) {
 					float distSq = glm::length2(softbody.points[i].position - detail.position);
 
 					if (distSq <= detail.radius * detail.radius) {
-						hitPoints.push_back({ i, distSq });
+						hitpoints.push_back({ i, distSq });
 					}
 				}
 
-				auto& name = entityManager->get(playerId).getComponent<wf::component::NameTag>();
-				printf("hitpoints on %s = %zu", name.name.c_str(), hitPoints.size());
-
 				// 3. if we have points, dispatch the event
-				if (hitPoints.size()) {
-					event::SplitSquishy e(playerId, hitPoints, detail.position, detail.power);
+				if (hitpoints.size()) {
+					event::SplitSquishy e(entityManager->get(playerId), hitpoints, detail.position, detail.power);
 					eventDispatcher->dispatch<event::SplitSquishy>(e);
-
-					// @todo do something more devestating than a printf log. plus it'd be the listener that does this stuff not here.
-					printf("GOTCHA!\n");
-					//entityManager->destroy(playerId);
 				}
 			});
 	}

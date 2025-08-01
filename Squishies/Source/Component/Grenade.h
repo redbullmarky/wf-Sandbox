@@ -5,7 +5,7 @@ namespace Squishies::Component
 {
 	struct Grenade
 	{
-		wf::EntityID playerId{};			// who threw it
+		wf::Entity player;					// who threw it
 		wf::Vec3 force{};					// forces on the nade
 		wf::Vec3 velocity{};				// current speed
 		float mass{ 1.f };					// grenade mass

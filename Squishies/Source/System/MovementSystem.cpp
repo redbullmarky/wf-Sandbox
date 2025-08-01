@@ -64,7 +64,7 @@ namespace Squishies
 				// fire!
 				if (wf::isMouseButtonPressed(wf::BUTTON_LEFT)) {
 					const auto cam = *scene->getCurrentCamera();
-					deployWeapon(playerId, squishy, inventory, wf::getMouseWorldPosition(cam));
+					deployWeapon(entityManager->get(playerId), squishy, inventory, wf::getMouseWorldPosition(cam));
 				}
 			});
 	}
@@ -90,10 +90,10 @@ namespace Squishies
 		}
 	}
 
-	void MovementSystem::deployWeapon(wf::EntityID playerId, Component::SoftBody& squishy, Component::Inventory& inventory, const wf::Vec3& target)
+	void MovementSystem::deployWeapon(wf::Entity player, Component::SoftBody& squishy, Component::Inventory& inventory, const wf::Vec3& target)
 	{
 		auto pos = squishy.derivedPosition;
-		auto e = event::DeployWeapon{ playerId, inventory.selectedIndex, squishy.derivedPosition, target, 20.f };
+		auto e = event::DeployWeapon{ player, inventory.selectedIndex, squishy.derivedPosition, target, 20.f };
 
 		eventDispatcher->dispatch<event::DeployWeapon>(e);
 	}

@@ -24,6 +24,6 @@ namespace Squishies
 		void applyJump(Component::SoftBody& squishy);
 		void applyDuck(Component::SoftBody& squishy);
 
-		void deployWeapon(wf::EntityID playerId, Component::SoftBody& squishy, Component::Inventory& inventory, const wf::Vec3& target);
+		void deployWeapon(wf::Entity player, Component::SoftBody& squishy, Component::Inventory& inventory, const wf::Vec3& target);
 	};
 }
