@@ -4,6 +4,7 @@
   "dependencies": [
     "assimp",
     "bullet3",
+    "entt",
     "fmt",
     "glew",
     "glm",
@@ -29,6 +30,6 @@
         "png"
       ]
     },
-    "entt"
+    "spdlog"
   ]
 }
