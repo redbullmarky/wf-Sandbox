@@ -17,7 +17,7 @@ namespace Squishies
 		wf::initGui();
 		//wf::setFixedTimestep(0.005f);
 
-		m_scene = std::make_shared<GameScene>();
+		m_scene = std::make_shared<TestScene>();
 		if (!m_scene->init()) {
 			return false;
 		}
