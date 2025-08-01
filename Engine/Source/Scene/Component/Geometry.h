@@ -3,9 +3,9 @@
 
 #include <memory>
 
-namespace wf::component
+namespace wf
 {
-	struct Geometry
+	struct GeometryComponent
 	{
 		std::shared_ptr<Mesh> mesh;					// the actual mesh geometry
 	};

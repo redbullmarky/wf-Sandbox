@@ -170,7 +170,7 @@ namespace wf
 		return g_gameState.inputHandler.isMouseButtonHeld(button);
 	}
 
-	Vec3 getMouseWorldPosition(const component::Camera& camera)
+	Vec3 getMouseWorldPosition(const CameraComponent& camera)
 	{
 		Vec2 mousePos = getMousePosition();
 		Vec2 screenSize = getWindow().getSize();

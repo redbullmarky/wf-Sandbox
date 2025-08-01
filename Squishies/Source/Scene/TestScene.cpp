@@ -35,16 +35,16 @@ namespace Squishies
 
 		wf::wgl::bindRenderTarget(m_shadowMap);
 		{
-			getEntityManager()->each<wf::component::Material>(
-				[&](wf::component::Material& mat) {
+			getEntityManager()->each<wf::MaterialComponent>(
+				[&](wf::MaterialComponent& mat) {
 					mat.shadow.shadowPass = true;
 				});
 
 			currentCamera = &currentLight->lightCam;
 			wf::Scene::render(dt);
 
-			getEntityManager()->each<wf::component::Material>(
-				[&](wf::component::Material& mat) {
+			getEntityManager()->each<wf::MaterialComponent>(
+				[&](wf::MaterialComponent& mat) {
 					mat.shadow.shadowPass = false;
 				});
 		}
@@ -78,18 +78,18 @@ namespace Squishies
 
 		{
 			auto obj = createObject();
-			obj.addComponent<wf::component::NameTag>("Plane");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSimplePlane());
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::NameTagComponent>("Plane");
+			auto& geometry = obj.addComponent<wf::GeometryComponent>(wf::mesh::createSimplePlane());
+			auto& material = obj.addComponent<wf::MaterialComponent>();
 			material.diffuse.map = grassTex;
 			material.shadow.map = &m_shadowMap;
 		}
 
 		{
 			auto obj = createObject({ 2.f, 1.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Sphere 1");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::NameTagComponent>("Sphere 1");
+			auto& geometry = obj.addComponent<wf::GeometryComponent>(wf::mesh::createSphere(1.f, 25, 25));
+			auto& material = obj.addComponent<wf::MaterialComponent>();
 			material.diffuse.colour = wf::ORANGE;
 			material.normal.map = scuffyNorm;
 			material.specular.intensity = 1.5f;
@@ -98,9 +98,9 @@ namespace Squishies
 
 		{
 			auto obj = createObject({ 2.f, 1.f, 4.f });
-			obj.addComponent<wf::component::NameTag>("Sphere 2");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::NameTagComponent>("Sphere 2");
+			auto& geometry = obj.addComponent<wf::GeometryComponent>(wf::mesh::createSphere(1.f, 25, 25));
+			auto& material = obj.addComponent<wf::MaterialComponent>();
 			material.diffuse.colour = wf::RED;
 			material.normal.map = scuffyNorm;
 			material.specular.intensity = 1.5f;
@@ -138,8 +138,8 @@ namespace Squishies
 			}
 			ImGui::PopID();
 
-			getEntityManager()->each<wf::component::Transform, wf::component::Material, wf::component::NameTag>(
-				[&](wf::EntityID id, wf::component::Transform& transform, wf::component::Material& material, const wf::component::NameTag& nametag) {
+			getEntityManager()->each<wf::TransformComponent, wf::MaterialComponent, wf::NameTagComponent>(
+				[&](wf::EntityID id, wf::TransformComponent& transform, wf::MaterialComponent& material, const wf::NameTagComponent& nametag) {
 					ImGui::PushID(static_cast<int>(id));
 					ImGui::SeparatorText(nametag.name.c_str());
 

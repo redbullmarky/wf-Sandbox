@@ -25,10 +25,10 @@ namespace Squishies
 
 	void SoftBodySystem::update(float dt)
 	{
-		entityManager->each<Component::SoftBody, wf::component::Geometry>(
-			[&](wf::EntityID id, Component::SoftBody& softbody, wf::component::Geometry& geometry) {
+		entityManager->each<Component::SoftBody, wf::GeometryComponent>(
+			[&](wf::EntityID id, Component::SoftBody& softbody, wf::GeometryComponent& geometry) {
 
-				entityManager->get(id).getComponent<wf::component::Material>().diffuse.colour = softbody.colour;
+				entityManager->get(id).getComponent<wf::MaterialComponent>().diffuse.colour = softbody.colour;
 
 				auto& verts = geometry.mesh->vertices;
 				verts[0].position = softbody.derivedPosition;
@@ -66,13 +66,13 @@ namespace Squishies
 
 		// create the dynamic geometry
 		auto& points = softbody.shape.getPoints();
-		auto& geometry = entity.addComponent<wf::component::Geometry>(softbody.shape.createMesh());
+		auto& geometry = entity.addComponent<wf::GeometryComponent>(softbody.shape.createMesh());
 		geometry.mesh->isDynamic = true;
-		entity.getComponent<wf::component::Material>().diffuse.colour = softbody.colour;
+		entity.getComponent<wf::MaterialComponent>().diffuse.colour = softbody.colour;
 
 		// set up the pointmasses for all of the vertices.
 		// we can probably use the indices too for joints, though might be a little sloppy
-		auto& transform = entity.getComponent<wf::component::Transform>();
+		auto& transform = entity.getComponent<wf::TransformComponent>();
 		auto& mesh = geometry.mesh;
 
 		softbody.points.resize(points.size());

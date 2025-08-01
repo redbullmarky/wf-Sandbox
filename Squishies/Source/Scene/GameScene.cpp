@@ -64,13 +64,13 @@ namespace Squishies
 		createSquishy("Squishy 1", { -2.f, -5.f, 0.f }, wf::RED)
 			.addComponent<Component::UserControl>();
 		createSquishy("Squishy 2", { -1.2f, -3.f, 0.f }, wf::BLUE);
-		//createSquishy("Squishy 3", { 5.f, 5.f, 0.f }, wf::YELLOW);
+		createSquishy("Squishy 3", { 5.f, 5.f, 0.f }, wf::YELLOW);
 
 		// create a temporary floor
 		{
 			auto obj = createObject({ 0.f, -15.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Beam");
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::NameTagComponent>("Beam");
+			auto& material = obj.addComponent<wf::MaterialComponent>();
 			material.diffuse.map = woodTex;
 			material.normal.map = woodNorm;
 			auto& beam = obj.addComponent<Component::SoftBody>(SquishyFactory::createRect(100.f, 10.f));
@@ -84,8 +84,8 @@ namespace Squishies
 			platformSquishy.poly.rotate(-30.f);
 
 			auto obj = createObject({ -5.f, -5.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Platform");
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::NameTagComponent>("Platform");
+			auto& material = obj.addComponent<wf::MaterialComponent>();
 			material.diffuse.map = woodTex;
 			material.normal.map = woodNorm;
 			obj.addComponent<Component::SoftBody>(platformSquishy).setFixed();
@@ -94,8 +94,8 @@ namespace Squishies
 
 		{
 			auto obj = createObject({ 5.f, 5.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Gear");
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::NameTagComponent>("Gear");
+			auto& material = obj.addComponent<wf::MaterialComponent>();
 			//material.specular.intensity = 1.5f;
 			obj.addComponent<Component::SoftBody>(SquishyFactory::createGear(1.5, 10, .3f, wf::BLACK)).setFixed();
 			obj.addComponent<Component::Collider>(CollisionGroup::KINEMATIC);
@@ -145,8 +145,8 @@ namespace Squishies
 			ImGui::PopID();
 
 			// INVENTORIES
-			getEntityManager()->each<wf::component::NameTag, Component::Inventory>(
-				[&](wf::EntityID id, const wf::component::NameTag& nametag, Component::Inventory& inventory) {
+			getEntityManager()->each<wf::NameTagComponent, Component::Inventory>(
+				[&](wf::EntityID id, const wf::NameTagComponent& nametag, Component::Inventory& inventory) {
 					ImGui::PushID(static_cast<int>(id));
 					ImGui::SeparatorText(nametag.name.c_str());
 
@@ -161,8 +161,8 @@ namespace Squishies
 				});
 
 			if (ImGui::CollapsingHeader("Obj explorere")) {
-				getEntityManager()->each<wf::component::Transform, wf::component::Material, wf::component::NameTag>(
-					[&](wf::EntityID id, wf::component::Transform& transform, wf::component::Material& material, const wf::component::NameTag& nametag) {
+				getEntityManager()->each<wf::TransformComponent, wf::MaterialComponent, wf::NameTagComponent>(
+					[&](wf::EntityID id, wf::TransformComponent& transform, wf::MaterialComponent& material, const wf::NameTagComponent& nametag) {
 
 						auto ent = getEntityManager()->get(id);
 
@@ -208,8 +208,8 @@ namespace Squishies
 
 	void GameScene::resetSquishies()
 	{
-		getEntityManager()->each<wf::component::Transform, Component::SoftBody>(
-			[&](wf::EntityID id, wf::component::Transform& transform, Component::SoftBody& softbody) {
+		getEntityManager()->each<wf::TransformComponent, Component::SoftBody>(
+			[&](wf::EntityID id, wf::TransformComponent& transform, Component::SoftBody& softbody) {
 				for (size_t i = 0; i < softbody.points.size(); i++) {
 					softbody.points[i].position = wf::Vec3(softbody.shape.poly.points[i], 0.f) + softbody.originalPosition;
 					softbody.points[i].velocity = softbody.points[i].force = {};
@@ -234,9 +234,9 @@ namespace Squishies
 
 		// main object
 		auto obj = createObject(pos);
-		obj.addComponent<wf::component::NameTag>(name);
+		obj.addComponent<wf::NameTagComponent>(name);
 		obj.addComponent<Component::Character>();
-		auto& material = obj.addComponent<wf::component::Material>();
+		auto& material = obj.addComponent<wf::MaterialComponent>();
 		//material.specular.intensity = 1.5f;
 
 		// collider

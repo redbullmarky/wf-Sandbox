@@ -2,9 +2,9 @@
 #include "Camera.h"
 #include "Core/Core.h"
 
-namespace wf::component
+namespace wf
 {
-	[[nodiscard]] Camera Camera::createPerspective(Vec3 position, Vec3 target, float fovDegrees)
+	[[nodiscard]] CameraComponent CameraComponent::createPerspective(Vec3 position, Vec3 target, float fovDegrees)
 	{
 		return {
 			.position = position,
@@ -14,7 +14,7 @@ namespace wf::component
 		};
 	}
 
-	[[nodiscard]] Camera Camera::createOrthographic(Vec3 position, Vec3 target, float width)
+	[[nodiscard]] CameraComponent CameraComponent::createOrthographic(Vec3 position, Vec3 target, float width)
 	{
 		return {
 			.position = position,
@@ -24,12 +24,12 @@ namespace wf::component
 		};
 	}
 
-	Vec3 Camera::getDirection() const
+	Vec3 CameraComponent::getDirection() const
 	{
 		return glm::normalize(target - position);
 	}
 
-	Mat4 Camera::getViewMatrix() const
+	Mat4 CameraComponent::getViewMatrix() const
 	{
 		Vec3 forward = glm::normalize(target - position);
 
@@ -43,7 +43,7 @@ namespace wf::component
 		return Mat4{ glm::lookAt(position, position + forward, safeUp) };
 	}
 
-	Mat4 Camera::getProjectionMatrix() const
+	Mat4 CameraComponent::getProjectionMatrix() const
 	{
 		if (orthographic) {
 			float halfWidth = orthoWidth / 2.f;
@@ -60,27 +60,27 @@ namespace wf::component
 		}
 	}
 
-	Mat4 Camera::getViewProjectionMatrix() const
+	Mat4 CameraComponent::getViewProjectionMatrix() const
 	{
 		return getProjectionMatrix() * getViewMatrix();
 	}
 
-	Vec3 Camera::getForward() const
+	Vec3 CameraComponent::getForward() const
 	{
 		return glm::normalize(target - position);
 	}
 
-	Vec3 Camera::getUp() const
+	Vec3 CameraComponent::getUp() const
 	{
 		return glm::normalize(up);
 	}
 
-	Vec3 Camera::getRight() const
+	Vec3 CameraComponent::getRight() const
 	{
 		return glm::normalize(glm::cross(getForward(), getUp()));
 	}
 
-	void Camera::moveForward(float distance, bool moveInWorldPlane)
+	void CameraComponent::moveForward(float distance, bool moveInWorldPlane)
 	{
 		auto forward = getForward();
 
@@ -96,7 +96,7 @@ namespace wf::component
 		target += forward;
 	}
 
-	void Camera::moveUp(float distance)
+	void CameraComponent::moveUp(float distance)
 	{
 		auto up = getUp() * distance;
 
@@ -104,7 +104,7 @@ namespace wf::component
 		target += up;
 	}
 
-	void Camera::moveRight(float distance, bool moveInWorldPlane)
+	void CameraComponent::moveRight(float distance, bool moveInWorldPlane)
 	{
 		auto right = getRight();
 
@@ -120,7 +120,7 @@ namespace wf::component
 		target += right;
 	}
 
-	void Camera::moveToTarget(float delta)
+	void CameraComponent::moveToTarget(float delta)
 	{
 		float distance = glm::distance(position, target) + delta;
 		if (distance <= 0) distance = 0.001f;
@@ -128,7 +128,7 @@ namespace wf::component
 		position = target + (getForward() * -distance);
 	}
 
-	void Camera::yaw(float angle, bool rotateAroundTarget)
+	void CameraComponent::yaw(float angle, bool rotateAroundTarget)
 	{
 		auto targetPosition = target - position;
 		targetPosition = glm::angleAxis(angle, getUp()) * targetPosition;
@@ -141,7 +141,7 @@ namespace wf::component
 		}
 	}
 
-	void Camera::pitch(float angle, bool lockView, bool rotateAroundTarget, bool rotateUp)
+	void CameraComponent::pitch(float angle, bool lockView, bool rotateAroundTarget, bool rotateUp)
 	{
 		auto up = getUp();
 		auto right = getRight();
@@ -175,12 +175,12 @@ namespace wf::component
 		}
 	}
 
-	void Camera::roll(float angle)
+	void CameraComponent::roll(float angle)
 	{
 		up = glm::angleAxis(angle, getForward()) * up;
 	}
 
-	void Camera::updateFree(float dt, float moveSpeed, float lookSpeed, float zoomSpeed)
+	void CameraComponent::updateFree(float dt, float moveSpeed, float lookSpeed, float zoomSpeed)
 	{
 		// base speeds until we figure out stuff
 		float moveBase{ 3.f * dt };

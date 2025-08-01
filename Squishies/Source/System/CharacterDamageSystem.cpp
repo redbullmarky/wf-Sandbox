@@ -18,7 +18,7 @@ namespace Squishies
 
 	void CharacterDamageSystem::split(event::SplitSquishy& event)
 	{
-		auto& name = event.player.getComponent<wf::component::NameTag>();
+		auto& name = event.player.getComponent<wf::NameTagComponent>();
 		printf("GOTCHA! hitpoints on %s = %zu\n", name.name.c_str(), event.hitpoints.size());
 
 		// @todo

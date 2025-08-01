@@ -3,7 +3,7 @@
 #include "Geometry/Geometry.h"
 #include "Misc/Colour.h"
 
-namespace wf::component
+namespace wf
 {
 	enum class LightType
 	{
@@ -12,15 +12,15 @@ namespace wf::component
 		SPOT
 	};
 
-	struct Light
+	struct LightComponent
 	{
 		LightType type{ LightType::DIRECTIONAL }; // @todo currently only directional works anyway
 		Colour colour{ WHITE };
 		float ambientLevel{ .1f };
 
-		Camera lightCam;
+		CameraComponent lightCam;
 
-		Light(const Vec3& position, const Vec3& target, LightType type = LightType::DIRECTIONAL);
+		LightComponent(const Vec3& position, const Vec3& target, LightType type = LightType::DIRECTIONAL);
 
 		Vec3 getDirection() const;
 		Mat4 getViewProjectionMatrix() const;

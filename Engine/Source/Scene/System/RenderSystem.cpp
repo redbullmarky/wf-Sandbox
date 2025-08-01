@@ -22,8 +22,8 @@ namespace wf::system
 	{
 		// for any geometry we've not prepared, we'll need to create the VAO/VBOs for it.
 		// if we already have those, and we're working with a dynamic mesh, see if it needs updating and update it
-		entityManager->each<component::Geometry>(
-			[&](component::Geometry& geometry) {
+		entityManager->each<GeometryComponent>(
+			[&](GeometryComponent& geometry) {
 				// no mesh yet
 				if (!geometry.mesh) return;
 
@@ -40,8 +40,8 @@ namespace wf::system
 
 		// for any materials we've not prepared, we'll setup the textures/shaders, etc.
 		// for those we have, we'll update the shader uniforms
-		entityManager->each<component::Material>(
-			[&](component::Material& material) {
+		entityManager->each<MaterialComponent>(
+			[&](MaterialComponent& material) {
 				// if we've not got a handle, prep it.
 				if (!material.shader || !material.shader->handle) {
 					uploadMaterialData(material);
@@ -62,8 +62,8 @@ namespace wf::system
 
 		auto& camera = *scene->getCurrentCamera();
 
-		entityManager->each<component::Geometry, component::Material, component::Transform>(
-			[&](const component::Geometry& geometry, const component::Material& material, const component::Transform& transform) {
+		entityManager->each<GeometryComponent, MaterialComponent, TransformComponent>(
+			[&](const GeometryComponent& geometry, const MaterialComponent& material, const TransformComponent& transform) {
 				if (!material.visible) return;
 				if (!geometry.mesh || !geometry.mesh->handle || !m_meshBuffers.contains(geometry.mesh->handle)) return;
 				if (!material.shader || !material.shader->handle) return;
@@ -157,8 +157,8 @@ namespace wf::system
 	void RenderSystem::teardown()
 	{
 		// delete material (i.e. textures and shaders)
-		entityManager->each<component::Material>(
-			[&](component::Material& material) {
+		entityManager->each<MaterialComponent>(
+			[&](MaterialComponent& material) {
 				if (!material.shader->handle) return;
 				if (material.diffuse.map && material.diffuse.map->handle.glId) {
 					wgl::destroyTexture(material.diffuse.map.get()->handle);
@@ -179,8 +179,8 @@ namespace wf::system
 			});
 
 		// delete the VAO/VBOs
-		entityManager->each<component::Geometry>(
-			[&](component::Geometry& geometry) {
+		entityManager->each<GeometryComponent>(
+			[&](GeometryComponent& geometry) {
 				if (!geometry.mesh->handle) return;
 
 				if (!m_meshBuffers.contains(geometry.mesh->handle)) throw std::runtime_error("Encountered an unmanaged MeshBuffer");
@@ -194,7 +194,7 @@ namespace wf::system
 		// @todo delete FBOs, although we don't yet manage those here
 	}
 
-	void RenderSystem::uploadMesh(component::Geometry& geometry)
+	void RenderSystem::uploadMesh(GeometryComponent& geometry)
 	{
 		auto buffers = wgl::createMeshBuffers();
 		wgl::uploadMeshData(buffers, geometry.mesh->vertices, geometry.mesh->indices, geometry.mesh->isDynamic);
@@ -203,7 +203,7 @@ namespace wf::system
 		m_meshBuffers[id] = buffers;
 	}
 
-	void RenderSystem::updateMeshData(const component::Geometry& geometry)
+	void RenderSystem::updateMeshData(const GeometryComponent& geometry)
 	{
 		if (geometry.mesh->isDynamic && (geometry.mesh->needsUpdate || geometry.mesh->autoUpdate)) {
 			auto& buffers = m_meshBuffers[geometry.mesh->handle];
@@ -211,7 +211,7 @@ namespace wf::system
 		}
 	}
 
-	void RenderSystem::uploadMaterialData(component::Material& material)
+	void RenderSystem::uploadMaterialData(MaterialComponent& material)
 	{
 		if (!material.shader) {
 			material.shader = Shader::create();
@@ -255,7 +255,7 @@ namespace wf::system
 		}
 	}
 
-	void RenderSystem::updateMaterialData(const component::Material& material)
+	void RenderSystem::updateMaterialData(const MaterialComponent& material)
 	{
 		if (!material.shader || !material.shader->handle) throw std::runtime_error("NO shader loaded");
 

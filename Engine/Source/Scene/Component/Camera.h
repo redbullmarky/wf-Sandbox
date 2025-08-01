@@ -2,9 +2,9 @@
 #include "Geometry/Geometry.h"
 #include "Math/Math.h"
 
-namespace wf::component
+namespace wf
 {
-	struct Camera
+	struct CameraComponent
 	{
 		Vec3 position{};
 		Vec3 target{};
@@ -19,8 +19,8 @@ namespace wf::component
 		// For ortho:
 		float orthoWidth = 10.f;
 
-		static Camera createPerspective(Vec3 position, Vec3 target, float fovDegrees = 60.f);
-		static Camera createOrthographic(Vec3 position, Vec3 target, float width);
+		static CameraComponent createPerspective(Vec3 position, Vec3 target, float fovDegrees = 60.f);
+		static CameraComponent createOrthographic(Vec3 position, Vec3 target, float width);
 
 		Vec3 getDirection() const;
 

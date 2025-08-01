@@ -81,32 +81,32 @@ namespace wf
 	[[nodiscard]] Entity Scene::createObject(const wf::Vec3& position)
 	{
 		auto ob = createEmptyObject();
-		ob.addComponent<component::Transform>(position);
+		ob.addComponent<TransformComponent>(position);
 		return ob;
 	}
 
-	component::Camera* Scene::createCamera(const Vec3& position, const Vec3& target, bool ortho, float fovOrWidth)
+	CameraComponent* Scene::createCamera(const Vec3& position, const Vec3& target, bool ortho, float fovOrWidth)
 	{
 		auto object = createObject(position);
 
-		component::Camera cam;
+		CameraComponent cam;
 
 		if (ortho) {
-			cam = component::Camera::createOrthographic(
+			cam = CameraComponent::createOrthographic(
 				position,
 				target,
 				fovOrWidth > 0.f ? fovOrWidth : 10.f
 			);
 		}
 		else {
-			cam = component::Camera::createPerspective(
+			cam = CameraComponent::createPerspective(
 				position,
 				target,
 				fovOrWidth > 0.f ? fovOrWidth : 60.f
 			);
 		}
 
-		auto& camera = object.addComponent<component::Camera>(cam);
+		auto& camera = object.addComponent<CameraComponent>(cam);
 		if (!currentCamera) {
 			currentCamera = &camera;
 		}
@@ -114,18 +114,18 @@ namespace wf
 		return &camera;
 	}
 
-	component::Camera* Scene::getCurrentCamera()
+	CameraComponent* Scene::getCurrentCamera()
 	{
 		return currentCamera;
 	}
 
-	component::Light* Scene::createLight(const Vec3& position, const Vec3& target)
+	LightComponent* Scene::createLight(const Vec3& position, const Vec3& target)
 	{
 		auto object = createObject();
 
-		component::Light light(position, target);
+		LightComponent light(position, target);
 
-		auto& lightCmp = object.addComponent<component::Light>(light);
+		auto& lightCmp = object.addComponent<LightComponent>(light);
 		if (!currentLight) {
 			currentLight = &lightCmp;
 		}
@@ -133,7 +133,7 @@ namespace wf
 		return &lightCmp;
 	}
 
-	component::Light* Scene::getCurrentLight()
+	LightComponent* Scene::getCurrentLight()
 	{
 		return currentLight;
 	}

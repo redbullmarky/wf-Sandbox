@@ -68,7 +68,7 @@ namespace wf
 	bool isMouseButtonReleased(int button);
 	bool isMouseButtonHeld(int button);
 
-	Vec3 getMouseWorldPosition(const component::Camera& camera);
+	Vec3 getMouseWorldPosition(const CameraComponent& camera);
 	Vec2 getMousePosition();
 	Vec2 getMouseWheel();
 	Vec2 getMouseDelta();

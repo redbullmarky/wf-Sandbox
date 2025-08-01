@@ -35,16 +35,16 @@ namespace Sandbox
 
 		wf::wgl::bindRenderTarget(m_shadowMap);
 		{
-			getEntityManager()->each<wf::component::Material>(
-				[&](wf::component::Material& mat) {
+			getEntityManager()->each<wf::component::MaterialComponent>(
+				[&](wf::component::MaterialComponent& mat) {
 					mat.shadow.shadowPass = true;
 				});
 
 			currentCamera = &currentLight->lightCam;
 			wf::Scene::render(dt);
 
-			getEntityManager()->each<wf::component::Material>(
-				[&](wf::component::Material& mat) {
+			getEntityManager()->each<wf::component::MaterialComponent>(
+				[&](wf::component::MaterialComponent& mat) {
 					mat.shadow.shadowPass = false;
 				});
 		}
@@ -86,9 +86,9 @@ namespace Sandbox
 
 		{
 			auto obj = createObject();
-			obj.addComponent<wf::component::NameTag>("Plane");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSimplePlane());
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::component::NameTagComponent>("Plane");
+			auto& geometry = obj.addComponent<wf::component::GeometryComponent>(wf::mesh::createSimplePlane());
+			auto& material = obj.addComponent<wf::component::MaterialComponent>();
 			material.diffuse.map = grassTex;
 			material.shadow.map = &m_shadowMap;
 		}
@@ -96,9 +96,9 @@ namespace Sandbox
 		// ROW
 		{
 			auto obj = createObject({ -2.f, 1.f, -4.f });
-			obj.addComponent<wf::component::NameTag>("Triangle");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createHelloTriangle());
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::component::NameTagComponent>("Triangle");
+			auto& geometry = obj.addComponent<wf::component::GeometryComponent>(wf::mesh::createHelloTriangle());
+			auto& material = obj.addComponent<wf::component::MaterialComponent>();
 			material.diffuse.map = brickTex;
 			material.normal.map = brickNorm;
 			material.shadow.map = &m_shadowMap;
@@ -106,9 +106,9 @@ namespace Sandbox
 
 		{
 			auto obj = createObject({ 2.f, .5f, -4.f });
-			obj.addComponent<wf::component::NameTag>("Scruffcube");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCube({ 1.f, 1.f, 1.f }));
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::component::NameTagComponent>("Scruffcube");
+			auto& geometry = obj.addComponent<wf::component::GeometryComponent>(wf::mesh::createCube({ 1.f, 1.f, 1.f }));
+			auto& material = obj.addComponent<wf::component::MaterialComponent>();
 			material.diffuse.map = brickTex;
 			material.normal.map = brickNorm;
 			material.shadow.map = &m_shadowMap;
@@ -116,9 +116,9 @@ namespace Sandbox
 
 		{
 			auto obj = createObject({ 6.f, .5f, -4.f });
-			obj.addComponent<wf::component::NameTag>("Waterbox");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::component::NameTagComponent>("Waterbox");
+			auto& geometry = obj.addComponent<wf::component::GeometryComponent>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
+			auto& material = obj.addComponent<wf::component::MaterialComponent>();
 			material.diffuse.map = waterTex;
 			material.specular.intensity = 1.5f;
 			material.shadow.map = &m_shadowMap;
@@ -127,9 +127,9 @@ namespace Sandbox
 		// ROW
 		{
 			auto obj = createObject({ -2.f, .5f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Cube");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::component::NameTagComponent>("Cube");
+			auto& geometry = obj.addComponent<wf::component::GeometryComponent>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
+			auto& material = obj.addComponent<wf::component::MaterialComponent>();
 			material.diffuse.map = gravelTex;
 			material.normal.map = gravelNorm;
 			material.shadow.map = &m_shadowMap;
@@ -137,9 +137,9 @@ namespace Sandbox
 
 		{
 			auto obj = createObject({ 2.f, 1.f, 0.f });
-			obj.addComponent<wf::component::NameTag>("Globe");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::component::NameTagComponent>("Globe");
+			auto& geometry = obj.addComponent<wf::component::GeometryComponent>(wf::mesh::createSphere(1.f, 25, 25));
+			auto& material = obj.addComponent<wf::component::MaterialComponent>();
 			material.diffuse.map = earthTex;
 			material.shadow.map = &m_shadowMap;
 		}
@@ -147,9 +147,9 @@ namespace Sandbox
 		// ROW
 		{
 			auto obj = createObject({ -2.f, .5f, 4.f });
-			obj.addComponent<wf::component::NameTag>("Cube 2");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::component::NameTagComponent>("Cube 2");
+			auto& geometry = obj.addComponent<wf::component::GeometryComponent>(wf::mesh::createCubeExt({ 1.f, 1.f, 1.f }));
+			auto& material = obj.addComponent<wf::component::MaterialComponent>();
 			material.diffuse.map = brickTex;
 			material.normal.map = brickNorm;
 			material.shadow.map = &m_shadowMap;
@@ -157,9 +157,9 @@ namespace Sandbox
 
 		{
 			auto obj = createObject({ 2.f, 1.f, 4.f });
-			obj.addComponent<wf::component::NameTag>("Sphere");
-			auto& geometry = obj.addComponent<wf::component::Geometry>(wf::mesh::createSphere(1.f, 25, 25));
-			auto& material = obj.addComponent<wf::component::Material>();
+			obj.addComponent<wf::component::NameTagComponent>("Sphere");
+			auto& geometry = obj.addComponent<wf::component::GeometryComponent>(wf::mesh::createSphere(1.f, 25, 25));
+			auto& material = obj.addComponent<wf::component::MaterialComponent>();
 			material.diffuse.colour = wf::RED;
 			material.normal.map = scuffyNorm;
 			material.specular.intensity = 1.5f;
@@ -197,8 +197,8 @@ namespace Sandbox
 			}
 			ImGui::PopID();
 
-			getEntityManager()->each<wf::component::Transform, wf::component::Material, wf::component::NameTag>(
-				[&](wf::EntityID id, wf::component::Transform& transform, wf::component::Material& material, const wf::component::NameTag& nametag) {
+			getEntityManager()->each<wf::component::TransformComponent, wf::component::MaterialComponent, wf::component::NameTagComponent>(
+				[&](wf::EntityID id, wf::component::TransformComponent& transform, wf::component::MaterialComponent& material, const wf::component::NameTagComponent& nametag) {
 					ImGui::PushID(static_cast<int>(id));
 					ImGui::SeparatorText(nametag.name.c_str());
 

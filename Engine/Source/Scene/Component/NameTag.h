@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
 
-namespace wf::component
+namespace wf
 {
-	struct NameTag
+	struct NameTagComponent
 	{
 		std::string name;
 	};

@@ -2,27 +2,27 @@
 #include "Light.h"
 
 
-namespace wf::component
+namespace wf
 {
-	Light::Light(const Vec3& position, const Vec3& target, LightType type)
+	LightComponent::LightComponent(const Vec3& position, const Vec3& target, LightType type)
 		: type(type)
 	{
 		switch (type) {
 		case LightType::DIRECTIONAL:
-			lightCam = Camera::createOrthographic(position, target, 50.f);
+			lightCam = CameraComponent::createOrthographic(position, target, 50.f);
 			lightCam.farPlane = 500.f;
 			break;
 		default:
-			lightCam = Camera::createPerspective(position, target, 90.f);
+			lightCam = CameraComponent::createPerspective(position, target, 90.f);
 		}
 	}
 
-	Vec3 Light::getDirection() const
+	Vec3 LightComponent::getDirection() const
 	{
 		return lightCam.getDirection();
 	}
 
-	Mat4 Light::getViewProjectionMatrix() const
+	Mat4 LightComponent::getViewProjectionMatrix() const
 	{
 		return lightCam.getViewProjectionMatrix();
 	}

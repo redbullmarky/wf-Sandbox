@@ -1,11 +1,11 @@
 #pragma once
 #include "Math/Math.h"
 
-namespace wf::component
+namespace wf
 {
 	using BaseT = wf::Transform;
 
-	struct Transform : public BaseT
+	struct TransformComponent : public BaseT
 	{
 	};
 }

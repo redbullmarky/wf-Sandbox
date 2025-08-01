@@ -6,9 +6,9 @@
 
 #include <memory>
 
-namespace wf::component
+namespace wf
 {
-	struct Material
+	struct MaterialComponent
 	{
 		std::shared_ptr<Shader> shader;
 

@@ -132,7 +132,7 @@ namespace wf
 			return Vec2{ screenPos.x, screenPos.y };
 		}
 
-		void setCamera(component::Camera* camera)
+		void setCamera(CameraComponent* camera)
 		{
 			m_camera = camera;
 		}
@@ -166,7 +166,7 @@ namespace wf
 		}
 
 	private:
-		component::Camera* m_camera{ nullptr };
+		CameraComponent* m_camera{ nullptr };
 
 		std::vector<std::shared_ptr<IShape>> m_shapes;
 	};

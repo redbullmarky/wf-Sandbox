@@ -10,11 +10,8 @@
 
 namespace wf
 {
-	namespace component
-	{
-		struct Camera;
-		struct Light;
-	}
+	struct CameraComponent;
+	struct LightComponent;
 
 	struct SceneConfig
 	{
@@ -96,22 +93,22 @@ namespace wf
 		/**
 		 * @brief Create a perspective (default) or ortho camera. If it's the first camera, it'll also be used as the default
 		 */
-		component::Camera* createCamera(const Vec3& position, const Vec3& target, bool ortho = false, float fovOrWidth = -1.f);
+		CameraComponent* createCamera(const Vec3& position, const Vec3& target, bool ortho = false, float fovOrWidth = -1.f);
 
 		/**
 		 * @brief Fetch the camera currently in use
 		 */
-		component::Camera* getCurrentCamera();
+		CameraComponent* getCurrentCamera();
 
 		/**
 		 * @brief Create a simple light @todo only one for now for testing shadows, we'll need more.
 		 */
-		component::Light* createLight(const Vec3& position, const Vec3& target);
+		LightComponent* createLight(const Vec3& position, const Vec3& target);
 
 		/**
 		 * @brief Fetch the main light. @todo see createLight()
 		 */
-		component::Light* getCurrentLight();
+		LightComponent* getCurrentLight();
 
 		/**
 		 * @brief Return the entity manager attached to this scene
@@ -138,8 +135,8 @@ namespace wf
 		EntityManager entityManager;
 		EventDispatcher eventDispatcher;
 		SceneConfig config;
-		component::Camera* currentCamera{ nullptr };
-		component::Light* currentLight{ nullptr };
+		CameraComponent* currentCamera{ nullptr };
+		LightComponent* currentLight{ nullptr };
 
 	private:
 		std::vector<std::unique_ptr<ISystem>> m_systems;

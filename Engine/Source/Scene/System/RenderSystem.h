@@ -5,15 +5,14 @@
 
 #include <unordered_map>
 
-namespace wf::component
+namespace wf
 {
-	struct Geometry;
-	struct Material;
+	struct GeometryComponent;
+	struct MaterialComponent;
 }
 
 namespace wf::system
 {
-
 	class RenderSystem : public ISystem
 	{
 	public:
@@ -26,11 +25,11 @@ namespace wf::system
 		virtual void teardown() override;
 
 	private:
-		void uploadMesh(component::Geometry& geometry);
-		void updateMeshData(const component::Geometry& geometry);
+		void uploadMesh(GeometryComponent& geometry);
+		void updateMeshData(const GeometryComponent& geometry);
 
-		void uploadMaterialData(component::Material& material);
-		void updateMaterialData(const component::Material& material);
+		void uploadMaterialData(MaterialComponent& material);
+		void updateMaterialData(const MaterialComponent& material);
 
 	private:
 		std::unordered_map<unsigned int, wgl::MeshBufferHandle> m_meshBuffers;
