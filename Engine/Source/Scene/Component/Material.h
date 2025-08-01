@@ -14,8 +14,8 @@ namespace wf
 
 		struct Diffuse											// diffuse settings
 		{
-			std::shared_ptr<Texture> map;						// diffuse texture
-			Colour colour{ WHITE };							// base diffuse colour
+			std::shared_ptr<Texture> map;							// diffuse texture
+			Colour colour{ WHITE };									// base diffuse colour
 		} diffuse;
 
 		struct Normal											// normal map settings
@@ -27,7 +27,7 @@ namespace wf
 		struct Specular											// specular settings
 		{
 			std::shared_ptr<Texture> map;						// specular map
-			Colour colour{ WHITE };							// specular colour
+			Colour colour{ WHITE };									// specular colour
 			float shininess{ 32.f };								// how shiny
 			float intensity{ 0.f };									// level of specular. defaults to bland.
 		} specular;
@@ -38,11 +38,11 @@ namespace wf
 			bool shadowPass{ false };								// if we're creating the shadows (true) or using them.
 		} shadow;
 
-		wgl::BlendMode blendMode = wgl::BlendMode::OPAQUE;				// blend mode
-		wgl::CullMode cullMode = wgl::CullMode::BACK;						// cull mode
+		wgl::BlendMode blendMode = wgl::BlendMode::OPAQUE;		// blend mode
+		wgl::CullMode cullMode = wgl::CullMode::BACK;			// cull mode
 		bool depthMask{ true };									// depth mask
 		bool depthTest{ true };									// depth test
-		wgl::DepthFunc depthFunc{ wgl::DepthFunc::LESS };					// depth test function
+		wgl::DepthFunc depthFunc{ wgl::DepthFunc::LESS };		// depth test function
 
 		bool visible{ true };									// current visibility state
 		bool wireframe{ false };								// if we're drawing using wireframe mode
