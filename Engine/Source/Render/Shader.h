@@ -8,7 +8,7 @@ namespace wf
 {
 	struct Shader
 	{
-		unsigned int handle{ 0 };							// internal GL id
+		wgl::ShaderHandle handle;							// internal GL 
 		std::unordered_map<std::string, int> locs;			// shader locations
 
 		static std::shared_ptr<Shader> create()

@@ -1,4 +1,5 @@
 #pragma once
+#include "Core/GL.h"
 #include "Geometry.h"
 
 #include <memory>
@@ -8,7 +9,7 @@ namespace wf
 {
 	struct Mesh
 	{
-		unsigned int handle{};							// internal handle to associate with the GPU data
+		wgl::MeshBufferHandle buffers{};				// vao/vbo/ebo, etc. Anything associated/owned by our mesh
 
 		std::vector<wf::Vertex> vertices;				// vertices
 		std::vector<unsigned int> indices;				// indices for the triangles

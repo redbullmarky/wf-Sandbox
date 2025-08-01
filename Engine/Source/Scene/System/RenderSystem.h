@@ -3,8 +3,6 @@
 #include "Scene/Scene.h"
 #include "Scene/System.h"
 
-#include <unordered_map>
-
 namespace wf
 {
 	struct GeometryComponent;
@@ -30,12 +28,5 @@ namespace wf::system
 
 		void uploadMaterialData(MaterialComponent& material);
 		void updateMaterialData(const MaterialComponent& material);
-
-	private:
-		std::unordered_map<unsigned int, wgl::MeshBufferHandle> m_meshBuffers;
-		std::unordered_map<unsigned int, wgl::TextureHandle> m_textures;
-		std::unordered_map<unsigned int, wgl::ShaderHandle> m_shaders;
-
-		unsigned int m_lastId{ 0 };
 	};
 }
