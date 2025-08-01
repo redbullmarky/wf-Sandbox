@@ -11,6 +11,6 @@ namespace Squishies::Component
 		float mass{ 1.f };					// grenade mass
 		float blastRadius{ 3.f };			// effective coverage
 
-		float timer{ 3.f };			// how long before boom
+		float timer{ 3.f };					// how long before boom
 	};
 }

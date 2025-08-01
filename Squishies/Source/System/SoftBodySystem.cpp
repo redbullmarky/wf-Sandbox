@@ -1,5 +1,7 @@
 #include "SoftBodySystem.h"
 
+#include "Component/Character.h"
+#include "Component/Collider.h"
 #include "Component/SoftBody.h"
 #include "Config.h"
 
@@ -7,6 +9,11 @@
 
 namespace Squishies
 {
+	SoftBodySystem::SoftBodySystem(wf::Scene* scene)
+		:ISystem(scene), m_collider(scene->getEventDispatcher())
+	{
+	}
+
 	bool SoftBodySystem::init()
 	{
 		entityManager->onCreate<Component::SoftBody>([&](wf::Entity entity) {
@@ -19,10 +26,11 @@ namespace Squishies
 	void SoftBodySystem::update(float dt)
 	{
 		entityManager->each<Component::SoftBody, wf::component::Geometry>(
-			[&](Component::SoftBody& softbody, wf::component::Geometry& geometry) {
+			[&](wf::EntityID id, Component::SoftBody& softbody, wf::component::Geometry& geometry) {
+
+				entityManager->get(id).getComponent<wf::component::Material>().diffuse.colour = softbody.colour;
 
 				auto& verts = geometry.mesh->vertices;
-
 				verts[0].position = softbody.derivedPosition;
 
 				// update our actual mesh verts from our points
@@ -53,6 +61,7 @@ namespace Squishies
 	//		3. build the joints
 	void SoftBodySystem::createSquishy(wf::Entity entity)
 	{
+		// grab the body we'll be building from
 		auto& softbody = entity.getComponent<Component::SoftBody>();
 
 		// create the dynamic geometry
@@ -271,19 +280,24 @@ namespace Squishies
 	//		- process all collisions when we've checked the lot
 	void SoftBodySystem::handleCollisions()
 	{
-		auto view = entityManager->find<Component::SoftBody>();
+		auto view = entityManager->find<Component::SoftBody, Component::Collider>();
 
 		// make sure we're starting fresh
 		m_collider.reset();
 
 		// loop the objects and see what's colliding
 		view.each(
-			[&](wf::EntityID id, Component::SoftBody& softbody) {
+			[&](wf::EntityID id, Component::SoftBody& softbody, Component::Collider& collider) {
 				view.each(
-					[&](wf::EntityID id2, Component::SoftBody& softbody2) {
+					[&](wf::EntityID id2, Component::SoftBody& softbody2, Component::Collider& collider2) {
 
-						if (id == id2 || softbody.fixed && softbody2.fixed) return;
+						// no point if they're the same object or both fixed
+						if (id == id2 || (softbody.fixed && softbody2.fixed)) return;
 
+						// group vs mask says no
+						if (!((collider.collisionMask & collider2.collisionGroup) && (collider2.collisionMask & collider.collisionGroup))) return;
+
+						// now we can check
 						softbody.colliding = m_collider.check(softbody, softbody2);
 					});
 			});

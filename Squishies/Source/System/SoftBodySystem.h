@@ -11,7 +11,7 @@ namespace Squishies
 	class SoftBodySystem : public wf::ISystem
 	{
 	public:
-		using wf::ISystem::ISystem;
+		SoftBodySystem(wf::Scene* scene);
 
 		virtual bool init() override;
 		virtual void update(float dt) override;

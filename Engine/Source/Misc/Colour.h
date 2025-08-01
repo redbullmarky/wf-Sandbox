@@ -129,6 +129,12 @@ namespace wf
 		constexpr Colour() = default;
 		constexpr Colour(float r, float g, float b) : Colour(r, g, b, 1.f) {}
 		constexpr Colour(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
+
+		bool operator==(const Colour& other) const
+		{
+			return r == other.r && g == other.g &&
+				b == other.b && a == other.a;
+		}
 	};
 
 

@@ -18,6 +18,8 @@ namespace Squishies
 
 		static Poly createCircle(float radius, int segments);
 
+		static Poly createEllipse(float radiusX, float radiusY, int segments);
+
 		static Poly createGear(float radius, int teeth, float toothDepth);
 
 	private:

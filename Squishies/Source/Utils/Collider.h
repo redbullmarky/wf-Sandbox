@@ -19,7 +19,7 @@ namespace Squishies
 		float dist{};
 	};
 
-	struct Collision
+	struct CollisionData
 	{
 		Component::SoftBody* obj1{ nullptr };
 		size_t obj1Point{};
@@ -45,7 +45,7 @@ namespace Squishies
 	class Collider
 	{
 	public:
-		Collider() = default;
+		Collider(wf::EventDispatcher* eventDispatcher);
 		~Collider() = default;
 
 		/**
@@ -81,7 +81,9 @@ namespace Squishies
 		wf::Vec2 perp(const wf::Vec2& vec);
 
 	private:
-		std::vector<Collision> m_collisions;
+		wf::EventDispatcher* m_eventDispatcher{ nullptr };
+
+		std::vector<CollisionData> m_collisions;
 
 		// config
 		float m_penetrationThreshold{ .3f };

@@ -7,6 +7,10 @@
 
 namespace Squishies
 {
+	Collider::Collider(wf::EventDispatcher* eventDispatcher) : m_eventDispatcher(eventDispatcher)
+	{
+	}
+
 	void Collider::setup(float penetrationThreshold, float elasticity, float friction)
 	{
 		m_penetrationThreshold = penetrationThreshold;
@@ -46,8 +50,8 @@ namespace Squishies
 		size_t bBpmCount = obj2.points.size();
 		auto boxB = obj2.boundingBox;
 
-		Collision infoAway;
-		Collision infoSame;
+		CollisionData infoAway;
+		CollisionData infoSame;
 		bool hasCollisions = false;
 
 		for (size_t i = 0; i < bApmCount; i++) {
@@ -149,7 +153,7 @@ namespace Squishies
 		int penCount = 0;
 
 		for (size_t i = 0; i < m_collisions.size(); i++) {
-			const Collision& info = m_collisions[i];
+			const CollisionData& info = m_collisions[i];
 
 			// @todo this was quite useful but maybe a better way now we know what we're doing a bit more...
 			/*if (NotifyCollision(info)) {

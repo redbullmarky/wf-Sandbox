@@ -2,6 +2,7 @@
 #include "Engine.h"
 
 #include "Component/Character.h"
+#include "Component/Collider.h"
 #include "Component/Inventory.h"
 #include "Component/SoftBody.h"
 #include "Component/UserControl.h"
@@ -72,6 +73,7 @@ namespace Squishies
 			material.normal.map = woodNorm;
 			auto& beam = obj.addComponent<Component::SoftBody>(SquishyFactory::createRect(100.f, 10.f));
 			beam.setFixed();
+			obj.addComponent<Component::Collider>(CollisionGroup::STATIC, CollisionGroup::ALL & ~(CollisionGroup::STATIC));
 		}
 
 		// and a platform
@@ -85,16 +87,16 @@ namespace Squishies
 			material.diffuse.map = woodTex;
 			material.normal.map = woodNorm;
 			obj.addComponent<Component::SoftBody>(platformSquishy).setFixed();
+			obj.addComponent<Component::Collider>(CollisionGroup::STATIC, CollisionGroup::ALL & ~(CollisionGroup::STATIC));
 		}
 
 		{
-			Squishy proto = SquishyFactory::createGear(1.5, 10, .3f);
-			proto.colour = wf::DARKGREY;
 			auto obj = createObject({ 5.f, 5.f, 0.f });
 			obj.addComponent<wf::component::NameTag>("Gear");
 			auto& material = obj.addComponent<wf::component::Material>();
-			material.specular.intensity = 1.5f;
-			obj.addComponent<Component::SoftBody>(proto).setFixed();
+			//material.specular.intensity = 1.5f;
+			obj.addComponent<Component::SoftBody>(SquishyFactory::createGear(1.5, 10, .3f, wf::BLACK)).setFixed();
+			obj.addComponent<Component::Collider>(CollisionGroup::KINEMATIC);
 		}
 
 		wf::Scene::setup();
@@ -217,26 +219,31 @@ namespace Squishies
 			});
 	}
 
-	// simple prefab helper
 	wf::Entity GameScene::createSquishy(const std::string& name, const wf::Vec3 pos, const wf::Colour& colour)
 	{
-		int points = 20;		// number of points on the squishies
-		float radius = 1.f;		// size
-		int strength = 3;		// how much support with joints etc.
+		static Squishy _proto = SquishyFactory::createCircle(
+			1.f,		// radius
+			20,			// number of points on the squishies
+			3			// how much support with joints etc.
+		);
 
-		static Squishy proto = SquishyFactory::createCircle(radius, points, strength);
+		Squishy proto = _proto;
+		proto.colour = colour;
 
+		// main object
 		auto obj = createObject(pos);
 		obj.addComponent<wf::component::NameTag>(name);
 		obj.addComponent<Component::Character>();
 		auto& material = obj.addComponent<wf::component::Material>();
-		material.specular.intensity = 1.5f;
+		//material.specular.intensity = 1.5f;
 
-		Squishy pCopy = proto;
-		pCopy.colour = colour;
+		// collider
+		obj.addComponent<Component::Collider>(CollisionGroup::CHARACTER);
 
-		obj.addComponent<Component::SoftBody>(pCopy);
+		// main softbody instance
+		obj.addComponent<Component::SoftBody>(proto);
 
+		// inventory for weapons
 		resetInventory(obj);
 
 		return obj;

@@ -1,10 +1,15 @@
 #pragma once
 #include "Engine.h"
+
 #include "Event/DeployWeapon.h"
 #include "Event/Explosion.h"
 
+#include <memory>
+
 namespace Squishies
 {
+	struct Squishy;
+
 	class WeaponSystem : public wf::ISystem
 	{
 	public:
@@ -18,7 +23,6 @@ namespace Squishies
 		void explode(event::Explosion& detail);
 
 	private:
-		// grenade model, for when we need it
-		std::shared_ptr<wf::Mesh> m_grenade;
+		std::shared_ptr<Squishy> m_grenadeProto;
 	};
 }

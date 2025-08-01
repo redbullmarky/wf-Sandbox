@@ -9,13 +9,15 @@ namespace Squishies
 	class SquishyFactory
 	{
 	public:
-		static Squishy createRect(float width, float height);
+		static Squishy createRect(float width, float height, wf::Colour colour = wf::WHITE);
 
-		static Squishy createSquare(float size);
+		static Squishy createSquare(float size, wf::Colour colour = wf::WHITE);
 
-		static Squishy createCircle(float radius, int segments, int strength = 2);
+		static Squishy createCircle(float radius, int segments, int strength = 2, wf::Colour colour = wf::WHITE);
 
-		static Squishy createGear(float radius, int teeth, float toothDepth);
+		static Squishy createEllipse(float radiusX, float radiusY, int segments, int strength = 2, wf::Colour colour = wf::WHITE);
+
+		static Squishy createGear(float radius, int teeth, float toothDepth, wf::Colour colour = wf::DARKGREY);
 
 	private:
 		SquishyFactory() = default;

@@ -1,13 +1,16 @@
 #include "WeaponSystem.h"
 
+#include "Component/Character.h"
+#include "Component/Collider.h"
 #include "Component/Grenade.h"
 #include "Component/SoftBody.h"
 #include "Config.h"
 #include "Event/DeployWeapon.h"
 #include "Event/ExplodeGrenade.h"
 #include "Event/Explosion.h"
-
 #include "Event/SplitSquishyEvent.h"
+#include "Poly/Squishy.h"
+#include "Poly/SquishyFactory.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
@@ -17,11 +20,13 @@ namespace Squishies
 {
 	bool WeaponSystem::init()
 	{
-		m_grenade = wf::mesh::createSphere(.2f, 5, 5);
+		// @todo we might us an ellipse if it had actual rotation when thrown
+		m_grenadeProto = std::make_shared<Squishy>(SquishyFactory::createEllipse(.25f, .25f, 9, 4, wf::DARKGREY));
 
 		eventDispatcher->on<event::DeployWeapon>([&](event::DeployWeapon& e) {
 			spawnGrenade(e);
 			});
+
 		eventDispatcher->on<event::Explosion>([&](event::Explosion& e) {
 			explode(e);
 			});
@@ -30,81 +35,42 @@ namespace Squishies
 
 	void WeaponSystem::update(float dt)
 	{
-		entityManager->each<wf::component::Transform, Component::Grenade>(
-			[&](wf::EntityID id, wf::component::Transform& transform, Component::Grenade& grenade) {
-				grenade.force.y += Config::get().gravity;
+		// visualising blast radius
+		/*entityManager->each<Component::SoftBody, Component::Grenade>(
+			[&](Component::SoftBody& softbody, Component::Grenade& nade) {
 
-				grenade.velocity += (grenade.force / grenade.mass) * dt;
-				transform.position += grenade.velocity * dt;
-
-				// hard-limit bounds
-				// @todo in the final one, we'll just get rid of the nades if they go out of bounds - we'll be
-				// enclosed in a proper map so if we go out of that, we're not doing well.
-				auto bounds = Config::get().worldBounds;
-
-				// horizontals
-				if (transform.position.x < bounds.min.x) {
-					transform.position.x = bounds.min.x;
-					grenade.velocity.x = -grenade.velocity.x * .8f;
-				}
-				else if (transform.position.x > bounds.max.x) {
-					transform.position.x = bounds.max.x;
-					grenade.velocity.x = -grenade.velocity.x * .8f;
-				}
-
-				if (transform.position.z < bounds.min.z) {
-					transform.position.z = bounds.min.z;
-					grenade.velocity.z = -grenade.velocity.z * .8f;
-				}
-				else if (transform.position.z > bounds.max.z) {
-					transform.position.z = bounds.max.z;
-					grenade.velocity.z = -grenade.velocity.z * .8f;
-				}
-
-				// vertical
-				if (transform.position.y < bounds.min.y + .2f) { // bit of extra for the grenade radius
-					transform.position.y = bounds.min.y + .2f;
-					grenade.velocity.y = -grenade.velocity.y * .6f;
-					grenade.velocity.x *= .8f;
-					grenade.velocity.z *= .8f;
-				}
-				else if (transform.position.y > bounds.max.y) {
-					transform.position.y = bounds.max.y;
-					grenade.velocity.y = -grenade.velocity.y * .8f;
-					grenade.velocity.x *= .8f;
-					grenade.velocity.z *= .8f;
-				}
-
-				// reset forces
-				grenade.force = {};
-
-				auto p1 = wf::Debug::screenPos(wf::Vec3(transform.position.x, 0, 0));
-				auto p2 = wf::Debug::screenPos(wf::Vec3(transform.position.x + grenade.blastRadius, 0, 0));
+				auto p1 = wf::Debug::screenPos(wf::Vec3(softbody.derivedPosition.x, 0, 0));
+				auto p2 = wf::Debug::screenPos(wf::Vec3(softbody.derivedPosition.x + nade.blastRadius, 0, 0));
 				auto dist = glm::length(p1 - p2);
-				wf::Debug::circle(transform.position, dist, wf::RED);
-			});
+				wf::Debug::circle(softbody.derivedPosition, dist, wf::RED);
+			});*/
 	}
 
+	// @todo these kind of spawnables (like players) should probably be a scene-level thing so that we keep prefabs etc all together.
 	void WeaponSystem::spawnGrenade(event::DeployWeapon& detail)
 	{
 		auto ent = scene->createObject(detail.position);
-
-		ent.addComponent<wf::component::Geometry>(m_grenade);
 		auto& material = ent.addComponent<wf::component::Material>();
-		material.diffuse.colour = wf::DARKGREY;
-
+		auto& body = ent.addComponent<Component::SoftBody>(*m_grenadeProto.get());
 		auto& nade = ent.addComponent<Component::Grenade>();
 		nade.playerId = detail.playerId;
-		nade.timer = 2.f;
-		nade.velocity = glm::normalize(detail.target - detail.position) * detail.power;
+
+		// collider
+		ent.addComponent<Component::Collider>(CollisionGroup::PROJECTILE, CollisionGroup::ALL & ~(CollisionGroup::CHARACTER));
+
+		auto vel = glm::normalize(detail.target - detail.position) * detail.power;;
+
+		for (auto& pt : body.points) {
+			pt.velocity = vel;
+		}
 
 		wf::createTimer(nade.timer, [ent, this](wf::CustomTimer& timer) mutable {
 
 			auto& nade = ent.getComponent<Component::Grenade>();
-			auto& pos = ent.getComponent<wf::component::Transform>();
+			auto& body = ent.getComponent<Component::SoftBody>();
 
 			// trigger the explosion and remove the grenade
-			auto e = event::Explosion(pos.position, nade.blastRadius, 1.f);
+			auto e = event::Explosion(body.derivedPosition, nade.blastRadius, 1.f);
 			eventDispatcher->dispatch<event::Explosion>(e);
 			entityManager->destroy(ent.handle);
 
@@ -116,11 +82,27 @@ namespace Squishies
 		entityManager->each<Component::SoftBody>(
 			[&](wf::EntityID playerId, Component::SoftBody& softbody) {
 
-				// 1. see if the blast radius reaches our bounding box
-				auto dir = glm::normalize(softbody.derivedPosition - detail.position); // direction from nade to player
-				auto edgePt = detail.position + dir * detail.radius; // point on edge of the blast radius
+				// not a player
+				if (!entityManager->get(playerId).hasComponent<Component::Character>()) return;
 
-				if (!softbody.boundingBox.contains(edgePt)) return; // quick exit if we're nowhere near
+				// 1. see if the blast radius reaches our bounding box
+				const wf::Vec2 corners[4] = {
+					softbody.boundingBox.min,
+					{ softbody.boundingBox.max.x, softbody.boundingBox.min.y },
+					softbody.boundingBox.max,
+					{ softbody.boundingBox.min.x, softbody.boundingBox.max.y }
+				};
+
+				bool outside = true;
+				for (const auto& corner : corners) {
+					float dist2 = glm::length2(wf::Vec2(detail.position) - corner);
+					if (dist2 <= detail.radius * detail.radius) {
+						outside = false;
+						break;
+					}
+				}
+
+				if (outside) return;
 
 				// 2. check the points
 				std::vector<std::pair<unsigned int, float>> hitPoints;
@@ -133,6 +115,9 @@ namespace Squishies
 					}
 				}
 
+				auto& name = entityManager->get(playerId).getComponent<wf::component::NameTag>();
+				printf("hitpoints on %s = %zu", name.name.c_str(), hitPoints.size());
+
 				// 3. if we have points, dispatch the event
 				if (hitPoints.size()) {
 					event::SplitSquishy e(playerId, hitPoints, detail.position, detail.power);
@@ -140,7 +125,7 @@ namespace Squishies
 
 					// @todo do something more devestating than a printf log. plus it'd be the listener that does this stuff not here.
 					printf("GOTCHA!\n");
-					entityManager->destroy(playerId);
+					//entityManager->destroy(playerId);
 				}
 			});
 	}

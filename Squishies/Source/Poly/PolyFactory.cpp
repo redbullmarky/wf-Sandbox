@@ -50,13 +50,18 @@ namespace Squishies
 
 	Poly PolyFactory::createCircle(float radius, int segments)
 	{
+		return createEllipse(radius, radius, segments);
+	}
+
+	Poly PolyFactory::createEllipse(float radiusX, float radiusY, int segments)
+	{
 		std::vector<wf::Vec2> points;
 		points.resize(segments);
 
 		for (size_t i = 0; i < segments; i++) {
 			float angle = (2.f * PI * i) / segments;
-			float x = radius * cos(angle);
-			float y = radius * sin(angle);
+			float x = radiusX * cos(angle);
+			float y = radiusY * sin(angle);
 
 			points[i] = { x, y };
 		}
