@@ -8,7 +8,7 @@ namespace Squishies
 	/**
 	 * @brief Splitting and combining softbodies
 	 */
-	class SplitCombineSystem : public wf::ISystem
+	class CharacterDamageSystem : public wf::ISystem
 	{
 	public:
 		using wf::ISystem::ISystem;

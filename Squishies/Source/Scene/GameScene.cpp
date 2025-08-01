@@ -9,7 +9,7 @@
 #include "Poly/PolyFactory.h"
 #include "Poly/SquishyFactory.h"
 #include "System/SoftBodySystem.h"
-#include "System/SplitCombineSystem.h"
+#include "System/CharacterDamageSystem.h"
 #include "System/MovementSystem.h"
 #include "System/WeaponSystem.h"
 
@@ -25,7 +25,7 @@ namespace Squishies
 		addSystem<SoftBodySystem>();
 		addSystem<MovementSystem>();
 		addSystem<WeaponSystem>();
-		addSystem<SplitCombineSystem>();
+		addSystem<CharacterDamageSystem>();
 
 		return wf::Scene::init();
 	}
