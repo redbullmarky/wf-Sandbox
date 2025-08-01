@@ -1,11 +1,11 @@
 #pragma once
-#include "Common.h"
-
 #include <entt/entt.hpp>
 #include <string>
 
 namespace wf
 {
+	using EntityID = entt::entity;
+
 	struct Entity
 	{
 		Entity(entt::registry& registry, EntityID handle, const std::string& name = "") : registry(registry), handle(handle), name(name)

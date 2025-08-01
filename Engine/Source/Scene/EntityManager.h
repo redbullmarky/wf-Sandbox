@@ -1,5 +1,4 @@
 #pragma once
-#include "Common.h"
 #include "Core/EventDispatcher.h"
 #include "Entity.h"
 
@@ -9,6 +8,8 @@
 
 namespace wf
 {
+	using EntityID = entt::entity;
+
 	/**
 	 * @brief Wrapper for entt, mostly full of hacky/naive convenience functions
 	 */

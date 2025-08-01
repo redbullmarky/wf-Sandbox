@@ -32,7 +32,6 @@
 #include "Scene/Component/MaterialComponent.h"
 #include "Scene/Component/NameTagComponent.h"
 #include "Scene/Component/TransformComponent.h"
-#include "Scene/Common.h"
 #include "Scene/Entity.h"
 #include "Scene/EntityManager.h"
 #include "Scene/Scene.h"

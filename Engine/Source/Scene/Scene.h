@@ -1,5 +1,4 @@
 #pragma once
-#include "Common.h"
 #include "Core/EventDispatcher.h"
 #include "EntityManager.h"
 #include "Geometry/Geometry.h"
