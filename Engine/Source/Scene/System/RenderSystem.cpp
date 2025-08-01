@@ -62,10 +62,6 @@ namespace wf::system
 
 		auto& camera = *scene->getCurrentCamera();
 
-		/*GameScene* gameScene = static_cast<GameScene*>(scene);
-		auto& camera = gameScene->m_lightCamera;*/
-
-		// @todo render meshes with assigned material
 		entityManager->each<component::Geometry, component::Material, component::Transform>(
 			[&](const component::Geometry& geometry, const component::Material& material, const component::Transform& transform) {
 				if (!material.visible) return;
@@ -147,8 +143,7 @@ namespace wf::system
 				wgl::setBlendMode(material.blendMode);
 				wgl::enableDepthTest(material.depthTest); // @todo apparently only supposed to be done once unless necessary according to gpt.
 				wgl::enableDepthMask(material.depthMask);
-
-				// @todo depth func? if we find out what it's for...
+				wgl::setDepthFunc(material.depthFunc);
 
 				wgl::drawMeshBuffers(
 					buffers,

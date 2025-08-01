@@ -15,6 +15,9 @@ namespace wf
 	using Vec4 = glm::vec4;
 	using Quat = glm::quat;
 
+	/**
+	 * @brief Wrapper for glm matrix with some common logic attached
+	 */
 	struct Mat4
 	{
 		glm::mat4 matrix;
@@ -26,6 +29,9 @@ namespace wf
 		Mat4 operator*(const Mat4& rhs) const;
 	};
 
+	/**
+	 * @brief Simple AABB bounding box
+	 */
 	struct BoundingBox
 	{
 		Vec3 min{ FLT_MAX, FLT_MAX, FLT_MAX };
@@ -42,9 +48,6 @@ namespace wf
 		bool contains(const Vec3& point) const;			// box has a point inside?
 		bool contains(const BoundingBox& other) const;		// bounding box encloses another entirely?
 	};
-
-	Vec2 getSpringForce(const Vec2& p1, const Vec2& v1, const Vec2& p2, const Vec2& v2, float k, float damping, float rest);
-	Vec3 getSpringForce(const Vec3& p1, const Vec3& v1, const Vec3& p2, const Vec3& v2, float k, float damping, float rest);
 
 	/**
 	 * @brief Transform utility.

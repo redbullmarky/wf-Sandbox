@@ -231,7 +231,7 @@ namespace Squishies
 				pointB2.position -= wf::Vec3(info.normal * pointB2move, 0.f);
 			}
 
-			wf::Vec2 tangent = perp(info.normal);
+			wf::Vec2 tangent = wf::perpCCW(info.normal);
 			float fNumerator = glm::dot(relVel, tangent) * m_friction;
 			float f = fNumerator / jDenom;
 
@@ -257,7 +257,7 @@ namespace Squishies
 
 		wf::Vec2 toP = pt - wf::Vec2(edge.p1);
 
-		wf::Vec2 n = perp(edge.dir);
+		wf::Vec2 n = wf::perpCCW(edge.dir);
 		float x = glm::dot(toP, wf::Vec2(edge.dir));
 
 		if (x <= 0.f) {
@@ -273,7 +273,7 @@ namespace Squishies
 			ret.normal = n;
 		}
 		else {
-			ret.dist = cross2(toP, wf::Vec2(edge.dir));
+			ret.dist = wf::cross2D(toP, wf::Vec2(edge.dir));
 			ret.dist *= ret.dist;
 			ret.hitPoint = edge.p1 + (edge.dir * x);
 			ret.edgeD = x / edge.length;
@@ -298,15 +298,5 @@ namespace Squishies
 			}
 		}
 		return inside;
-	}
-
-	float Collider::cross2(const wf::Vec2& vec, const wf::Vec2& other)
-	{
-		return (vec.x * other.y) - (vec.y * other.x);
-	}
-
-	wf::Vec2 Collider::perp(const wf::Vec2& vec)
-	{
-		return { -vec.y, vec.x };
 	}
 }

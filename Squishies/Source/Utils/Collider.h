@@ -77,8 +77,6 @@ namespace Squishies
 	private:
 		EdgeCol getClosestPointOnEdgeSquared(const wf::Vec2& pt, const Component::Edge& edge);
 		bool checkCollisionPoint(const wf::Vec2 point, const std::vector<Component::PointMass>& points);
-		float cross2(const wf::Vec2& vec, const wf::Vec2& other);
-		wf::Vec2 perp(const wf::Vec2& vec);
 
 	private:
 		wf::EventDispatcher* m_eventDispatcher{ nullptr };

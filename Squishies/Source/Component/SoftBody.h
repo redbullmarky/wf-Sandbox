@@ -1,7 +1,6 @@
 #pragma once
 #include "Engine.h"
 #include "Poly/Squishy.h"
-#include "Utils/Bitfield.h"
 
 #include <bitset>
 
@@ -90,7 +89,7 @@ namespace Squishies::Component
 		bool colliding{ false };									// whether we're colliding with another
 		wf::BoundingBox collisionBox{};								// bounding box containing all points currently colliding
 
-		Bitfields bitFields;										// simple space partitioning, for collisons
+		wf::Bitfields bitFields;									// simple space partitioning, for collisons
 		wf::BoundingBox boundingBox{};								// cached bounding box from the mesh
 		std::vector<Edge> edges;									// edge data
 

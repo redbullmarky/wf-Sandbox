@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Squishies
+namespace wf
 {
 	struct Bitfield
 	{
@@ -12,6 +12,20 @@ namespace Squishies
 		bool getBit(int bit) const { return ((mask & (0x01 << (bit))) != 0); }
 	};
 
+	/**
+	 * @brief Represents a 3D grid of bitflags used to mark spatial regions (x/y/z).
+	 *
+	 * Each axis (x/y/z) is a Bitfield, typically used to tag which cells or regions
+	 * an object occupies in a grid-like space partitioning system.
+	 *
+	 * This is useful for broadphase overlap checks. If two objects don't share any
+	 * bits in ANY axis, they're definitely not colliding and can be skipped.
+	 *
+	 * Use `miss()` to quickly check if two objects are in completely disjoint regions.
+	 * Use `same()` if you want the inverse (i.e., they share at least one bit on some axis).
+	 *
+	 * Meant for speeding up spatial queries or reducing pairwise collision checks.
+	 */
 	struct Bitfields
 	{
 		Bitfield x;

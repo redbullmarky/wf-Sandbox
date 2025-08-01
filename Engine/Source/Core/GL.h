@@ -87,6 +87,7 @@ namespace wf::wgl
 		EQUAL,
 		LEQUAL,
 		GREATER,
+		NOTEQUAL,
 		GEQUAL,
 		ALWAYS,
 		NEVER
@@ -120,6 +121,7 @@ namespace wf::wgl
 
 	void enableDepthTest(bool enable = true);
 	void enableDepthMask(bool enable = true);
+	void setDepthFunc(DepthFunc func);
 	void setCullMode(CullMode mode);
 	void setBlendMode(BlendMode mode);
 

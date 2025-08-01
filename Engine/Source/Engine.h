@@ -14,9 +14,11 @@
 #include "Geometry/Model.h"
 #include "Geometry/Terrain.h"
 
+#include "Math/Bitfield.h"
 #include "Math/Math.h"
 #include "Math/Noise.h"
 #include "Math/Splines.h"
+#include "Math/Utils.h"
 
 #include "Misc/Colour.h"
 #include "Misc/Debug.h"

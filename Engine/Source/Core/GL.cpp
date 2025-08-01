@@ -59,6 +59,11 @@ namespace wf::wgl
 		glDepthMask(enable ? GL_TRUE : GL_FALSE);
 	}
 
+	void setDepthFunc(DepthFunc func)
+	{
+		// @todo
+	}
+
 	void setCullMode(CullMode mode)
 	{
 		switch (mode)
