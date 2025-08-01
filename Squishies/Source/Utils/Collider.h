@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine.h"
-#include "Component/SoftBody.h"
+#include "Component/SoftBodyComponent.h"
 
 #include <vector>
 

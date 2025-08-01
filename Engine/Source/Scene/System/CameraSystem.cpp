@@ -2,7 +2,7 @@
 #include "CameraSystem.h"
 
 #include "Core/Core.h"
-#include "Scene/Component/Camera.h"
+#include "Scene/Component/CameraComponent.h"
 #include "Scene/Scene.h"
 
 namespace wf::system

@@ -2,7 +2,7 @@
 #include "Gui.h"
 #include "Input.h"
 #include "Math/Math.h"
-#include "Scene/Component/Camera.h"
+#include "Scene/Component/CameraComponent.h"
 #include "Timer.h"
 #include "Window.h"
 

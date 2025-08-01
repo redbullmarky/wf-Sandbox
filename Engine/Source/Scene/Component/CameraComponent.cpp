@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Camera.h"
+#include "CameraComponent.h"
 #include "Core/Core.h"
 
 namespace wf

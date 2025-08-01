@@ -1,4 +1,5 @@
 #pragma once
+
 constexpr auto PERLIN_SIZE = 256;
 
 namespace wf

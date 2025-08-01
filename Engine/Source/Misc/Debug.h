@@ -2,7 +2,7 @@
 #include "Colour.h"
 #include "Core/Core.h"
 #include "Geometry/Geometry.h"
-#include "Scene/Component/Camera.h"
+#include "Scene/Component/CameraComponent.h"
 
 #include <imgui.h>
 #include <memory>

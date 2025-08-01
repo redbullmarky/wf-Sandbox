@@ -1,7 +1,7 @@
 #include "CharacterDamageSystem.h"
 #include "Engine.h"
 
-#include "Component/SoftBody.h"
+#include "Component/SoftBodyComponent.h"
 #include "Poly/Squishy.h"
 
 #include <vector>

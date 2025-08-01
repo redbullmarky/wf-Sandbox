@@ -1,9 +1,9 @@
 #include "WeaponSystem.h"
 
-#include "Component/Character.h"
-#include "Component/Collider.h"
-#include "Component/Grenade.h"
-#include "Component/SoftBody.h"
+#include "Component/CharacterComponent.h"
+#include "Component/ColliderComponent.h"
+#include "Component/GrenadeComponent.h"
+#include "Component/SoftBodyComponent.h"
 #include "Config.h"
 #include "Event/DeployWeapon.h"
 #include "Event/ExplodeGrenade.h"

@@ -1,4 +1,4 @@
-#include "SoftBody.h"
+#include "SoftBodyComponent.h"
 #include "Engine.h"
 
 #include "Config.h"

@@ -1,10 +1,10 @@
 #include "MovementSystem.h"
 #include "Engine.h"
 
-#include "Component/Character.h"
-#include "Component/Inventory.h"
-#include "Component/SoftBody.h"
-#include "Component/UserControl.h"
+#include "Component/CharacterComponent.h"
+#include "Component/InventoryComponent.h"
+#include "Component/SoftBodyComponent.h"
+#include "Component/UserControlComponent.h"
 
 #include "Event/DeployWeapon.h"
 

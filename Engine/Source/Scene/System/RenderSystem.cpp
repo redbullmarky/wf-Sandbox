@@ -1,11 +1,11 @@
 #include "pch.h"
 #include "RenderSystem.h"
 
-#include "Scene/Component/Camera.h"
-#include "Scene/Component/Geometry.h"
-#include "Scene/Component/Light.h"
-#include "Scene/Component/Material.h"
-#include "Scene/Component/Transform.h"
+#include "Scene/Component/CameraComponent.h"
+#include "Scene/Component/GeometryComponent.h"
+#include "Scene/Component/LightComponent.h"
+#include "Scene/Component/MaterialComponent.h"
+#include "Scene/Component/TransformComponent.h"
 
 namespace wf::system
 {

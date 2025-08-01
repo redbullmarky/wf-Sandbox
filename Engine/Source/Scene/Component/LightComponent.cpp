@@ -1,6 +1,5 @@
 #include "pch.h"
-#include "Light.h"
-
+#include "LightComponent.h"
 
 namespace wf
 {

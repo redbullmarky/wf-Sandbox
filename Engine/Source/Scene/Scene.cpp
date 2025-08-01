@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "Scene.h"
 
-#include "Component/Camera.h"
-#include "Component/Light.h"
-#include "Component/Transform.h"
+#include "Component/CameraComponent.h"
+#include "Component/LightComponent.h"
+#include "Component/TransformComponent.h"
 #include "Entity.h"
 
 namespace wf

@@ -1,8 +1,8 @@
 #pragma once
 #include "Engine.h"
 
-#include "Component/Inventory.h"
-#include "Component/SoftBody.h"
+#include "Component/InventoryComponent.h"
+#include "Component/SoftBodyComponent.h"
 
 namespace Squishies
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "Camera.h"
+#include "CameraComponent.h"
 #include "Geometry/Geometry.h"
 #include "Misc/Colour.h"
 
