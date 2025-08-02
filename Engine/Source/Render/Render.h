@@ -1,4 +1,7 @@
 #pragma once
+#include "Material.h"
+#include "Scene/Component/CameraComponent.h"
+#include "Scene/Component/LightComponent.h"
 #include "Shader.h"
 #include "Texture.h"
 
@@ -10,6 +13,14 @@
  */
 namespace wf
 {
+	struct RenderContext
+	{
+		CameraComponent* camera;
+		LightComponent* light;
+
+		RenderContext(CameraComponent* camera, LightComponent* light) : camera(camera), light(light) {}
+	};
+
 	/**
 	 * @brief Load a texture from an image
 	 */
@@ -21,6 +32,12 @@ namespace wf
 	 * Locations will need configuring manually to suit
 	 */
 	[[nodiscard]] Shader loadShader(const char* vertFilename, const char* fragFilename);
+
+	/**
+	 * @brief Material loaders
+	 */
+	[[nodiscard]] Material createBasicMaterial();
+	[[nodiscard]] Material createPhongMaterial();
 
 	/**
 	 * @brief Load the standard internal phong shader or, if required, from custom files but with the locations configured.

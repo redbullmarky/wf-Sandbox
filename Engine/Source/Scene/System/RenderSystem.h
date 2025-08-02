@@ -28,6 +28,5 @@ namespace wf::system
 		void updateMeshData(const GeometryComponent& geometry);
 
 		void uploadMaterialData(Material& material);
-		void updateMaterialData(const Material& material);
 	};
 }

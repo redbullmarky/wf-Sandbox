@@ -1,40 +1,41 @@
 #pragma once
 #include "Core/GL.h"
+#include "MaterialTraits.h"
+#include "Math/Math.h"
 #include "Misc/Colour.h"
 #include "Shader.h"
 #include "Texture.h"
 
 namespace wf
 {
-	struct Material
+	struct Material :
+		public TransformTrait,
+		public LightingTrait,
+		public CameraTrait,
+		public DiffuseTrait,
+		public NormalTrait,
+		public SpecularTrait,
+		public ShadowRecieverTrait
 	{
 		Shader shader;
 
-		struct Diffuse											// diffuse settings
+		void bind(RenderContext& context, const Transform& transform) const
 		{
-			Texture map;										// diffuse texture
-			Colour colour{ WHITE };									// base diffuse colour
-		} diffuse;
+			wgl::useShader(shader.handle);
+			TransformTrait::bind(shader, context, transform);
+			LightingTrait::bind(shader, context, transform);
+			CameraTrait::bind(shader, context, transform);
+			DiffuseTrait::bind(shader, context, transform);
+			NormalTrait::bind(shader, context, transform);
+			SpecularTrait::bind(shader, context, transform);
+			ShadowRecieverTrait::bind(shader, context, transform);
 
-		struct Normal											// normal map settings
-		{
-			Texture map;											// normal map
-			float strength{ 1.f };									// strength for applying map
-		} normal;
-
-		struct Specular											// specular settings
-		{
-			Texture map;											// specular map
-			Colour colour{ WHITE };									// specular colour
-			float shininess{ 32.f };								// how shiny
-			float intensity{ 0.f };									// level of specular. defaults to bland.
-		} specular;
-
-		struct Shadow											// shadow map (internals, @todo temporary to get it working)
-		{
-			wgl::RenderTargetHandle* map{ nullptr };				// shadow map
-			bool shadowPass{ false };								// if we're creating the shadows (true) or using them.
-		} shadow;
+			wgl::setCullMode(cullMode);
+			wgl::setBlendMode(blendMode);
+			wgl::enableDepthTest(depthTest); // @todo apparently only supposed to be done once unless necessary according to gpt.
+			wgl::enableDepthMask(depthMask);
+			wgl::setDepthFunc(depthFunc);
+		}
 
 		wgl::BlendMode blendMode = wgl::BlendMode::OPAQUE;		// blend mode
 		wgl::CullMode cullMode = wgl::CullMode::BACK;			// cull mode
@@ -74,7 +75,7 @@ namespace wf
 		 */
 		bool hasShadowMap() const
 		{
-			return !shadow.shadowPass && shadow.map && shadow.map->fbo && shadow.map->depthTexture.glId;
+			return !shadow.shadowPass && shadow.map.fbo && shadow.map.depthTexture.glId;
 		}
 	};
 }

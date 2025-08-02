@@ -71,6 +71,7 @@ namespace Squishies
 			auto obj = createObject({ 0.f, -15.f, 0.f });
 			obj.addComponent<wf::NameTagComponent>("Beam");
 			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material = wf::createPhongMaterial();
 			meshRenderer.material.diffuse.map = woodTex;
 			meshRenderer.material.normal.map = woodNorm;
 			auto& beam = obj.addComponent<Component::SoftBody>(SquishyFactory::createRect(100.f, 10.f));
@@ -86,6 +87,7 @@ namespace Squishies
 			auto obj = createObject({ -5.f, -5.f, 0.f });
 			obj.addComponent<wf::NameTagComponent>("Platform");
 			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material = wf::createPhongMaterial();
 			meshRenderer.material.diffuse.map = woodTex;
 			meshRenderer.material.normal.map = woodNorm;
 			obj.addComponent<Component::SoftBody>(platformSquishy).setFixed();
@@ -96,6 +98,7 @@ namespace Squishies
 			auto obj = createObject({ 5.f, 5.f, 0.f });
 			obj.addComponent<wf::NameTagComponent>("Gear");
 			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material = wf::createPhongMaterial();
 			//meshRenderer.material.specular.intensity = 1.5f;
 			obj.addComponent<Component::SoftBody>(SquishyFactory::createGear(1.5, 10, .3f, wf::BLACK)).setFixed();
 			obj.addComponent<Component::Collider>(CollisionGroup::KINEMATIC);
@@ -237,6 +240,7 @@ namespace Squishies
 		obj.addComponent<wf::NameTagComponent>(name);
 		obj.addComponent<Component::Character>();
 		auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+		meshRenderer.material = wf::createPhongMaterial();
 		//meshRenderer.material.specular.intensity = 1.5f;
 
 		// collider

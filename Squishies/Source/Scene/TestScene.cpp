@@ -76,35 +76,53 @@ namespace Squishies
 		auto grassTex = wf::loadTexture("resources/images/grass12.png");
 		auto scuffyNorm = wf::loadTexture("resources/images/tileable-TT7002066_nm.png");
 
+		// sphere
+		auto sphere = wf::mesh::createSphere(1.f, 25, 25);
+
 		{
 			auto obj = createObject();
 			obj.addComponent<wf::NameTagComponent>("Plane");
 			auto& geometry = obj.addComponent<wf::GeometryComponent>(wf::mesh::createSimplePlane());
 			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material = wf::createPhongMaterial();
 			meshRenderer.material.diffuse.map = grassTex;
-			meshRenderer.material.shadow.map = &m_shadowMap;
+			meshRenderer.material.shadow.map = m_shadowMap;
 		}
 
 		{
 			auto obj = createObject({ 2.f, 1.f, 0.f });
 			obj.addComponent<wf::NameTagComponent>("Sphere 1");
-			auto& geometry = obj.addComponent<wf::GeometryComponent>(wf::mesh::createSphere(1.f, 25, 25));
+			auto& geometry = obj.addComponent<wf::GeometryComponent>(sphere);
 			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material = wf::createPhongMaterial();
 			meshRenderer.material.diffuse.colour = wf::ORANGE;
 			meshRenderer.material.normal.map = scuffyNorm;
 			meshRenderer.material.specular.intensity = 1.5f;
-			meshRenderer.material.shadow.map = &m_shadowMap;
+			meshRenderer.material.shadow.map = m_shadowMap;
 		}
 
 		{
 			auto obj = createObject({ 2.f, 1.f, 4.f });
 			obj.addComponent<wf::NameTagComponent>("Sphere 2");
-			auto& geometry = obj.addComponent<wf::GeometryComponent>(wf::mesh::createSphere(1.f, 25, 25));
+			auto& geometry = obj.addComponent<wf::GeometryComponent>(sphere);
 			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material = wf::createPhongMaterial();
 			meshRenderer.material.diffuse.colour = wf::RED;
 			meshRenderer.material.normal.map = scuffyNorm;
 			meshRenderer.material.specular.intensity = 1.5f;
-			meshRenderer.material.shadow.map = &m_shadowMap;
+			meshRenderer.material.shadow.map = m_shadowMap;
+		}
+
+		{
+			auto obj = createObject({ -2.f, 1.f, 2.f });
+			obj.addComponent<wf::NameTagComponent>("Sphere 3");
+			auto& geometry = obj.addComponent<wf::GeometryComponent>(sphere);
+			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material = wf::createPhongMaterial();
+			meshRenderer.material.diffuse.colour = wf::BLUE;
+			meshRenderer.material.normal.map = scuffyNorm;
+			meshRenderer.material.specular.intensity = 1.5f;
+			meshRenderer.material.shadow.map = m_shadowMap;
 		}
 	}
 

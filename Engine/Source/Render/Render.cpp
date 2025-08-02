@@ -17,8 +17,23 @@ namespace wf
 		return s;
 	}
 
+	Material createBasicMaterial()
+	{
+		Material m;
+		m.shader = loadBasicShader();
+		return m;
+	}
+
+	Material createPhongMaterial()
+	{
+		Material m;
+		m.shader = loadPhongShader();
+		return m;
+	}
+
 	Shader loadPhongShader()
 	{
+		// @todo this'll eventually load from internals not files
 		return loadPhongShader("resources/shaders/phong.vert", "resources/shaders/phong.frag");
 	}
 
@@ -61,6 +76,7 @@ namespace wf
 
 	Shader loadBasicShader()
 	{
+		// @todo this'll eventually load from internals not files
 		return loadBasicShader("resources/shaders/basic.vert", "resources/shaders/basic.frag");
 	}
 
@@ -71,6 +87,9 @@ namespace wf
 		// transform
 		s.locs["mvp"] = wgl::getShaderUniformLocation(s.handle, "mvp");
 		s.locs["matModel"] = wgl::getShaderUniformLocation(s.handle, "matModel");
+
+		// basic colour
+		s.locs["diffuseColour"] = wgl::getShaderUniformLocation(s.handle, "diffuseColour");
 
 		return s;
 	}

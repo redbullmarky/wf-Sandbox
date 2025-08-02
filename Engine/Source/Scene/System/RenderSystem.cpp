@@ -47,9 +47,6 @@ namespace wf::system
 				if (!meshRenderer.material.shader.handle.glId) {
 					uploadMaterialData(meshRenderer.material);
 				}
-
-				// set the uniforms
-				updateMaterialData(meshRenderer.material);
 			});
 
 		// @todo framebuffers/render targets
@@ -72,80 +69,8 @@ namespace wf::system
 				if (!geometry.mesh || !geometry.mesh->buffers.vao) return;
 				if (!material.shader.handle.glId) return;
 
-				auto& shader = material.shader;
-
-				wgl::useShader(shader.handle);
-
-				if (material.hasDiffuseTexture()) {
-					wgl::bindTexture(material.diffuse.map.handle, 0);
-				}
-				if (material.hasNormalTexture()) {
-					wgl::bindTexture(material.normal.map.handle, 1);
-				}
-				if (material.hasSpecularTexture()) {
-					wgl::bindTexture(material.specular.map.handle, 2);
-				}
-				if (material.hasShadowMap()) {
-					wgl::bindTexture(material.shadow.map->depthTexture, 3);
-
-					wgl::setShaderUniform(
-						shader.handle,
-						shader.location("shadowMapResolution"),
-						(float)material.shadow.map->width
-					);
-
-					wgl::setShaderUniform(
-						shader.handle,
-						shader.location("shadowBias"),
-						.005f
-					);
-				}
-
-				Mat4 matModel = transform.getTransformMatrix();
-				Mat4 mvp(camera.getViewProjectionMatrix() * matModel);
-
-				wgl::setShaderUniform(
-					shader.handle,
-					shader.location("lightVP"),
-					scene->getCurrentLight()->getViewProjectionMatrix()
-				);
-				wgl::setShaderUniform(
-					shader.handle,
-					shader.location("lightDir"),
-					scene->getCurrentLight()->getDirection()
-				);
-
-				wgl::setShaderUniform(
-					shader.handle,
-					shader.location("viewPos"),
-					camera.position
-				);
-				wgl::setShaderUniform(
-					shader.handle,
-					shader.location("matModel"),
-					matModel
-				);
-				wgl::setShaderUniform(
-					shader.handle,
-					shader.location("mvp"),
-					mvp
-				);
-				wgl::setShaderUniform(
-					shader.handle,
-					shader.location("lightColour"),
-					scene->getCurrentLight()->colour
-				);
-				wgl::setShaderUniform(
-					shader.handle,
-					shader.location("ambientLevel"),
-					scene->getCurrentLight()->ambientLevel
-				);
-
-				wgl::setCullMode(material.cullMode);
-				wgl::setBlendMode(material.blendMode);
-				wgl::enableDepthTest(material.depthTest); // @todo apparently only supposed to be done once unless necessary according to gpt.
-				wgl::enableDepthMask(material.depthMask);
-				wgl::setDepthFunc(material.depthFunc);
+				RenderContext ctx(&camera, scene->getCurrentLight());
+				material.bind(ctx, transform);
 
 				wgl::drawMeshBuffers(
 					geometry.mesh->buffers,
@@ -203,105 +128,7 @@ namespace wf::system
 	void RenderSystem::uploadMaterialData(Material& material)
 	{
 		if (!material.shader.handle.glId) {
-			material.shader = loadPhongShader();
-		}
-	}
-
-	void RenderSystem::updateMaterialData(const Material& material)
-	{
-		if (!material.shader.handle.glId) throw std::runtime_error("NO shader loaded");
-
-		auto& shader = material.shader;
-
-		wgl::useShader(material.shader.handle);
-
-		// DIFFUSE
-		if (shader.isValidLocation("hasDiffuseMap") && shader.isValidLocation("diffuseMap")) {
-			wgl::setShaderUniform(material.shader.handle, shader.location("hasDiffuseMap"), material.hasDiffuseTexture());
-
-			if (material.hasDiffuseTexture()) {
-				wgl::setShaderUniform(
-					material.shader.handle,
-					shader.location("diffuseMap"),
-					0
-				);
-			}
-		}
-
-		if (shader.isValidLocation("diffuseColour")) {
-			wgl::setShaderUniform(
-				material.shader.handle,
-				shader.location("diffuseColour"),
-				material.diffuse.colour
-			);
-		}
-
-		// NORMAL
-		if (shader.isValidLocation("hasNormalMap") && shader.isValidLocation("normalMap")) {
-			wgl::setShaderUniform(material.shader.handle, shader.location("hasNormalMap"), material.hasNormalTexture());
-
-			if (material.hasNormalTexture()) {
-				wgl::setShaderUniform(
-					material.shader.handle,
-					shader.location("normalMap"),
-					1
-				);
-			}
-
-			if (shader.isValidLocation("normalStrength")) {
-				wgl::setShaderUniform(
-					material.shader.handle,
-					shader.location("normalStrength"),
-					material.normal.strength
-				);
-			}
-		}
-
-		// SPECULAR
-		if (shader.isValidLocation("hasSpecularMap") && shader.isValidLocation("specularMap")) {
-			wgl::setShaderUniform(material.shader.handle, shader.location("hasSpecularMap"), material.hasSpecularTexture());
-
-			if (material.hasSpecularTexture()) {
-				wgl::setShaderUniform(
-					material.shader.handle,
-					shader.location("specularMap"),
-					2
-				);
-			}
-		}
-
-		// SHADOW
-		if (shader.isValidLocation("hasShadowMap") && shader.isValidLocation("shadowMap")) {
-			wgl::setShaderUniform(material.shader.handle, shader.location("hasShadowMap"), material.hasShadowMap());
-
-			wgl::setShaderUniform(
-				material.shader.handle,
-				shader.location("shadowMap"),
-				3
-			);
-		}
-
-		if (shader.isValidLocation("specularColour")) {
-			wgl::setShaderUniform(
-				material.shader.handle,
-				shader.location("specularColour"),
-				material.specular.colour
-			);
-		}
-		if (shader.isValidLocation("specularShininess")) {
-			wgl::setShaderUniform(
-				material.shader.handle,
-				shader.location("specularShininess"),
-				material.specular.shininess
-			);
-		}
-
-		if (shader.isValidLocation("specularIntensity")) {
-			wgl::setShaderUniform(
-				material.shader.handle,
-				shader.location("specularIntensity"),
-				material.specular.intensity
-			);
+			material.shader = loadBasicShader();
 		}
 	}
 }
