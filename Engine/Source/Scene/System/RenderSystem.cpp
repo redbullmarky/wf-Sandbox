@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "RenderSystem.h"
 
+#include "Core/Core.h"
 #include "Render/Render.h"
 #include "Scene/Component/CameraComponent.h"
 #include "Scene/Component/GeometryComponent.h"
@@ -58,8 +59,6 @@ namespace wf::system
 	{
 		wgl::clearColour(scene->getBackgroundColour(), true);
 
-		auto& camera = *scene->getCurrentCamera();
-
 		entityManager->each<GeometryComponent, MeshRendererComponent, TransformComponent>(
 			[&](const GeometryComponent& geometry, const MeshRendererComponent& meshRenderer, const TransformComponent& transform) {
 
@@ -69,7 +68,7 @@ namespace wf::system
 				if (!geometry.mesh || !geometry.mesh->buffers.vao) return;
 				if (!material.shader.handle.glId) return;
 
-				RenderContext ctx(&camera, scene->getCurrentLight());
+				RenderContext ctx(scene->getCurrentCamera(), scene->getCurrentLight());
 				material.bind(ctx, transform);
 
 				wgl::drawMeshBuffers(

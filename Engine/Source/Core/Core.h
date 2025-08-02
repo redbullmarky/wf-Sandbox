@@ -2,12 +2,14 @@
 #include "Gui.h"
 #include "Input.h"
 #include "Math/Math.h"
+#include "Render/Renderer.h"
 #include "ResourceManager.h"
 #include "Scene/Component/CameraComponent.h"
 #include "Timer.h"
 #include "Window.h"
 
 #include <memory>
+#include <stack>
 
 namespace wf
 {
@@ -26,6 +28,8 @@ namespace wf
 		Timer timer;
 		Window window;
 
+		std::stack<std::shared_ptr<Renderer>> renderStack;
+
 		State() : guiHandler(&window) {}
 	};
 
@@ -42,7 +46,8 @@ namespace wf
 	float getAspectRatio();
 	Window& getWindow();
 
-	bool beginDrawing();
+	Renderer* beginDrawing();
+	Renderer* getCurrentRenderer();
 	void endDrawing();
 
 	bool initGui();
