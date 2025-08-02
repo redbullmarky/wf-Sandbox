@@ -17,9 +17,14 @@ namespace wf
 		return s;
 	}
 
-	Shader wf::loadPhongShader()
+	Shader loadPhongShader()
 	{
-		auto s = loadShader("resources/shaders/phong.vert", "resources/shaders/phong.frag");
+		return loadPhongShader("resources/shaders/phong.vert", "resources/shaders/phong.frag");
+	}
+
+	Shader loadPhongShader(const char* vertFilename, const char* fragFilename)
+	{
+		auto s = loadShader(vertFilename, fragFilename);
 
 		// transform
 		s.locs["mvp"] = wgl::getShaderUniformLocation(s.handle, "mvp");
@@ -54,9 +59,14 @@ namespace wf
 		return s;
 	}
 
-	Shader wf::loadBasicShader()
+	Shader loadBasicShader()
 	{
-		auto s = loadShader("resources/shaders/basic.vert", "resources/shaders/basic.frag");
+		return loadBasicShader("resources/shaders/basic.vert", "resources/shaders/basic.frag");
+	}
+
+	Shader loadBasicShader(const char* vertFilename, const char* fragFilename)
+	{
+		auto s = loadShader(vertFilename, fragFilename);
 
 		// transform
 		s.locs["mvp"] = wgl::getShaderUniformLocation(s.handle, "mvp");
