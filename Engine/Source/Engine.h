@@ -1,9 +1,11 @@
 #pragma once
 #include "Core/Application.h"
 #include "Core/Core.h"
+#include "Core/EntityManager.h"
 #include "Core/EventDispatcher.h"
 #include "Core/GL.h"
 #include "Core/Input.h"
+#include "Core/ResourceManager.h"
 #include "Core/Timer.h"
 #include "Core/Window.h"
 
@@ -23,6 +25,7 @@
 #include "Misc/Colour.h"
 #include "Misc/Debug.h"
 
+#include "Render/Render.h"
 #include "Render/Shader.h"
 #include "Render/Texture.h"
 
@@ -32,8 +35,6 @@
 #include "Scene/Component/MaterialComponent.h"
 #include "Scene/Component/NameTagComponent.h"
 #include "Scene/Component/TransformComponent.h"
-#include "Scene/Entity.h"
-#include "Scene/EntityManager.h"
 #include "Scene/Scene.h"
 #include "Scene/System.h"
 #include "Scene/System/CameraSystem.h"

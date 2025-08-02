@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Scene/EntityManager.h"
+#include "EntityManager.h"
 
 #include <stdexcept>
 

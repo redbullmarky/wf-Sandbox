@@ -2,6 +2,7 @@
 #include "Gui.h"
 #include "Input.h"
 #include "Math/Math.h"
+#include "ResourceManager.h"
 #include "Scene/Component/CameraComponent.h"
 #include "Timer.h"
 #include "Window.h"
@@ -21,18 +22,19 @@ namespace wf
 
 		Gui guiHandler;
 		Input inputHandler;
+		ResourceManager resourceManager;
 		Timer timer;
 		Window window;
 
 		State() : guiHandler(&window) {}
 	};
 
-	struct Texture;
-
 	extern State g_gameState;
 
 	bool init(const char* title, int width, int height, int flags = 0);
 	void shutdown();
+
+	ResourceManager& getResourceManager();
 
 	void close();
 	bool shouldClose();
@@ -72,8 +74,6 @@ namespace wf
 	Vec2 getMousePosition();
 	Vec2 getMouseWheel();
 	Vec2 getMouseDelta();
-
-	[[nodiscard]] std::shared_ptr<Texture> loadTexture(const char* filename);
 }
 
 namespace {

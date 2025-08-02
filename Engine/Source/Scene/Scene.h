@@ -1,6 +1,6 @@
 #pragma once
+#include "Core/EntityManager.h"
 #include "Core/EventDispatcher.h"
-#include "EntityManager.h"
 #include "Geometry/Geometry.h"
 #include "Misc/Colour.h"
 #include "System.h"

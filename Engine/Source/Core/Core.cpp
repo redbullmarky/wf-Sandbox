@@ -3,7 +3,6 @@
 
 #include "GL.h"
 #include "Gui.h"
-#include "Render/Texture.h"
 
 #include <SDL3/SDL.h>
 
@@ -18,7 +17,16 @@ namespace wf
 
 	void shutdown()
 	{
+		// close out our resources before the window/context given that they're likely mostly owners of some kind of GL context anyway
+		g_gameState.resourceManager.shutdown();
+
+		// now wrap.
 		g_gameState.window.close();
+	}
+
+	ResourceManager& getResourceManager()
+	{
+		return g_gameState.resourceManager;
 	}
 
 	void close()
@@ -211,13 +219,6 @@ namespace wf
 	Vec2 getMouseDelta()
 	{
 		return g_gameState.inputHandler.getMouseDelta();
-	}
-
-	std::shared_ptr<Texture> loadTexture(const char* filename)
-	{
-		auto texture = wf::Texture::create();
-		texture->handle = wf::wgl::loadTexture(filename);
-		return texture;
 	}
 }
 

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "System.h"
 
-#include "EntityManager.h"
+#include "Core/EntityManager.h"
 #include "Scene.h"
 
 namespace wf

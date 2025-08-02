@@ -4,7 +4,6 @@
 #include "Component/CameraComponent.h"
 #include "Component/LightComponent.h"
 #include "Component/TransformComponent.h"
-#include "Entity.h"
 
 namespace wf
 {
