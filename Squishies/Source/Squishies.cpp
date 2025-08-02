@@ -3,7 +3,6 @@
 
 #include "Scene/GameScene.h"
 #include "Scene/TestScene.h"
-#include "Scene/TestRendererScene.h"
 
 #include <SDL3/SDL.h>
 
@@ -18,7 +17,7 @@ namespace Squishies
 		wf::initGui();
 		//wf::setFixedTimestep(0.005f);
 
-		m_scene = std::make_shared<TestRendererScene>();
+		m_scene = std::make_shared<TestScene>();
 		if (!m_scene->init()) {
 			return false;
 		}

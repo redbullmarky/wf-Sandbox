@@ -54,24 +54,15 @@ namespace wf
 		return g_gameState.window;
 	}
 
-	Renderer* beginDrawing()
+	bool beginDrawing()
 	{
-		// meh, but it does the job for now. @todo
-		auto renderer = std::make_shared<Renderer>();
-		g_gameState.renderStack.push(renderer);
-		return renderer.get();
-	}
-
-	Renderer* getCurrentRenderer()
-	{
-		if (!g_gameState.renderStack.size()) return nullptr;
-		return g_gameState.renderStack.top().get();
+		// @todo mostly just a token function matching the 'endDrawing' but we'll probably pad this out at some point
+		// to do some pre-prep of the renderers, etc.
+		return true;
 	}
 
 	void endDrawing()
 	{
-		g_gameState.renderStack.pop(); // @todo we'll likely want to render here too, perhaps, when it comes to deferred stuff etc.
-
 		if (g_gameState.guiHandler.isRenderReady()) {
 			g_gameState.guiHandler.render();
 		}
