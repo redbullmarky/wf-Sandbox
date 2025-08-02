@@ -50,7 +50,7 @@ namespace Squishies
 	void WeaponSystem::spawnGrenade(event::DeployWeapon& detail)
 	{
 		auto ent = scene->createObject(detail.position);
-		auto& material = ent.addComponent<wf::MaterialComponent>();
+		auto& material = ent.addComponent<wf::MeshRendererComponent>();
 		auto& body = ent.addComponent<Component::SoftBody>(*m_grenadeProto.get());
 		auto& nade = ent.addComponent<Component::Grenade>(detail.player);
 

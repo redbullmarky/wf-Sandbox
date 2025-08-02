@@ -32,7 +32,7 @@
 #include "Scene/Component/CameraComponent.h"
 #include "Scene/Component/GeometryComponent.h"
 #include "Scene/Component/LightComponent.h"
-#include "Scene/Component/MaterialComponent.h"
+#include "Scene/Component/MeshRendererComponent.h"
 #include "Scene/Component/NameTagComponent.h"
 #include "Scene/Component/TransformComponent.h"
 #include "Scene/Scene.h"

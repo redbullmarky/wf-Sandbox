@@ -70,9 +70,9 @@ namespace Squishies
 		{
 			auto obj = createObject({ 0.f, -15.f, 0.f });
 			obj.addComponent<wf::NameTagComponent>("Beam");
-			auto& material = obj.addComponent<wf::MaterialComponent>();
-			material.diffuse.map = woodTex;
-			material.normal.map = woodNorm;
+			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material.diffuse.map = woodTex;
+			meshRenderer.material.normal.map = woodNorm;
 			auto& beam = obj.addComponent<Component::SoftBody>(SquishyFactory::createRect(100.f, 10.f));
 			beam.setFixed();
 			obj.addComponent<Component::Collider>(CollisionGroup::STATIC, CollisionGroup::ALL & ~(CollisionGroup::STATIC));
@@ -85,9 +85,9 @@ namespace Squishies
 
 			auto obj = createObject({ -5.f, -5.f, 0.f });
 			obj.addComponent<wf::NameTagComponent>("Platform");
-			auto& material = obj.addComponent<wf::MaterialComponent>();
-			material.diffuse.map = woodTex;
-			material.normal.map = woodNorm;
+			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material.diffuse.map = woodTex;
+			meshRenderer.material.normal.map = woodNorm;
 			obj.addComponent<Component::SoftBody>(platformSquishy).setFixed();
 			obj.addComponent<Component::Collider>(CollisionGroup::STATIC, CollisionGroup::ALL & ~(CollisionGroup::STATIC));
 		}
@@ -95,8 +95,8 @@ namespace Squishies
 		{
 			auto obj = createObject({ 5.f, 5.f, 0.f });
 			obj.addComponent<wf::NameTagComponent>("Gear");
-			auto& material = obj.addComponent<wf::MaterialComponent>();
-			//material.specular.intensity = 1.5f;
+			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			//meshRenderer.material.specular.intensity = 1.5f;
 			obj.addComponent<Component::SoftBody>(SquishyFactory::createGear(1.5, 10, .3f, wf::BLACK)).setFixed();
 			obj.addComponent<Component::Collider>(CollisionGroup::KINEMATIC);
 		}
@@ -161,8 +161,8 @@ namespace Squishies
 				});
 
 			if (ImGui::CollapsingHeader("Obj explorere")) {
-				getEntityManager()->each<wf::TransformComponent, wf::MaterialComponent, wf::NameTagComponent>(
-					[&](wf::EntityID id, wf::TransformComponent& transform, wf::MaterialComponent& material, const wf::NameTagComponent& nametag) {
+				getEntityManager()->each<wf::TransformComponent, wf::MeshRendererComponent, wf::NameTagComponent>(
+					[&](wf::EntityID id, wf::TransformComponent& transform, wf::MeshRendererComponent& meshRenderer, const wf::NameTagComponent& nametag) {
 
 						auto ent = getEntityManager()->get(id);
 
@@ -172,10 +172,10 @@ namespace Squishies
 						ImGui::DragFloat3("Pos", &transform.position.x);
 						ImGui::DragFloat3("Rot", &transform.rotation.x);
 
-						ImGui::SliderFloat("Norm. strength", &material.normal.strength, -3.f, 3.f);
+						ImGui::SliderFloat("Norm. strength", &meshRenderer.material.normal.strength, -3.f, 3.f);
 
-						ImGui::SliderFloat("Spec. intesity", &material.specular.intensity, 0.f, 2.f);
-						ImGui::SliderFloat("Spec. shine", &material.specular.shininess, 0.f, 128.f);
+						ImGui::SliderFloat("Spec. intesity", &meshRenderer.material.specular.intensity, 0.f, 2.f);
+						ImGui::SliderFloat("Spec. shine", &meshRenderer.material.specular.shininess, 0.f, 128.f);
 
 						if (ent.hasComponent<Component::SoftBody>()) {
 							auto& squishy = ent.getComponent<Component::SoftBody>();
@@ -236,8 +236,8 @@ namespace Squishies
 		auto obj = createObject(pos);
 		obj.addComponent<wf::NameTagComponent>(name);
 		obj.addComponent<Component::Character>();
-		auto& material = obj.addComponent<wf::MaterialComponent>();
-		//material.specular.intensity = 1.5f;
+		auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+		//meshRenderer.material.specular.intensity = 1.5f;
 
 		// collider
 		obj.addComponent<Component::Collider>(CollisionGroup::CHARACTER);

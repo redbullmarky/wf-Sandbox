@@ -1,12 +1,13 @@
 #pragma once
 #include "Core/GL.h"
+#include "Render/Material.h"
 #include "Scene/Scene.h"
 #include "Scene/System.h"
 
 namespace wf
 {
 	struct GeometryComponent;
-	struct MaterialComponent;
+	struct MeshRendererComponent;
 }
 
 namespace wf::system
@@ -26,7 +27,7 @@ namespace wf::system
 		void uploadMesh(GeometryComponent& geometry);
 		void updateMeshData(const GeometryComponent& geometry);
 
-		void uploadMaterialData(MaterialComponent& material);
-		void updateMaterialData(const MaterialComponent& material);
+		void uploadMaterialData(Material& material);
+		void updateMaterialData(const Material& material);
 	};
 }

@@ -1,4 +1,6 @@
 #pragma once
+#include "Core/GL.h"
+
 #include <string>
 #include <unordered_map>
 

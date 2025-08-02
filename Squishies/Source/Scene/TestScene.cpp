@@ -35,17 +35,17 @@ namespace Squishies
 
 		wf::wgl::bindRenderTarget(m_shadowMap);
 		{
-			getEntityManager()->each<wf::MaterialComponent>(
-				[&](wf::MaterialComponent& mat) {
-					mat.shadow.shadowPass = true;
+			getEntityManager()->each<wf::MeshRendererComponent>(
+				[&](wf::MeshRendererComponent& renderer) {
+					renderer.material.shadow.shadowPass = true;
 				});
 
 			currentCamera = &currentLight->lightCam;
 			wf::Scene::render(dt);
 
-			getEntityManager()->each<wf::MaterialComponent>(
-				[&](wf::MaterialComponent& mat) {
-					mat.shadow.shadowPass = false;
+			getEntityManager()->each<wf::MeshRendererComponent>(
+				[&](wf::MeshRendererComponent& renderer) {
+					renderer.material.shadow.shadowPass = false;
 				});
 		}
 		wf::wgl::unbindRenderTarget(m_shadowMap);
@@ -80,31 +80,31 @@ namespace Squishies
 			auto obj = createObject();
 			obj.addComponent<wf::NameTagComponent>("Plane");
 			auto& geometry = obj.addComponent<wf::GeometryComponent>(wf::mesh::createSimplePlane());
-			auto& material = obj.addComponent<wf::MaterialComponent>();
-			material.diffuse.map = grassTex;
-			material.shadow.map = &m_shadowMap;
+			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material.diffuse.map = grassTex;
+			meshRenderer.material.shadow.map = &m_shadowMap;
 		}
 
 		{
 			auto obj = createObject({ 2.f, 1.f, 0.f });
 			obj.addComponent<wf::NameTagComponent>("Sphere 1");
 			auto& geometry = obj.addComponent<wf::GeometryComponent>(wf::mesh::createSphere(1.f, 25, 25));
-			auto& material = obj.addComponent<wf::MaterialComponent>();
-			material.diffuse.colour = wf::ORANGE;
-			material.normal.map = scuffyNorm;
-			material.specular.intensity = 1.5f;
-			material.shadow.map = &m_shadowMap;
+			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material.diffuse.colour = wf::ORANGE;
+			meshRenderer.material.normal.map = scuffyNorm;
+			meshRenderer.material.specular.intensity = 1.5f;
+			meshRenderer.material.shadow.map = &m_shadowMap;
 		}
 
 		{
 			auto obj = createObject({ 2.f, 1.f, 4.f });
 			obj.addComponent<wf::NameTagComponent>("Sphere 2");
 			auto& geometry = obj.addComponent<wf::GeometryComponent>(wf::mesh::createSphere(1.f, 25, 25));
-			auto& material = obj.addComponent<wf::MaterialComponent>();
-			material.diffuse.colour = wf::RED;
-			material.normal.map = scuffyNorm;
-			material.specular.intensity = 1.5f;
-			material.shadow.map = &m_shadowMap;
+			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.material.diffuse.colour = wf::RED;
+			meshRenderer.material.normal.map = scuffyNorm;
+			meshRenderer.material.specular.intensity = 1.5f;
+			meshRenderer.material.shadow.map = &m_shadowMap;
 		}
 	}
 
@@ -138,18 +138,18 @@ namespace Squishies
 			}
 			ImGui::PopID();
 
-			getEntityManager()->each<wf::TransformComponent, wf::MaterialComponent, wf::NameTagComponent>(
-				[&](wf::EntityID id, wf::TransformComponent& transform, wf::MaterialComponent& material, const wf::NameTagComponent& nametag) {
+			getEntityManager()->each<wf::TransformComponent, wf::MeshRendererComponent, wf::NameTagComponent>(
+				[&](wf::EntityID id, wf::TransformComponent& transform, wf::MeshRendererComponent& meshRenderer, const wf::NameTagComponent& nametag) {
 					ImGui::PushID(static_cast<int>(id));
 					ImGui::SeparatorText(nametag.name.c_str());
 
 					ImGui::DragFloat3("Pos", &transform.position.x);
 					ImGui::DragFloat3("Rot", &transform.rotation.x);
 
-					ImGui::SliderFloat("Norm. strength", &material.normal.strength, -3.f, 3.f);
+					ImGui::SliderFloat("Norm. strength", &meshRenderer.material.normal.strength, -3.f, 3.f);
 
-					ImGui::SliderFloat("Spec. intesity", &material.specular.intensity, 0.f, 2.f);
-					ImGui::SliderFloat("Spec. shine", &material.specular.shininess, 0.f, 128.f);
+					ImGui::SliderFloat("Spec. intesity", &meshRenderer.material.specular.intensity, 0.f, 2.f);
+					ImGui::SliderFloat("Spec. shine", &meshRenderer.material.specular.shininess, 0.f, 128.f);
 
 					ImGui::PopID();
 				});

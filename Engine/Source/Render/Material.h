@@ -1,14 +1,12 @@
 #pragma once
 #include "Core/GL.h"
 #include "Misc/Colour.h"
-#include "Render/Shader.h"
-#include "Render/Texture.h"
-
-#include <memory>
+#include "Shader.h"
+#include "Texture.h"
 
 namespace wf
 {
-	struct MaterialComponent
+	struct Material
 	{
 		Shader shader;
 

@@ -1,10 +1,11 @@
 #include "pch.h"
 #include "RenderSystem.h"
 
+#include "Render/Render.h"
 #include "Scene/Component/CameraComponent.h"
 #include "Scene/Component/GeometryComponent.h"
 #include "Scene/Component/LightComponent.h"
-#include "Scene/Component/MaterialComponent.h"
+#include "Scene/Component/MeshRendererComponent.h"
 #include "Scene/Component/TransformComponent.h"
 
 namespace wf::system
@@ -40,15 +41,15 @@ namespace wf::system
 
 		// for any materials we've not prepared, we'll setup the textures/shaders, etc.
 		// for those we have, we'll update the shader uniforms
-		entityManager->each<MaterialComponent>(
-			[&](MaterialComponent& material) {
+		entityManager->each<MeshRendererComponent>(
+			[&](MeshRendererComponent& meshRenderer) {
 				// if we've not got a handle, prep it.
-				if (!material.shader.handle.glId) {
-					uploadMaterialData(material);
+				if (!meshRenderer.material.shader.handle.glId) {
+					uploadMaterialData(meshRenderer.material);
 				}
 
 				// set the uniforms
-				updateMaterialData(material);
+				updateMaterialData(meshRenderer.material);
 			});
 
 		// @todo framebuffers/render targets
@@ -62,8 +63,11 @@ namespace wf::system
 
 		auto& camera = *scene->getCurrentCamera();
 
-		entityManager->each<GeometryComponent, MaterialComponent, TransformComponent>(
-			[&](const GeometryComponent& geometry, const MaterialComponent& material, const TransformComponent& transform) {
+		entityManager->each<GeometryComponent, MeshRendererComponent, TransformComponent>(
+			[&](const GeometryComponent& geometry, const MeshRendererComponent& meshRenderer, const TransformComponent& transform) {
+
+				auto& material = meshRenderer.material;
+
 				if (!material.visible) return;
 				if (!geometry.mesh || !geometry.mesh->buffers.vao) return;
 				if (!material.shader.handle.glId) return;
@@ -155,20 +159,20 @@ namespace wf::system
 	void RenderSystem::teardown()
 	{
 		// delete material (i.e. textures and shaders)
-		entityManager->each<MaterialComponent>(
-			[&](MaterialComponent& material) {
-				if (!material.shader.handle.glId) return;
-				if (material.diffuse.map.handle.glId) {
-					wgl::destroyTexture(material.diffuse.map.handle);
+		entityManager->each<MeshRendererComponent>(
+			[&](MeshRendererComponent& meshRenderer) {
+				if (!meshRenderer.material.shader.handle.glId) return;
+				if (meshRenderer.material.diffuse.map.handle.glId) {
+					wgl::destroyTexture(meshRenderer.material.diffuse.map.handle);
 				}
-				if (material.normal.map.handle.glId) {
-					wgl::destroyTexture(material.normal.map.handle);
+				if (meshRenderer.material.normal.map.handle.glId) {
+					wgl::destroyTexture(meshRenderer.material.normal.map.handle);
 				}
-				if (material.specular.map.handle.glId) {
-					wgl::destroyTexture(material.specular.map.handle);
+				if (meshRenderer.material.specular.map.handle.glId) {
+					wgl::destroyTexture(meshRenderer.material.specular.map.handle);
 				}
 
-				wgl::destroyShader(material.shader.handle);
+				wgl::destroyShader(meshRenderer.material.shader.handle);
 			});
 
 		// delete the VAO/VBOs
@@ -196,46 +200,14 @@ namespace wf::system
 		}
 	}
 
-	void RenderSystem::uploadMaterialData(MaterialComponent& material)
+	void RenderSystem::uploadMaterialData(Material& material)
 	{
 		if (!material.shader.handle.glId) {
-			material.shader.handle = wgl::loadShader("resources/shaders/phong.vert", "resources/shaders/phong.frag");
-
-			auto shaderHandle = material.shader.handle;
-
-			// transform
-			material.shader.locs["mvp"] = wgl::getShaderUniformLocation(shaderHandle, "mvp");
-			material.shader.locs["matModel"] = wgl::getShaderUniformLocation(shaderHandle, "matModel");
-
-			// textures
-			material.shader.locs["diffuseMap"] = wgl::getShaderUniformLocation(shaderHandle, "diffuseMap");
-			material.shader.locs["normalMap"] = wgl::getShaderUniformLocation(shaderHandle, "normalMap");
-			material.shader.locs["specularMap"] = wgl::getShaderUniformLocation(shaderHandle, "specularMap");
-			material.shader.locs["shadowMap"] = wgl::getShaderUniformLocation(shaderHandle, "shadowMap");
-			// flags
-			material.shader.locs["hasDiffuseMap"] = wgl::getShaderUniformLocation(shaderHandle, "hasDiffuseMap");
-			material.shader.locs["hasNormalMap"] = wgl::getShaderUniformLocation(shaderHandle, "hasNormalMap");
-			material.shader.locs["hasSpecularMap"] = wgl::getShaderUniformLocation(shaderHandle, "hasSpecularMap");
-			material.shader.locs["hasShadowMap"] = wgl::getShaderUniformLocation(shaderHandle, "hasShadowMap");
-			// material props
-			material.shader.locs["diffuseColour"] = wgl::getShaderUniformLocation(shaderHandle, "diffuseColour");
-			material.shader.locs["specularColour"] = wgl::getShaderUniformLocation(shaderHandle, "specularColour");
-			material.shader.locs["normalStrength"] = wgl::getShaderUniformLocation(shaderHandle, "normalStrength");
-			material.shader.locs["specularShininess"] = wgl::getShaderUniformLocation(shaderHandle, "specularShininess");
-			material.shader.locs["specularIntensity"] = wgl::getShaderUniformLocation(shaderHandle, "specularIntensity");
-			// lights & camera
-			material.shader.locs["viewPos"] = wgl::getShaderUniformLocation(shaderHandle, "viewPos");
-			material.shader.locs["lightDir"] = wgl::getShaderUniformLocation(shaderHandle, "lightDir");
-			material.shader.locs["lightColour"] = wgl::getShaderUniformLocation(shaderHandle, "lightColour");
-			material.shader.locs["ambientLevel"] = wgl::getShaderUniformLocation(shaderHandle, "ambientLevel");
-			// shadows
-			material.shader.locs["lightVP"] = wgl::getShaderUniformLocation(shaderHandle, "lightVP");
-			material.shader.locs["shadowBias"] = wgl::getShaderUniformLocation(shaderHandle, "shadowBias");
-			material.shader.locs["shadowMapResolution"] = wgl::getShaderUniformLocation(shaderHandle, "shadowMapResolution");
+			material.shader = loadPhongShader();
 		}
 	}
 
-	void RenderSystem::updateMaterialData(const MaterialComponent& material)
+	void RenderSystem::updateMaterialData(const Material& material)
 	{
 		if (!material.shader.handle.glId) throw std::runtime_error("NO shader loaded");
 
