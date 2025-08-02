@@ -5,5 +5,5 @@
 
 namespace wf
 {
-	[[nodiscard]] std::shared_ptr<Texture> loadTexture(const char* filename);
+	[[nodiscard]] Texture loadTexture(const char* filename);
 }

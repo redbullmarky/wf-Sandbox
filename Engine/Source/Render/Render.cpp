@@ -3,10 +3,10 @@
 
 namespace wf
 {
-	std::shared_ptr<Texture> loadTexture(const char* filename)
+	Texture loadTexture(const char* filename)
 	{
-		auto texture = Texture::create();
-		texture->handle = wgl::loadTexture(filename);
+		Texture texture;
+		texture.handle = wgl::loadTexture(filename);
 		return texture;
 	}
 }

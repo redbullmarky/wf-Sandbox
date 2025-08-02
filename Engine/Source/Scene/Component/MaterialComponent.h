@@ -10,23 +10,23 @@ namespace wf
 {
 	struct MaterialComponent
 	{
-		std::shared_ptr<Shader> shader;
+		Shader shader;
 
 		struct Diffuse											// diffuse settings
 		{
-			std::shared_ptr<Texture> map;							// diffuse texture
+			Texture map;										// diffuse texture
 			Colour colour{ WHITE };									// base diffuse colour
 		} diffuse;
 
 		struct Normal											// normal map settings
 		{
-			std::shared_ptr<Texture> map;						// normal map
+			Texture map;											// normal map
 			float strength{ 1.f };									// strength for applying map
 		} normal;
 
 		struct Specular											// specular settings
 		{
-			std::shared_ptr<Texture> map;						// specular map
+			Texture map;											// specular map
 			Colour colour{ WHITE };									// specular colour
 			float shininess{ 32.f };								// how shiny
 			float intensity{ 0.f };									// level of specular. defaults to bland.
@@ -52,7 +52,7 @@ namespace wf
 		 */
 		bool hasDiffuseTexture() const
 		{
-			return diffuse.map && diffuse.map->handle.glId;
+			return diffuse.map.handle.glId;
 		}
 
 		/**
@@ -60,7 +60,7 @@ namespace wf
 		 */
 		bool hasNormalTexture() const
 		{
-			return normal.map && normal.map->handle.glId;
+			return normal.map.handle.glId;
 		}
 
 		/**
@@ -68,7 +68,7 @@ namespace wf
 		 */
 		bool hasSpecularTexture() const
 		{
-			return specular.map && specular.map->handle.glId;
+			return specular.map.handle.glId;
 		}
 
 		/**
