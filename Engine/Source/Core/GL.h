@@ -61,6 +61,7 @@ namespace wf::wgl
 		unsigned int glId{};
 		int width{};
 		int height{};
+		int mipmaps{ 1 };
 
 		int format{};
 		int internalFormat{};
