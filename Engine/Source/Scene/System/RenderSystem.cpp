@@ -4,39 +4,34 @@
 #include "Core/Core.h"
 #include "Render/Render.h"
 #include "Scene/Component/CameraComponent.h"
-#include "Scene/Component/GeometryComponent.h"
 #include "Scene/Component/LightComponent.h"
 #include "Scene/Component/MeshRendererComponent.h"
 #include "Scene/Component/TransformComponent.h"
 
 namespace wf::system
 {
-	RenderSystem::RenderSystem(Scene* scene) : ISystem(scene)
-	{
-	}
-
-	bool RenderSystem::init()
-	{
-		return true;
-	}
-
 	void RenderSystem::update(float dt)
 	{
 		// for any geometry we've not prepared, we'll need to create the VAO/VBOs for it.
 		// if we already have those, and we're working with a dynamic mesh, see if it needs updating and update it
-		entityManager->each<GeometryComponent>(
-			[&](GeometryComponent& geometry) {
+		entityManager->each<MeshRendererComponent>(
+			[&](MeshRendererComponent& meshRenderer) {
 				// no mesh yet
-				if (!geometry.mesh) return;
+				if (!meshRenderer.mesh) return;
 
 				// create the VAO/VBOs else update them if necessary
-				if (!geometry.mesh->buffers.vao) {
-					if (geometry.mesh->vertices.size()) {
-						uploadMesh(geometry);
+				if (!meshRenderer.mesh->buffers.vao) {
+					if (meshRenderer.mesh->vertices.size()) {
+						meshRenderer.mesh->buffers = wgl::createMeshBuffers();
+
+						wgl::uploadMeshData(meshRenderer.mesh->buffers, meshRenderer.mesh->vertices, meshRenderer.mesh->indices, meshRenderer.mesh->isDynamic);
 					}
 				}
 				else {
-					updateMeshData(geometry);
+					// update the mesh data
+					if (meshRenderer.mesh->isDynamic && (meshRenderer.mesh->needsUpdate || meshRenderer.mesh->autoUpdate)) {
+						wgl::updateMeshData(meshRenderer.mesh->buffers, meshRenderer.mesh->vertices, meshRenderer.mesh->indices);
+					}
 				}
 			});
 
@@ -46,7 +41,9 @@ namespace wf::system
 			[&](MeshRendererComponent& meshRenderer) {
 				// if we've not got a handle, prep it.
 				if (!meshRenderer.material.shader.handle.glId) {
-					uploadMaterialData(meshRenderer.material);
+					if (!meshRenderer.material.shader.handle.glId) {
+						meshRenderer.material.shader = loadBasicShader();
+					}
 				}
 			});
 
@@ -59,22 +56,22 @@ namespace wf::system
 	{
 		wgl::clearColour(scene->getBackgroundColour(), true);
 
-		entityManager->each<GeometryComponent, MeshRendererComponent, TransformComponent>(
-			[&](const GeometryComponent& geometry, const MeshRendererComponent& meshRenderer, const TransformComponent& transform) {
+		entityManager->each<MeshRendererComponent, TransformComponent>(
+			[&](const MeshRendererComponent& meshRenderer, const TransformComponent& transform) {
 
 				auto& material = meshRenderer.material;
 
 				if (!material.visible) return;
-				if (!geometry.mesh || !geometry.mesh->buffers.vao) return;
+				if (!meshRenderer.mesh || !meshRenderer.mesh->buffers.vao) return;
 				if (!material.shader.handle.glId) return;
 
 				RenderContext ctx(scene->getCurrentCamera(), scene->getCurrentLight());
 				material.bind(ctx, transform);
 
 				wgl::drawMeshBuffers(
-					geometry.mesh->buffers,
-					static_cast<int>(geometry.mesh->vertices.size()),
-					static_cast<int>(geometry.mesh->indices.size()),
+					meshRenderer.mesh->buffers,
+					static_cast<int>(meshRenderer.mesh->vertices.size()),
+					static_cast<int>(meshRenderer.mesh->indices.size()),
 					material.wireframe
 				);
 			});
@@ -82,52 +79,29 @@ namespace wf::system
 
 	void RenderSystem::teardown()
 	{
-		// delete material (i.e. textures and shaders)
 		entityManager->each<MeshRendererComponent>(
 			[&](MeshRendererComponent& meshRenderer) {
-				if (!meshRenderer.material.shader.handle.glId) return;
-				if (meshRenderer.material.diffuse.map.handle.glId) {
-					wgl::destroyTexture(meshRenderer.material.diffuse.map.handle);
-				}
-				if (meshRenderer.material.normal.map.handle.glId) {
-					wgl::destroyTexture(meshRenderer.material.normal.map.handle);
-				}
-				if (meshRenderer.material.specular.map.handle.glId) {
-					wgl::destroyTexture(meshRenderer.material.specular.map.handle);
+
+				// delete material (i.e. textures and shaders)
+				if (meshRenderer.material.shader.handle.glId) {
+					if (meshRenderer.material.diffuse.map.handle.glId) {
+						wgl::destroyTexture(meshRenderer.material.diffuse.map.handle);
+					}
+					if (meshRenderer.material.normal.map.handle.glId) {
+						wgl::destroyTexture(meshRenderer.material.normal.map.handle);
+					}
+					if (meshRenderer.material.specular.map.handle.glId) {
+						wgl::destroyTexture(meshRenderer.material.specular.map.handle);
+					}
+
+					wgl::destroyShader(meshRenderer.material.shader.handle);
 				}
 
-				wgl::destroyShader(meshRenderer.material.shader.handle);
+				// delete the VAO/VBOs
+				if (meshRenderer.mesh->buffers.vao) {
+					wgl::destroyMeshBuffers(meshRenderer.mesh->buffers);
+					meshRenderer.mesh->buffers = {};
+				}
 			});
-
-		// delete the VAO/VBOs
-		entityManager->each<GeometryComponent>(
-			[&](GeometryComponent& geometry) {
-				if (!geometry.mesh->buffers.vao) return;
-
-				wgl::destroyMeshBuffers(geometry.mesh->buffers);
-				geometry.mesh->buffers = {};
-			});
-
-		// @todo delete FBOs, although we don't yet manage those here
-	}
-
-	void RenderSystem::uploadMesh(GeometryComponent& geometry)
-	{
-		geometry.mesh->buffers = wgl::createMeshBuffers();
-		wgl::uploadMeshData(geometry.mesh->buffers, geometry.mesh->vertices, geometry.mesh->indices, geometry.mesh->isDynamic);
-	}
-
-	void RenderSystem::updateMeshData(const GeometryComponent& geometry)
-	{
-		if (geometry.mesh->isDynamic && (geometry.mesh->needsUpdate || geometry.mesh->autoUpdate)) {
-			wgl::updateMeshData(geometry.mesh->buffers, geometry.mesh->vertices, geometry.mesh->indices);
-		}
-	}
-
-	void RenderSystem::uploadMaterialData(Material& material)
-	{
-		if (!material.shader.handle.glId) {
-			material.shader = loadBasicShader();
-		}
 	}
 }

@@ -8,7 +8,7 @@ namespace wf::system
 	public:
 		using ISystem::ISystem;
 
-		virtual bool init() override;
+		virtual bool init() override { return true; }
 		virtual void update(float dt) override;
 	};
 }

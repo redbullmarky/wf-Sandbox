@@ -31,7 +31,6 @@
 #include "Render/Texture.h"
 
 #include "Scene/Component/CameraComponent.h"
-#include "Scene/Component/GeometryComponent.h"
 #include "Scene/Component/LightComponent.h"
 #include "Scene/Component/MeshRendererComponent.h"
 #include "Scene/Component/NameTagComponent.h"

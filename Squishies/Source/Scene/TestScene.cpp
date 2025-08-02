@@ -82,8 +82,8 @@ namespace Squishies
 		{
 			auto obj = createObject();
 			obj.addComponent<wf::NameTagComponent>("Plane");
-			auto& geometry = obj.addComponent<wf::GeometryComponent>(wf::mesh::createSimplePlane());
 			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.mesh = wf::mesh::createSimplePlane();
 			meshRenderer.material = wf::createPhongMaterial();
 			meshRenderer.material.diffuse.map = grassTex;
 			meshRenderer.material.shadow.map = m_shadowMap;
@@ -92,8 +92,8 @@ namespace Squishies
 		{
 			auto obj = createObject({ 2.f, 1.f, 0.f });
 			obj.addComponent<wf::NameTagComponent>("Sphere 1");
-			auto& geometry = obj.addComponent<wf::GeometryComponent>(sphere);
 			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.mesh = sphere;
 			meshRenderer.material = wf::createPhongMaterial();
 			meshRenderer.material.diffuse.colour = wf::ORANGE;
 			meshRenderer.material.normal.map = scuffyNorm;
@@ -104,8 +104,8 @@ namespace Squishies
 		{
 			auto obj = createObject({ 2.f, 1.f, 4.f });
 			obj.addComponent<wf::NameTagComponent>("Sphere 2");
-			auto& geometry = obj.addComponent<wf::GeometryComponent>(sphere);
 			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.mesh = sphere;
 			meshRenderer.material = wf::createPhongMaterial();
 			meshRenderer.material.diffuse.colour = wf::RED;
 			meshRenderer.material.normal.map = scuffyNorm;
@@ -116,8 +116,8 @@ namespace Squishies
 		{
 			auto obj = createObject({ -2.f, 1.f, 2.f });
 			obj.addComponent<wf::NameTagComponent>("Sphere 3");
-			auto& geometry = obj.addComponent<wf::GeometryComponent>(sphere);
 			auto& meshRenderer = obj.addComponent<wf::MeshRendererComponent>();
+			meshRenderer.mesh = sphere;
 			meshRenderer.material = wf::createPhongMaterial();
 			meshRenderer.material.diffuse.colour = wf::BLUE;
 			meshRenderer.material.normal.map = scuffyNorm;

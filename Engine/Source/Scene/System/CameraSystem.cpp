@@ -7,11 +7,6 @@
 
 namespace wf::system
 {
-	bool CameraSystem::init()
-	{
-		return true;
-	}
-
 	void CameraSystem::update(float dt)
 	{
 		// regular freecam
